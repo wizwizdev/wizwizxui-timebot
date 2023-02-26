@@ -108,14 +108,13 @@ HamedAp
 
 ## برای اضافه کردن سرور به ربات از دستور زیر استفاده کنید
 
-##panel 
+
 ```sh
 /addpanel address/path,user,pass 
 ```
 
 or
 
-##panel
 ```sh
 /addpanel address,user,pass 
 ```
