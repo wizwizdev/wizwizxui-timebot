@@ -95,8 +95,16 @@ nohup python3 wiztimebot.py > serverlog.txt 2>&1 &
 
 ## برای اضافه کردن سرور به ربات از دستور زیر استفاده کنید
 
+##panel kafka
 ```sh
-/addpanel address,user,pass or /addpanel address/path,user,pass
+/addpanel address/path,user,pass 
+```
+
+or
+
+##panel x-ui ...
+```sh
+/addpanel address,user,pass 
 ```
 مثال
 ```sh
