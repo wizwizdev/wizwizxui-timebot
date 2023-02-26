@@ -62,12 +62,15 @@ pip install -r requirements.txt
 nano config.json
 ```
 
-
-
 به جای Token باید توکنی که از ربات Botfather دریافت کردید جایگزین کنید
 به جای idadmin باید ایدی عددی خودتون رو از ربات  username_to_id_bot دریافت کنید و جایگزین کنید
 به جای License باید username ک و به جای key باید password داخل سایت mongodb ایجاد کردیم رو وارد کنیم 
 
+<br>
+
+![غعهعخ](https://user-images.githubusercontent.com/27927279/221432931-7ad4095d-0d3d-463d-9055-fab112421f4b.JPG)
+
+<br>
 
 ## با دستور زیر فایل timebot.py را ادیت کنید
 
@@ -75,7 +78,7 @@ nano config.json
 nano wiztimebot.py
 ```
 
-به خط 48 برید و لینک مخصوص خودتون رو که از سایت mongodb که کپی کردید از @ به بعد هرچی هست را جایگزین کنید و سپس ذخیره کنید
+به خط 46 برید و لینک مخصوص خودتون رو که از سایت mongodb که کپی کردید از بین @ و ' جایگزین کنید و سپس ذخیره کنید
 
 
 ## و در اخر کد زیر را اجرا کنید 
