@@ -26,19 +26,23 @@ wiz3.ghdrss.mongodb.net/?retryWrites=true&w=majority
 
 <br>
 
-https://user-images.githubusercontent.com/27927279/221428341-2928bf78-5267-447d-a518-b22c6597106d.mp4
-
-<br>
-
-▪️داخل فهرست پنل روی گزینه Network Access کلیک کنید سپس روی گزینه   ADD IP ADDRESS کلیک کنید در پنجره باز شده روی گزینه  Allow Access from Anywhere کلیک کنید و سپس روی Confirm کلیک کنید
-
- در پنل mongodb سمت چپ داخل فهرست ها روی گزینه Database Access کلیک میکنیم و اینجا ما یک دیتابیس داریم و username ایجاد شده رو کپی میکنیم ، موقع ایجاد دیتابیس اگر یادتون باشه یه password داشتیم ، باید username و password رو کپی کنیم و یه جا ذخیره کنیم
- 
-<br>
-
 https://user-images.githubusercontent.com/27927279/221428430-c00add6c-100b-4a38-b5e5-665ceef3b65a.mp4
 
 <br>
+
+<br>
+
+داخل فهرست پنل روی گزینه Network Access کلیک کنید سپس روی گزینه   ADD IP ADDRESS کلیک کنید در پنجره باز شده روی گزینه  Allow Access from Anywhere کلیک کنید و سپس روی Confirm کلیک کنید
+
+<br>
+
+https://user-images.githubusercontent.com/27927279/221434942-5d4e0122-aa1c-4a7e-a020-7999a441ccc2.mp4
+
+<br>
+
+
+ در پنل mongodb سمت چپ داخل فهرست ها روی گزینه Database Access کلیک میکنیم و اینجا ما یک دیتابیس داریم و username ایجاد شده رو کپی میکنیم ، موقع ایجاد دیتابیس اگر یادتون باشه یه password داشتیم ، باید username و password رو کپی کنیم و یه جا ذخیره کنیم
+ 
 
 ## مراحل نصب | دستورات زیر را به ترتیب وارد کنید :
 
