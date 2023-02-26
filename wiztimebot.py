@@ -43,7 +43,7 @@ def init():
     except Exception as e:
         print(e)
 
-    codeline = f'mongodb+srv://{settings["License"]}:{urllib.parse.quote(settings["key"])}@
+    codeline = f'mongodb+srv://{settings["License"]}:{urllib.parse.quote(settings["key"])}@'
     codeline_CLIENT = MongoClient(codeline)[settings["bn"]]
 
     global ADMIN_ID
