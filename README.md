@@ -91,18 +91,29 @@ nano wiztimebot.py
 nohup python3 wiztimebot.py > serverlog.txt 2>&1 &
 ```
 
-وارد ربات بشید و ربات را  start کنید 
+وارد ربات بشید و ربات را  start کنید
+
+## پنل های زیر رو کامل تست کردم جواب داده:
+```sh
+FranzKafkaYu
+vaxilu
+NidukaAkalanka
+HamedAp
+```
+نکته مهم: یوزرهایی که یک دارای یک پورت هستند پشتیبانی نمیکند
+
+<br>
 
 ## برای اضافه کردن سرور به ربات از دستور زیر استفاده کنید
 
-##panel kafka
+##panel 
 ```sh
 /addpanel address/path,user,pass 
 ```
 
 or
 
-##panel x-ui ...
+##panel
 ```sh
 /addpanel address,user,pass 
 ```
