@@ -45,8 +45,8 @@ https://user-images.githubusercontent.com/27927279/221428430-c00add6c-100b-4a38-
 
 ```sh
 apt install python3-pip -y
-git clone https://github.com/wizwizdev/xui-timebot.git
-cd xui-timebot
+git clone https://github.com/wizwizdev/wizwizxui-timebot.git
+cd wizwizxui-timebot
 pip install -r requirements.txt
 ```
 
@@ -66,7 +66,7 @@ nano config.json
 ## با دستور زیر فایل timebot.py را ادیت کنید
 
 ```sh
-nano timebot.py
+nano wiztimebot.py
 ```
 
 به خط 48 برید و لینک مخصوص خودتون رو که از سایت mongodb که کپی کردید از @ به بعد هرچی هست را جایگزین کنید و سپس ذخیره کنید
@@ -75,7 +75,7 @@ nano timebot.py
 ## و در اخر کد زیر را اجرا کنید 
 
 ```sh
- nohup python3 timebot.py > serverlog.txt 2>&1 &
+ nohup python3 wiztimebot.py > serverlog.txt 2>&1 &
 ```
 
 وارد ربات بشید و ربات را  start کنید 
