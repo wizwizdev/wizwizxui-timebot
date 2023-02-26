@@ -45,8 +45,14 @@ https://user-images.githubusercontent.com/27927279/221428430-c00add6c-100b-4a38-
 
 ```sh
 apt install python3-pip -y
+```
+```sh
 git clone https://github.com/wizwizdev/wizwizxui-timebot.git
+```
+```sh
 cd wizwizxui-timebot
+```
+```sh
 pip install -r requirements.txt
 ```
 
@@ -75,7 +81,7 @@ nano wiztimebot.py
 ## و در اخر کد زیر را اجرا کنید 
 
 ```sh
- nohup python3 wiztimebot.py > serverlog.txt 2>&1 &
+nohup python3 wiztimebot.py > serverlog.txt 2>&1 &
 ```
 
 وارد ربات بشید و ربات را  start کنید 
