@@ -96,7 +96,7 @@ nohup python3 wiztimebot.py > serverlog.txt 2>&1 &
 ## برای اضافه کردن سرور به ربات از دستور زیر استفاده کنید
 
 ```sh
-/addpanel address,user,pass
+/addpanel address,user,pass or /addpanel address/path,user,pass
 ```
 مثال
 ```sh
@@ -108,7 +108,7 @@ nohup python3 wiztimebot.py > serverlog.txt 2>&1 &
 
 ## برای حذف کردن
 ```sh
-/removepanel addres
+/removepanel addres or /removepanel address/path,user,pass
 ```
 مثال
 ```sh
