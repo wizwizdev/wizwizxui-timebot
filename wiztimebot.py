@@ -1,5 +1,3 @@
-# dev: @wizwizxui
-
 import base64
 import requests
 import json
