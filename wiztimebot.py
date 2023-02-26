@@ -66,7 +66,6 @@ def start(update: Update, context: CallbackContext):
         keyboard = [
             [KeyboardButton("❗️ مشخصات سرور ❗️")],
             # [KeyboardButton("🔅 راهنما 🔅")],
-            [KeyboardButton("🧑‍💻 تغییر متن راهنما ( مخصوص ادمین ) 👨‍💻")],
             [KeyboardButton("ارسال پیام همگانی")],
         ]
         update.message.reply_html(f"""slm {update.effective_user.mention_html()} 😍
@@ -91,7 +90,6 @@ def cancel(update: Update, context: CallbackContext):
         keyboard = [
             [KeyboardButton("❗️ مشخصات سرور ❗️")],
             # [KeyboardButton("🔅 راهنما 🔅")],
-            [KeyboardButton("🧑‍💻 تغییر متن راهنما ( مخصوص ادمین ) 👨‍💻")],
             [KeyboardButton("ارسال پیام همگانی")],
         ]
         update.message.reply_html(f"""دوست عزیز ، گزینه مورد نظر خود را انتخاب کنید:""", reply_markup=ReplyKeyboardMarkup(
@@ -156,16 +154,6 @@ def conversion(update: Update, context: CallbackContext):
             keyboard, resize_keyboard=True, one_time_keyboard=False))
 
         return CANCEL
-
-    if update.effective_user.id == ADMIN_ID:
-        if update.message.text == "🧑‍💻 تغییر متن راهنما ( مخصوص ادمین ) 👨‍💻":
-            keyboard = [
-                [KeyboardButton("لغو")],
-            ]
-            update.message.reply_html("متن راهنما را وارد کنید", reply_markup=ReplyKeyboardMarkup(
-                keyboard, resize_keyboard=True, one_time_keyboard=False))
-
-            return CHANGE_HELER_TEXT
 
 
 def main():
