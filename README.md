@@ -56,6 +56,8 @@ pip install -r requirements.txt
 nano config.json
 ```
 
+
+
 به جای Token باید توکنی که از ربات Botfather دریافت کردید جایگزین کنید
 به جای idadmin باید ایدی عددی خودتون رو از ربات  username_to_id_bot دریافت کنید و جایگزین کنید
 به جای License باید username ک و به جای key باید password داخل سایت mongodb ایجاد کردیم رو وارد کنیم 
