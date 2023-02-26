@@ -64,7 +64,7 @@ nano timebot.py
 ```sh
 /addpanel address,user,pass
 ```
-      └──────────> مثال
+مثال
 ```sh
 /addpanel http://22.33.333.16:54321,admin,admin
 ```
@@ -76,7 +76,7 @@ nano timebot.py
 ```sh
 /removepanel addres
 ```
-      └──────────> مثال
+مثال
 ```sh
 /removepanel http://22.33.333.16:54321
 ```
