@@ -2,8 +2,11 @@
 
 ### [ترجمه به فارسی](README-persian.md)
 
+support: vless , vmess , trojan
 
-  In the first step, we need to create a database, to create a database, register at mongodb.com
+<br>
+
+In the first step, we need to create a database, to create a database, register at mongodb.com
 
 Go to the Database section
 
