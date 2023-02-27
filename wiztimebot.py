@@ -64,9 +64,7 @@ def start(update: Update, context: CallbackContext):
                 {"user_id": ADMIN_ID, "helper_text": "هیچ متن راهنمایی وجود ندارد!"})
 
         keyboard = [
-            [KeyboardButton("❗️ مشخصات سرور ❗️")],
-            # [KeyboardButton("🔅 راهنما 🔅")],
-            [KeyboardButton("ارسال پیام همگانی")],
+            [KeyboardButton("❗️ مشخصات سرور ❗️")]
         ]
         update.message.reply_html(f"""slm {update.effective_user.mention_html()} 😍
 دوست عزیز ، گزینه مورد نظر خود را انتخاب کنید:""", reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False))
@@ -76,8 +74,7 @@ def start(update: Update, context: CallbackContext):
         if user == None:
             USERS_DB.insert_one({"user_id": update.effective_user.id})
         keyboard = [
-            [KeyboardButton("❗️ مشخصات سرور ❗️")],
-            # [KeyboardButton("🔅 راهنما 🔅")]
+            [KeyboardButton("❗️ مشخصات سرور ❗️")]
         ]
         update.message.reply_html(f"""slm {update.effective_user.mention_html()} 😍
 دوست عزیز ، گزینه مورد نظر خود را انتخاب کنید:""", reply_markup=ReplyKeyboardMarkup(keyboard, resize_keyboard=True, one_time_keyboard=False))
@@ -88,9 +85,7 @@ def start(update: Update, context: CallbackContext):
 def cancel(update: Update, context: CallbackContext):
     if update.effective_user.id == ADMIN_ID:
         keyboard = [
-            [KeyboardButton("❗️ مشخصات سرور ❗️")],
-            # [KeyboardButton("🔅 راهنما 🔅")],
-            [KeyboardButton("ارسال پیام همگانی")],
+            [KeyboardButton("❗️ مشخصات سرور ❗️")]
         ]
         update.message.reply_html(f"""دوست عزیز ، گزینه مورد نظر خود را انتخاب کنید:""", reply_markup=ReplyKeyboardMarkup(
             keyboard, resize_keyboard=True, one_time_keyboard=False))
@@ -100,8 +95,7 @@ def cancel(update: Update, context: CallbackContext):
         if user == None:
             USERS_DB.insert_one({"user_id": update.effective_user.id})
         keyboard = [
-            [KeyboardButton("❗️ مشخصات سرور ❗️")],
-            # [KeyboardButton("🔅 راهنما 🔅")],
+            [KeyboardButton("❗️ مشخصات سرور ❗️")]
         ]
         update.message.reply_html(f"""دوست عزیز ، گزینه مورد نظر خود را انتخاب کنید:""", reply_markup=ReplyKeyboardMarkup(
             keyboard, resize_keyboard=True, one_time_keyboard=False))
@@ -126,16 +120,6 @@ def convert_link_vless(vless_account: str):
 # endregion
 
 
-def conversion(update: Update, context: CallbackContext):
-    if update.message.text == "ارسال پیام همگانی":
-        keyboard = []
-        keyboard.append([KeyboardButton("لغو")])
-
-        update.message.reply_html(
-            "متنی که میخواهید به تمام اعضای ربات ارسال شود را وارد کنید", reply_markup=ReplyKeyboardMarkup(
-                keyboard, resize_keyboard=True, one_time_keyboard=True))
-        return SEND_TO_ALL
-
     if update.message.text == "❗️ مشخصات سرور ❗️":
         keyboard = [
             [KeyboardButton("لغو")],
@@ -144,16 +128,6 @@ def conversion(update: Update, context: CallbackContext):
             keyboard, resize_keyboard=True, one_time_keyboard=False))
 
         return SHOW_ACCOUNT_INFO_STEP1
-
-    if update.message.text == "🔅 راهنما 🔅":
-        current_settings = SETTINGS_DB.find_one({"user_id": ADMIN_ID})
-        keyboard = [
-            [KeyboardButton("بازگشت")],
-        ]
-        update.message.reply_html(current_settings['helper_text'], reply_markup=ReplyKeyboardMarkup(
-            keyboard, resize_keyboard=True, one_time_keyboard=False))
-
-        return CANCEL
 
 
 def main():
@@ -180,76 +154,6 @@ def main():
 
     updater.start_polling()
     updater.idle()
-
-# region send to all
-
-
-def send_bulk_message(bot, message, users):
-    message_sent = 0
-    for i in range(0, len(users), 20):
-        for user in users[i:i+20]:
-            try:
-                bot.sendMessage(user['user_id'], message, parse_mode="HTML")
-                message_sent += 1
-            except:
-                pass
-
-            time.sleep(1.2)
-
-    bot.sendMessage(
-        ADMIN_ID, f"ارسال پیام ها با موفقیت انجام شد. تعداد کل اعضای ربات: {len(users)} و تعداد پیام های ارسال شده موفق: {message_sent} هستند", parse_mode="HTML")
-
-
-def send_to_all(update: Update, context: CallbackContext):
-    if update.message.text == "لغو":
-        return cancel(update, context)
-
-    try:
-        users = list(USERS_DB.find())
-        if users.__len__() == 0:
-            update.message.reply_html("ربات هیچ عضوی ندارد")
-            return cancel(update, context)
-
-        threading.Thread(target=send_bulk_message, args=[
-                         context.bot, update.message.text, users]).start()
-
-        update.message.reply_html(
-            "ارسال پیام ها شروع شد بسته به زمان مورد نیاز برای ارسال پیام به تمام کاربران، در انتها پیامی مبنی بر انتهای ارسال برای شما ارسال خواهد شد")
-        return cancel(update, context)
-
-    except Exception as e:
-        print(f"an error occured in the send_to_all function {e}")
-        update.message.reply_html(
-            "مشکلی در send_to_all بوجود آمد")
-        return cancel(update, context)
-
-# endregion
-
-
-def change_helper_text(update: Update, context: CallbackContext):
-    try:
-        if update.message.text == "لغو":
-            return cancel(update, context)
-
-        SETTINGS_DB.update_one({"user_id": ADMIN_ID}, {
-                               "$set": {"helper_text": update.message.text}})
-        keyboard = [
-            [KeyboardButton("بازگشت")],
-        ]
-        update.message.reply_html(f"متن راهنما با موفقیت تغییر کرد ✅", reply_markup=ReplyKeyboardMarkup(
-            keyboard, resize_keyboard=True, one_time_keyboard=False))
-
-        return CANCEL
-
-    except Exception as e:
-        print(f"error in chat {e}")
-        keyboard = [
-            [KeyboardButton("بازگشت")],
-        ]
-        update.message.reply_html(f"خطایی به وجود آمد", reply_markup=ReplyKeyboardMarkup(
-            keyboard, resize_keyboard=True, one_time_keyboard=False))
-
-        return CANCEL
 
 
 def convert_link_vmess(vmess_account: str):
