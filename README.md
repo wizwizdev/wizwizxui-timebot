@@ -88,6 +88,9 @@ https://user-images.githubusercontent.com/27927279/221434942-5d4e0122-aa1c-4a7e-
 ### Installation steps Enter the following commands in the Linux server in order:
 
 
+#### If you are using Ubuntu 18, be sure to select Python version 3, by default Python 2 is installed and selected and you will get an error when running the script. But it runs well on Ubuntu 20 and above
+
+
 ```sh
 apt update && apt upgrade -y
 ```
