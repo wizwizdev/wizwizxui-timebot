@@ -54,7 +54,7 @@ https://user-images.githubusercontent.com/27927279/221428162-4bfb5a68-30d9-4b50-
 
 <br>
 
-After the database is created, click on connect
+After the database is created, go to the Database section and click on connect the database you created
 
 Then click on Connect your application option
 
