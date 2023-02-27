@@ -51,7 +51,7 @@ https://user-images.githubusercontent.com/27927279/221428162-4bfb5a68-30d9-4b50-
 
 <br>
 
-بعد از ایجاد شدن دیتابیس روی connect کلیک کنید 
+بعد از ایجاد شدن دیتابیس به بخش Database بروید روی connect کلیک کنید 
 
 سپس روی گزینه Connect your application کلیک کنید
 
