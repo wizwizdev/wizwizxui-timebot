@@ -1,9 +1,7 @@
 ## Bot showing the volume and remaining subscription x-ui panel v.1
 
-[ترجمه به فارسی](README-persian.md)
+### [ترجمه به فارسی](README-persian.md)
 
-
-<br>
 
   In the first step, we need to create a database, to create a database, register at mongodb.com
 
