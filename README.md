@@ -1,4 +1,4 @@
-## Bot script to display subscription profile (x-ui panel)
+## Bot script to display subscription profile (x-ui panel) v.1
 
 ### [ترجمه به فارسی](README-persian.md)
 
