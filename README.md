@@ -146,10 +146,12 @@ Example
 ```
 
 <br>
-#### Also, if you have a problem running the code, repeat the following command 5 times to stop the process completely:
+
+### Also, if you have a problem running the code, repeat the following command 5 times to stop the process completely:
 ```sh
 pkill -f wiztimebot.py
 ```
+
 <br>
 
 Be sure to join the group because another robot is going to be available to you in the form of Raikan
