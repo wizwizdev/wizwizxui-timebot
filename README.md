@@ -47,7 +47,7 @@ https://user-images.githubusercontent.com/27927279/221434942-5d4e0122-aa1c-4a7e-
   In the mongodb panel on the left side inside the lists, we click on the Database Access option and here we have a database and copy the created username, if you remember we had a password when creating the database, we must copy the username and password and save it somewhere.
  
 
-###Installation steps Enter the following commands in the Linux server in order:
+### Installation steps Enter the following commands in the Linux server in order:
 
 
 ```sh
@@ -63,7 +63,7 @@ cd wizwizxui-timebot
 pip install -r requirements.txt
 ```
 
-###Replace the token and numerical id (administrator) with the following command and then save:
+### Replace the token and numerical id (administrator) with the following command and then save:
 
 ```sh
 nano config.json
@@ -75,7 +75,7 @@ instead of license, we should enter username, instead of key, we should enter pa
 
 <br>
 
-###Edit the timebot.py file with the following command
+### Edit the timebot.py file with the following command
 
 ```sh
 nano wiztimebot.py
@@ -84,13 +84,13 @@ nano wiztimebot.py
 Go to line 46 and replace your special link that you copied from the mongodb site between @ and ' and then save.
 
 
-###and finally run the following code
+### and finally run the following code
 
 ```sh
 nohup python3 wiztimebot.py > serverlog.txt 2>&1 &
 ```
 
-###It supports the following panels:
+### It supports the following panels:
 ```sh
 FranzKafkaYu
 Vaxilu
@@ -105,7 +105,7 @@ Important note: It does not support users who have one port and each user must h
 Enter the robot and start the robot
 
 
-###Use the following command to add a server to the robot
+### Use the following command to add a server to the robot
 
 
 ```sh
@@ -125,7 +125,7 @@ Example
 /addpanel https://google.com:54321,admin,admin
 ```
 
-###to delete
+### to delete
 ```sh
 /removepanel addres or /removepanel address/path,user,pass
 ```
@@ -137,7 +137,7 @@ Example
 /removepanel https://google.com:54321
 ```
 
-###View added panels
+### View added panels
 ```sh
 /showpanel
 ```
