@@ -144,4 +144,5 @@ Example
 
 Be sure to join the group because another robot is going to be available to you in the form of Raikan
 
-💎 Group: https://t.me/wizwizxui
+## Contact Developer
+💎 Group: https://t.me/wizwizdev
