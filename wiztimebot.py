@@ -576,7 +576,7 @@ def add_panel(update: Update, context: CallbackContext):
                     return
 
                 update.message.reply_html(
-                    "چند ثانیه منتظر بمانید تا سیستم آپدیت شود")
+                    "⏳ لطفا صبر کنید تا عملیات ثبت شود")
                 return cancel(update, context)
 
             except Exception as e:
@@ -614,7 +614,7 @@ def remove_panel(update: Update, context: CallbackContext):
                         {"address": addr})
 
                 update.message.reply_html(
-                    "چند ثانیه منتظر بمانید تا سیستم آپدیت شود")
+                    "⏳ لطفا صبر کنید تا عملیات ثبت شود")
 
                 try:
                     job_func()
