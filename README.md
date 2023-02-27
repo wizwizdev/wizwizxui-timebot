@@ -30,6 +30,10 @@ Show all servers
 
 Connect to the database
 
+Applicable on a server (for all panels)
+
+
+
 
 <br>
 
