@@ -2,11 +2,11 @@
 
 <br>
 
- در مرحله اول باید یک دیتابیس ایجاد کنیم، برای ایجاد دیتابیس در سایت mongodb.com ثبت نام کنید 
+  In the first step, we need to create a database, to create a database, register at mongodb.com
 
-به بخش Database بروید
+Go to the Database section
 
-سپس روی گزینه Build a Database کلیک کنید و یک دیتابیس از لوکیش المان ایجاد کنید و در اخر از شما یه یوزر و یه پسورد برای دیتابیس میخواد که باید انتخاب کنید و یه جا ذخیره کنید که جلوتر نیاز داریم
+Then click on the Build a Database option and create a database from the location of the element, and at the end, it will ask you for a user and a password for the database, which you must choose and save somewhere that we will need later.
 
 
 <br>
@@ -15,11 +15,11 @@ https://user-images.githubusercontent.com/27927279/221428162-4bfb5a68-30d9-4b50-
 
 <br>
 
-بعد از ایجاد شدن دیتابیس روی connect کلیک کنید 
+After the database is created, click on connect
 
-سپس روی گزینه Connect your application کلیک کنید
+Then click on Connect your application option
 
-لینکی که ایجاد شد مخصوص شماست و از @ به بعد رو کپی کنید و یه جا ذخیره کنید برای مثال 
+The link that was created is for you and copy from @ onwards and save it somewhere, for example
 ```sh
 wiz3.ghdrss.mongodb.net/?retryWrites=true&w=majority
 ```
@@ -32,7 +32,7 @@ https://user-images.githubusercontent.com/27927279/221428430-c00add6c-100b-4a38-
 
 <br>
 
-داخل فهرست پنل روی گزینه Network Access کلیک کنید سپس روی گزینه   ADD IP ADDRESS کلیک کنید در پنجره باز شده روی گزینه  Allow Access from Anywhere کلیک کنید و سپس روی Confirm کلیک کنید
+In the list of the panel, click on the Network Access option, then click on the ADD IP ADDRESS option, in the opened window, click on the Allow Access from Anywhere option, and then click on Confirm.
 
 <br>
 
@@ -41,10 +41,10 @@ https://user-images.githubusercontent.com/27927279/221434942-5d4e0122-aa1c-4a7e-
 <br>
 
 
- در پنل mongodb سمت چپ داخل فهرست ها روی گزینه Database Access کلیک میکنیم و اینجا ما یک دیتابیس داریم و username ایجاد شده رو کپی میکنیم ، موقع ایجاد دیتابیس اگر یادتون باشه یه password داشتیم ، باید username و password رو کپی کنیم و یه جا ذخیره کنیم
+  In the mongodb panel on the left side inside the lists, we click on the Database Access option and here we have a database and copy the created username, if you remember we had a password when creating the database, we must copy the username and password and save it somewhere.
  
 
-## مراحل نصب | دستورات زیر را داخل سرور لینوکسی به ترتیب وارد کنید :
+## Installation steps Enter the following commands in the Linux server in order:
 
 
 ```sh
@@ -60,65 +60,65 @@ cd wizwizxui-timebot
 pip install -r requirements.txt
 ```
 
-## با دستور زیر توکن و ایدی عددی ( مدیر ) را جایگزین کنید و سپس ذخیره کنید: 
+## Replace the token and numerical id (administrator) with the following command and then save:
 
 ```sh
 nano config.json
 ```
 
-به جای Token باید توکنی که از ربات Botfather دریافت کردید جایگزین کنید
-به جای idadmin باید ایدی عددی خودتون رو از ربات  username_to_id_bot دریافت کنید و جایگزین کنید
-به جای License باید username ک و به جای key باید password و به جای bn باید اسم دیتابیس را که داخل سایت mongodb ایجاد کردیم وارد کنیم 
+Instead of Token, you need to replace the token you received from Botfather bot
+Instead of idadmin, you should get your numeric ID from username_to_id_bot and replace it
+instead of license, we should enter username, instead of key, we should enter password, and instead of bn, we should enter the name of the database that we created in the mongodb site.
 
 <br>
 
-![غعهعخ](https://user-images.githubusercontent.com/27927279/221432931-7ad4095d-0d3d-463d-9055-fab112421f4b.JPG)
+!
 
 <br>
 
-## با دستور زیر فایل timebot.py را ادیت کنید
+## Edit the timebot.py file with the following command
 
 ```sh
 nano wiztimebot.py
 ```
 
-به خط 46 برید و لینک مخصوص خودتون رو که از سایت mongodb که کپی کردید از بین @ و ' جایگزین کنید و سپس ذخیره کنید
+Go to line 46 and replace your special link that you copied from the mongodb site between @ and ' and then save.
 
 
-## و در اخر کد زیر را اجرا کنید 
+## and finally run the following code
 
 ```sh
 nohup python3 wiztimebot.py > serverlog.txt 2>&1 &
 ```
 
-## پنل های زیر را ساپورت می کند:
+## It supports the following panels:
 ```sh
 FranzKafkaYu
-vaxilu
+Vaxilu
 NidukaAkalanka
 hossinasaadi
 HamedAp
 ```
-نکته مهم: یوزرهایی که یک دارای یک پورت هستند پشتیبانی نمیکند و هر یوزر باید پورت مخصوص به خودش را داشته باشد
+Important note: It does not support users who have one port and each user must have their own port
 
 <br>
 
-وارد ربات بشید و ربات را  start کنید
+Enter the robot and start the robot
 
 
-## برای اضافه کردن سرور به ربات از دستور زیر استفاده کنید
+## Use the following command to add a server to the robot
 
 
 ```sh
-/addpanel address/path,user,pass 
+/addpanel address/path,user,pass
 ```
 
 or
 
 ```sh
-/addpanel address,user,pass 
+/addpanel address,user,pass
 ```
-مثال
+Example
 ```sh
 /addpanel http://22.33.333.16:54321,admin,admin
 ```
@@ -126,11 +126,11 @@ or
 /addpanel https://google.com:54321,admin,admin
 ```
 
-## برای حذف کردن
+## to delete
 ```sh
 /removepanel addres or /removepanel address/path,user,pass
 ```
-مثال
+Example
 ```sh
 /removepanel http://22.33.333.16:54321
 ```
@@ -138,11 +138,11 @@ or
 /removepanel https://google.com:54321
 ```
 
-## دیدن پنل های اضافه شده
+## View added panels
 ```sh
 /showpanel
 ```
 
-حتما داخل گروه جوین شین که کلی ربات دیگه قراره به صورت رایکان در اختیار شما قرار بگیره 👇
+Be sure to join the group because another robot is going to be available to you in the form of Raikan
 
-💎 Group: https://t.me/wizwizxui 
+💎 Group: https://t.me/wizwizxui
