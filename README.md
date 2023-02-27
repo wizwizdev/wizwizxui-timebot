@@ -1,8 +1,29 @@
-## Bot showing the volume and remaining subscription x-ui panel v.1
+## Bot script to display subscription profile (x-ui panel)
 
 ### [ترجمه به فارسی](README-persian.md)
 
-support: vless , vmess , trojan
+
+
+
+Display subscription volume
+
+Show download volume
+
+Upload volume display
+
+Display the total volume consumed
+
+Display the remaining volume
+
+Show status
+
+Display the expiration date in solar format
+
+Account expiration date
+
+<br>
+
+#### support: vless , vmess , trojan
 
 <br>
 
