@@ -48,6 +48,9 @@ https://user-images.githubusercontent.com/27927279/221434942-5d4e0122-aa1c-4a7e-
 
 
 ```sh
+apt update && apt upgrade -y
+```
+```sh
 apt install python3-pip -y
 ```
 ```sh
