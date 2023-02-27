@@ -5,6 +5,7 @@
 
 
 
+
 Display subscription volume
 
 Show download volume
@@ -20,6 +21,15 @@ Show status
 Display the expiration date in solar format
 
 Account expiration date
+
+Create unlimited servers
+
+Delete created servers
+
+Show all servers
+
+Connect to the database
+
 
 <br>
 
