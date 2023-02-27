@@ -68,7 +68,7 @@ nano config.json
 
 به جای Token باید توکنی که از ربات Botfather دریافت کردید جایگزین کنید
 به جای idadmin باید ایدی عددی خودتون رو از ربات  username_to_id_bot دریافت کنید و جایگزین کنید
-به جای License باید username ک و به جای key باید password و به جای bn باید اسم دیتابیس را که داخل سایت mongodb ایجاد کردیم وارد کنیم 
+به جای License باید username ، به جای key باید password و به جای bn باید اسم دیتابیس را که داخل سایت mongodb ایجاد کردید وارد کنید 
 
 <br>
 
@@ -76,7 +76,7 @@ nano config.json
 
 <br>
 
-### با دستور زیر فایل timebot.py را ادیت کنید
+### با دستور زیر فایل timebot.py را ویرایش کنید
 
 ```sh
 nano wiztimebot.py
