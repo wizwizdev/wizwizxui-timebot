@@ -149,6 +149,16 @@ Important note: It does not support users who have one port and each user must h
 Enter the robot and start the robot
 
 
+#### The username and password of your x-ui panel must be simple (combination of numbers of letters) because there is a problem with a complicated username and password and the robot will not run, for example:
+
+```sh
+username: admin123
+```
+
+```sh
+password: test456
+```
+
 ### Use the following command to add a server to the robot
 
 
