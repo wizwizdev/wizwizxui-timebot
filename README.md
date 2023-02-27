@@ -154,7 +154,7 @@ pkill -f wiztimebot.py
 
 <br>
 
-Be sure to join the group because another robot is going to be available to you in the form of Raikan
+Be sure to join the group because you will get another robot for free
 
 ## Contact Developer
 💎 Group: https://t.me/wizwizdev
