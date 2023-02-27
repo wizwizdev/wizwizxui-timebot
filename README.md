@@ -75,10 +75,6 @@ instead of license, we should enter username, instead of key, we should enter pa
 
 <br>
 
-!
-
-<br>
-
 ## Edit the timebot.py file with the following command
 
 ```sh
