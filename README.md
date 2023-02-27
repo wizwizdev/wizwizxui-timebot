@@ -71,7 +71,7 @@ nano config.json
 
 Instead of Token, you need to replace the token you received from Botfather bot
 Instead of idadmin, you should get your numeric ID from username_to_id_bot and replace it
-instead of license, we should enter username, instead of key, we should enter password, and instead of bn, we should enter the name of the database that we created in the mongodb site.
+instead of license, you should enter username, instead of key, you should enter password, and instead of bn, you should enter the name of the database that you created in the mongodb site.
 
 <br>
 
