@@ -1,5 +1,8 @@
 ## Bot showing the volume and remaining subscription x-ui panel
 
+[ترجمه به فارسی](README-persian.md)
+
+
 <br>
 
   In the first step, we need to create a database, to create a database, register at mongodb.com
@@ -8,7 +11,7 @@ Go to the Database section
 
 Then click on the Build a Database option and create a database from the location of the element, and at the end, it will ask you for a user and a password for the database, which you must choose and save somewhere that we will need later.
 
-
+ 
 <br>
 
 https://user-images.githubusercontent.com/27927279/221428162-4bfb5a68-30d9-4b50-96fd-399aacc44fd1.mp4
