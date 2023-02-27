@@ -1,4 +1,4 @@
-# Bot showing the volume and remaining subscription x-ui panel
+## ربات نمایش حجم و زمان اشتراک پنل x-ui
 
 <br>
 
@@ -145,4 +145,5 @@ or
 
 حتما داخل گروه جوین شین که کلی ربات دیگه قراره به صورت رایکان در اختیار شما قرار بگیره 👇
 
-💎 Group: https://t.me/wizwizxui 
+## Contact Developer
+💎 Group: https://t.me/wizwizdev
