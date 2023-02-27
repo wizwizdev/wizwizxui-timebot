@@ -1,4 +1,4 @@
-## Bot showing the volume and remaining subscription x-ui panel
+## Bot showing the volume and remaining subscription x-ui panel v.1
 
 [ترجمه به فارسی](README-persian.md)
 
