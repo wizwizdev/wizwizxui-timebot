@@ -181,7 +181,7 @@ Example
 
 ### to delete
 ```sh
-/removepanel addres or /removepanel address/path,user,pass
+/removepanel addres or /removepanel address/path
 ```
 Example
 ```sh
