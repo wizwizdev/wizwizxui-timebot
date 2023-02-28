@@ -180,7 +180,7 @@ or
 
 ### برای حذف کردن
 ```sh
-/removepanel addres or /removepanel address/path,user,pass
+/removepanel addres or /removepanel address/path
 ```
 مثال
 ```sh
