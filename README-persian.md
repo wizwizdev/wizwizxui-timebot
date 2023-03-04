@@ -25,20 +25,30 @@
 
 ## فقط پشتیبانی از پنل های زیر:
 
+- ( وکسیلو ) هم تک یورتی ، هم چند پورتی
 ```` 
 https://github.com/vaxilu/x-ui
 ```` 
 
-
+- ( اسدی ) هم تک یورتی ، هم چند پورتی
 
 ```` 
 https://github.com/HexaSoftwareTech/x-ui
 ````
 
+- ( نیدوکا کالانکا ) هم تک یورتی ، هم چند پورتی
 
 ```` 
 https://github.com/NidukaAkalanka/x-ui-english
 ```` 
+
+
+- ( کافکا ) فقط تک پورتی
+
+```` 
+https://github.com/FranzKafkaYu/x-ui
+```` 
+
 
 <br>
 
@@ -54,6 +64,7 @@ https://github.com/NidukaAkalanka/x-ui-english
 
 ## نکته مهم در مورد آدرس پنل ورود به xui: 
 بدلیل محدودیتی که در بعضی از هاست های اشتراکی هست امکان ارسال درخواست از سمت اسکریپت به پورت های غیر 80 و 443 و 8080 و چند پورت دیگر مخصوص سی پنل که برای http و https هست وجود ندارد
+- یعی کنید پورت 8080 بزارید از فعال بودن آن روی هاست مطمئن باشید 
 
 <br>
 
@@ -63,6 +74,9 @@ https://github.com/NidukaAkalanka/x-ui-english
 ```` 
 https://github.com/wizwizdev/wizwizxui-timebot/archive/refs/heads/main.zip
 ````
+
+<br>
+
 2. داخل ربات Bothfather یک ربات ایجاد کنید و توکن را در جایی ذخیره کنید
 3. وارد پنل مدیریتی cpanel شوید
 4. روی MySQL® Databases کلیک کنید و یک دیتابیس ایجاد کنید
@@ -80,6 +94,7 @@ https://yordomain.com/wizwizxui-timebot-main/createDB.php
 https://sub.yordomain.com/wizwizxui-timebot-main/createDB.php
 ````
 
+
 <br>
 
 
@@ -91,6 +106,7 @@ https://sub.yordomain.com/wizwizxui-timebot-main/createDB.php
 
 
 <br>
+
 
 10.  فایل config.php را ویرایش کنید اطلاعات دیتابیس ، توکن ربات از Botfather و آیدی عددی خودتون و کانال تلگرامی ( برای ارسال اعلان اتمام حجم کاربر ) از طریق ربات get_id_bot بگیرید و جایگزین کنید:
 ```` 
@@ -106,7 +122,10 @@ $Database = [
 ];
 ````
 
-12. الان باید وبهوک رو ست کنید، آدرس زیر را ویرایش و اطلاعات توکن و آدرس را جایگزین سپس در مرورگر اجرا کنید:
+<br>
+
+
+11. الان باید وبهوک رو ست کنید، آدرس زیر را ویرایش و اطلاعات توکن و آدرس را جایگزین سپس در مرورگر اجرا کنید:
 ````
 https://api.telegram.org/bot1/setWebhook?url=2/bot.php
 ````
@@ -115,7 +134,9 @@ https://api.telegram.org/bot1/setWebhook?url=2/bot.php
 https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://yordomain.com/wizwizxui-timebot-main/bot.php
 ````
 
-13. به صفحه اصلی cpanel برگردین و روی دکمه Cron Jobs کلیک کنید:
+<br>
+
+12. به صفحه اصلی cpanel برگردین و روی دکمه Cron Jobs کلیک کنید:
 - در قسمت Common Settings حالت Once Per Minute(* * * * *) را انتخاب کنید
 - در قسمت Command لطفا ادرس زیر را وارد کنید:
 ````
@@ -125,7 +146,11 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 ````
 /usr/bin/php -q /home/yourfolder/public_html/yordomain.com/wizwizxui-timebot-main/serverWarn.php >/dev/null 2>&1
 ````
-14. همین مراحل را برای فایل warnUsage.php تکرار کنید:
+
+<br>
+
+
+13. همین مراحل را برای فایل warnUsage.php تکرار کنید:
 ````
 /usr/bin/php -q address2 >/dev/null 2>&1
 ````
@@ -134,11 +159,18 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 /usr/bin/php -q /home/yourfolder/public_html/yordomain.com/wizwizxui-timebot-main/warnUsage.php >/dev/null 2>&1
 ````
 
-15. سپس ربات را استارت کنید و لذت ببرید
+<br>
+
+
+
+14. سپس ربات را استارت کنید و لذت ببرید
 
 <br>
+
 ### مهم:
+
 - به هیچ وج اطلاعات دیتابیس ، سی پنل ، و توکن ربات را در اختیار کسی قرار ندید
+
 <br>
 
 
