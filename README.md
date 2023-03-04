@@ -4,6 +4,9 @@
 
 ### [ترجمه به فارسی](README-persian.md)
 
+## Robot script to show subscription profile (x-ui panel) 2.2 original version
+
+<br>
 
 ### Possibilities
 
@@ -26,18 +29,18 @@
 - Show input key
 - Professional management panel
 - Server management (create-delete-display)
--  ....
+- And ....
 
 <br>
 
 ## Only supports the following panels:
 
-- (Vexilo) both single-port
+- (Vaksilo) only single yurt
 ````
 https://github.com/vaxilu/x-ui
 ````
 
-- (asaadi) both single-port and multi-port
+- (SD) both single-port and multi-port
 
 ````
 https://github.com/HexaSoftwareTech/x-ui
@@ -91,21 +94,11 @@ https://github.com/wizwizdev/wizwizxui-timebot/archive/refs/heads/main.zip
 6. Then go back to the main cpanel management page
 7. Click on File Manager
 8. Upload the project you downloaded and then exit the extract mode
-9. Enter the address where the createDB.php file is located along with the domain in the browser and it should be a white page, in this case your database will be created:
-
-````
-https://yordomain.com/wizwizxui-timebot-main/createDB.php
-````
-Or if it is a subdomain:
-````
-https://sub.yordomain.com/wizwizxui-timebot-main/createDB.php
-````
 
 
-<br>
+9. Edit the config.php file, get the database information, the bot token from Botfather and your numeric ID and Telegram channel (to send notification of the end of the user's volume) through the get_id_bot bot and replace:
 
 
-10. Edit the config.php file, get the database information, the bot token from Botfather and your numerical ID and Telegram channel (to send the notification of the end of user volume) through the bot get_id_bot and replace:
 ````
 $Config = [
      'api_token' => "",
@@ -118,6 +111,20 @@ $Database = [
      'password' => ''
 ];
 ````
+
+<br>
+
+
+10. Enter the address where the createDB.php file is located along with the domain in the browser and it should be a white page, in this case your database will be created:
+
+````
+https://yordomain.com/wizwizxui-timebot-main/createDB.php
+````
+Or if it is a subdomain:
+````
+https://sub.yordomain.com/wizwizxui-timebot-main/createDB.php
+````
+
 
 <br>
 
@@ -165,6 +172,7 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 
 
 
+
 ### When adding a server to the robot, please enter the following address
 ````
 - https://fanland.vpnroz-trojan.tk:8080
@@ -186,6 +194,7 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 ````
 - https://fanland.vpnroz-trojan.tk:8080/
 ````
+
 
 
 <br>
