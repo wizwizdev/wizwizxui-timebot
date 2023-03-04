@@ -169,7 +169,7 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 
 
 
-14. Then start the robot and enjoy
+14. Then start the robot, enter the uuid key and enjoy
 
 
 ### When adding a server to the robot, please enter the following address
