@@ -70,7 +70,7 @@ https://github.com/FranzKafkaYu/x-ui
 
 ## Important note about the address of the xui login panel:
 Due to the limitation of some shared hosts, it is not possible to send requests from the script side to ports other than 80, 443, 8080 and some other ports for cPanel that are for http and https.
-- Put port 8080 and make sure it is active on the host
+- Try to set port 8080 to be sure that it is active on the host
 
 <br>
 
