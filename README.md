@@ -31,7 +31,7 @@
 
 ## Only supports the following panels:
 
-- (Vexilo) both single-port and multi-port
+- (Vexilo) both single-port
 ````
 https://github.com/vaxilu/x-ui
 ````
