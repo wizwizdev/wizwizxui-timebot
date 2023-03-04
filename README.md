@@ -29,20 +29,30 @@
 
 ## Only supports the following panels:
 
+- (Vexilo) both single-port and multi-port
 ````
 https://github.com/vaxilu/x-ui
 ````
 
-
+- (SD) both single-port and multi-port
 
 ````
 https://github.com/HexaSoftwareTech/x-ui
 ````
 
+- (Nidoka Kalanka) both single yurt and multi-port
 
 ````
 https://github.com/NidukaAkalanka/x-ui-english
 ````
+
+
+- (Kafka) only single port
+
+````
+https://github.com/FranzKafkaYu/x-ui
+````
+
 
 <br>
 
@@ -53,9 +63,13 @@ https://github.com/NidukaAkalanka/x-ui-english
 - domain + ssl
 
 
+
 <br>
+
 ## Important note about the address of the xui login panel:
 Due to the limitation of some shared hosts, it is not possible to send requests from the script side to ports other than 80, 443, 8080 and some other ports for cPanel that are for http and https.
+- Put port 8080 and make sure it is active on the host
+
 <br>
 
 ### learn inistallation
@@ -64,6 +78,9 @@ Due to the limitation of some shared hosts, it is not possible to send requests 
 ````
 https://github.com/wizwizdev/wizwizxui-timebot/archive/refs/heads/main.zip
 ````
+
+<br>
+
 2. Create a bot inside the Bothfather bot and save the token somewhere
 3. Enter the cpanel management panel
 4. Click on MySQL® Databases and create a database
@@ -81,6 +98,7 @@ Or if it is a subdomain:
 https://sub.yordomain.com/wizwizxui-timebot-main/createDB.php
 ````
 
+
 <br>
 
 
@@ -88,6 +106,8 @@ https://sub.yordomain.com/wizwizxui-timebot-main/createDB.php
 
 
 ![5634](https://user-images.githubusercontent.com/27927279/222905888-cd79782d-dbc3-4301-91b8-abe9eb6fc5c2.JPG)
+
+
 
 <br>
 
@@ -106,7 +126,10 @@ $Database = [
 ];
 ````
 
-12. Now you need to set up the website, edit the following address and replace the token and address information, then run it in the browser:
+<br>
+
+
+11. Now you need to set up the website, edit the following address and replace the token and address information, then run it in the browser:
 ````
 https://api.telegram.org/bot1/setWebhook?url=2/bot.php
 ````
@@ -115,7 +138,9 @@ Instead of 1, you must enter the robot token and instead of 2, the address: Exam
 https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://yordomain.com/wizwizxui-timebot-main/bot.php
 ````
 
-13. Go back to the cpanel home page and click on the Cron Jobs button:
+<br>
+
+12. Go back to the cpanel home page and click on the Cron Jobs button:
 - Select Once Per Minute (* * * * *) mode in the Common Settings section
 - In the Command field, please enter the following address:
 ````
@@ -125,7 +150,11 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 ````
 /usr/bin/php -q /home/yourfolder/public_html/yordomain.com/wizwizxui-timebot-main/serverWarn.php >/dev/null 2>&1
 ````
-14. Repeat the same steps for the warnUsage.php file:
+
+<br>
+
+
+13. Repeat the same steps for the warnUsage.php file:
 ````
 /usr/bin/php -q address2 >/dev/null 2>&1
 ````
@@ -134,10 +163,19 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 /usr/bin/php -q /home/yourfolder/public_html/yordomain.com/wizwizxui-timebot-main/warnUsage.php >/dev/null 2>&1
 ````
 
-15. Then start the robot and enjoy
+<br>
+
+
+
+14. Then start the robot and enjoy
 
 <br>
 
+### Important:
+
+- Do not share database, cPanel, and robot token information with anyone
+
+<br>
 
 
 Be sure to join the group and support us
