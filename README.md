@@ -160,6 +160,8 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 
 
 14. Then start the robot, enter the uuid key and enjoy
+15. For the notification section of the end of the user volume, the user must log in to his account in the robot to receive notifications, and the administrator must make the robot the channel manager so that the notifications are notified in the channel.
+
 
 
 ### When adding a server to the robot, please enter the following address
