@@ -168,6 +168,32 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 
 14. سپس ربات را استارت کنید و لذت ببرید
 
+
+
+### هنگام اضافه کردن سرور به ربات لطفا به صورت زیر آدرس وارد کنید
+````
+- https://fanland.vpnroz-trojan.tk:8080
+````
+
+````
+- https://fanland.vpnroz-trojan.tk:8080/path
+````
+
+````
+- http://192.180.125:8080
+````
+
+#### آدرس زیر اشتباه می باشد
+````
+- https://fanland.vpnroz-trojan.tk:8080/xui/inbounds
+````
+
+````
+- https://fanland.vpnroz-trojan.tk:8080/
+````
+
+
+
 <br>
 
 ### مهم:
