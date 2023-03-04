@@ -15,6 +15,7 @@
 - Convert link to QrCode
 - Display account name
 - Status display
+- Add channel
 - Display the total volume
 - Show download consumption
 - Show upload consumption
