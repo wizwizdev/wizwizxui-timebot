@@ -2,6 +2,10 @@
 
 <br>
 
+### [ترجمه به فارسی](README-persian.md)
+
+<br>
+
 ### Possibilities
 
 - Create accounts for users
