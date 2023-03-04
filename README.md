@@ -4,9 +4,6 @@
 
 ### [ترجمه به فارسی](README-persian.md)
 
-## Robot script to show subscription profile (x-ui panel) 2.2 original version
-
-<br>
 
 ### Possibilities
 
