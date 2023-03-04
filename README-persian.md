@@ -77,6 +77,17 @@ https://yordomain.com/wizwizxui-timebot-main/createDB.php
 https://sub.yordomain.com/wizwizxui-timebot-main/createDB.php
 ````
 
+<br>
+
+
+#### بعد باز کردن اگر خطای زیر در صفحه بود یعنی ماژول ionbube فعال نیست (در 99درصد هاست های اشتراکی فعال است) برای نصب ماژول مربوطه به هاستینگ تیکت بزنید و بدون مشکل برای شما فعال می کنند. 
+
+
+![5634](https://user-images.githubusercontent.com/27927279/222905888-cd79782d-dbc3-4301-91b8-abe9eb6fc5c2.JPG)
+
+
+
+<br>
 
 10.  فایل config.php را ویرایش کنید اطلاعات دیتابیس ، توکن ربات از Botfather و آیدی عددی خودتون و کانال تلگرامی ( برای ارسال اعلان اتمام حجم کاربر ) از طریق ربات get_id_bot بگیرید و جایگزین کنید:
 ```` 
