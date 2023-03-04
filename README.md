@@ -104,16 +104,6 @@ https://sub.yordomain.com/wizwizxui-timebot-main/createDB.php
 <br>
 
 
-#### After opening, if the following error was on the page, it means that the ionbube module is not active (it is active in 99% of shared hosts), send a ticket to the hosting to install the relevant module, and they will activate it for you without any problem.
-
-
-![5634](https://user-images.githubusercontent.com/27927279/222905888-cd79782d-dbc3-4301-91b8-abe9eb6fc5c2.JPG)
-
-
-
-<br>
-
-
 10. Edit the config.php file, get the database information, the bot token from Botfather and your numerical ID and Telegram channel (to send the notification of the end of user volume) through the bot get_id_bot and replace:
 ````
 $Config = [
