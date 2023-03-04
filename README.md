@@ -1,4 +1,4 @@
-## Robot script to display subscription profile (x-ui panel) v2.1 version
+## Robot script to display subscription profile (x-ui panel) v2.2 version
 
 <br>
 
