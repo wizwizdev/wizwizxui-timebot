@@ -166,7 +166,7 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 
 
 
-14. سپس ربات را استارت کنید و لذت ببرید
+14. سپس ربات را استارت کنید ، کلید uuid بدید و لذت ببرید
 
 
 
