@@ -8,6 +8,7 @@
 ### Possibilities
 
 - Create accounts for users
+- Fixed bugs in the previous version
 - Display the notification when the subscription ends (to the user and admin)
 - Get configuration information (for single port and multiple ports)
 - Support for 4 x-ui panels
