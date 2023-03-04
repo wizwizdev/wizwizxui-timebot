@@ -88,21 +88,11 @@ https://github.com/wizwizdev/wizwizxui-timebot/archive/refs/heads/main.zip
 6. سپس به صفحه اصلی مدییریتی cpanel برگردید
 7. روی File Manager کلیک کنید
 8. پروژه ای را که دانلود کردید را آپلود کنید و سپس از حالت اکسترک خارج کنید
-9. ادرسی که فایل createDB.php قرار دارد را همراه با دامنه داخل مرورگر وارد کنید و باید صفحه سفید باشد در این صورت دیتابیس شما ساخته می شود:
-
-```` 
-https://yordomain.com/wizwizxui-timebot-main/createDB.php
-````
-یا اگر به صورت ساب دامین هست:
-```` 
-https://sub.yordomain.com/wizwizxui-timebot-main/createDB.php
-````
 
 
-<br>
+9.  فایل config.php را ویرایش کنید اطلاعات دیتابیس ، توکن ربات از Botfather و آیدی عددی خودتون و کانال تلگرامی ( برای ارسال اعلان اتمام حجم کاربر ) از طریق ربات get_id_bot بگیرید و جایگزین کنید:
 
 
-10.  فایل config.php را ویرایش کنید اطلاعات دیتابیس ، توکن ربات از Botfather و آیدی عددی خودتون و کانال تلگرامی ( برای ارسال اعلان اتمام حجم کاربر ) از طریق ربات get_id_bot بگیرید و جایگزین کنید:
 ```` 
 $Config = [
     'api_token' => "",
@@ -115,6 +105,20 @@ $Database = [
     'password' => ''
 ];
 ````
+
+<br>
+
+
+10. ادرسی که فایل createDB.php قرار دارد را همراه با دامنه داخل مرورگر وارد کنید و باید صفحه سفید باشد در این صورت دیتابیس شما ساخته می شود:
+
+```` 
+https://yordomain.com/wizwizxui-timebot-main/createDB.php
+````
+یا اگر به صورت ساب دامین هست:
+```` 
+https://sub.yordomain.com/wizwizxui-timebot-main/createDB.php
+````
+
 
 <br>
 
