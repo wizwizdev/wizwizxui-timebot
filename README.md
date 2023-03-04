@@ -1,15 +1,16 @@
-## Robot script to display subscription profile (x-ui panel) v.2 beta version
+## Robot script to display subscription profile (x-ui panel) v2.1 beta version
 
 <br>
 
 ### [ترجمه به فارسی](README-persian.md)
 
-<br>
 
 ### Possibilities
 
 - Create accounts for users
 - Display the notification when the subscription ends (to the user and admin)
+- Get configuration information (for single port and multiple ports)
+- Support for 4 x-ui panels
 - Convert link to QrCode
 - Display account name
 - Status display
@@ -23,7 +24,7 @@
 - Show input key
 - Professional management panel
 - Server management (create-delete-display)
-- And ....
+-  ....
 
 <br>
 
