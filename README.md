@@ -40,7 +40,7 @@
 https://github.com/vaxilu/x-ui
 ````
 
-- (SD) both single-port and multi-port
+- (Asaadi) both single-port and multi-port
 
 ````
 https://github.com/HexaSoftwareTech/x-ui
