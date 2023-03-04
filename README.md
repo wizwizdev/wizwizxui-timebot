@@ -171,6 +171,30 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 
 14. Then start the robot and enjoy
 
+
+### When adding a server to the robot, please enter the following address
+````
+- https://fanland.vpnroz-trojan.tk:8080
+````
+
+````
+- https://fanland.vpnroz-trojan.tk:8080/path
+````
+
+````
+- http://192.180.125:8080
+````
+
+#### The following address is wrong
+````
+- https://fanland.vpnroz-trojan.tk:8080/xui/inbounds
+````
+
+````
+- https://fanland.vpnroz-trojan.tk:8080/
+````
+
+
 <br>
 
 ### Important:
