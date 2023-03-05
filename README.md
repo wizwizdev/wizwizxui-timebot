@@ -172,11 +172,11 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 
 ### When adding a server to the robot, please enter the following address
 ````
-- https://fanland.vpnroz-trojan.tk:8080
+- https://youdomain.com:8080
 ````
 
 ````
-- https://fanland.vpnroz-trojan.tk:8080/path
+- https://youdomain.com:8080/path
 ````
 
 ````
@@ -185,11 +185,11 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 
 #### The following address is wrong
 ````
-- https://fanland.vpnroz-trojan.tk:8080/xui/inbounds
+- https://youdomain.com:8080/xui/inbounds
 ````
 
 ````
-- https://fanland.vpnroz-trojan.tk:8080/
+- https://youdomain.com:8080/
 ````
 
 
