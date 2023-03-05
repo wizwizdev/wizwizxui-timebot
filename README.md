@@ -179,9 +179,7 @@ https://api.telegram.org/botHsMMWOqfNvYwuCU_1IzzCsQ34334/setWebhook?url=https://
 - https://youdomain.com:8080/path
 ````
 
-````
-- http://192.180.125:8080
-````
+
 
 #### The following address is wrong
 ````
