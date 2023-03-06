@@ -118,12 +118,12 @@ while($row = $servers->fetch_assoc()){
                     if($total - $totalUsed <  - ($mbLeft * 1024 * 1024) && $total != 0){
                         if(!isset($usersInfo[$uuid])){
                             $info['usersInfo'][$uuid] = "";
-                            sendMessage($Config['report_channel'], "حجم بسته ی کاربر $userId رو به اتمام است\nآیپی سرور: $serverIp\nuuid: $uuid");
+                            sendMessage($Config['report_channel'], "حجم بسته ی کاربر $userId\nuuid: $uuid");
                         }
                     }elseif($expiryTime - time() <= ($hourLeft * 60 * 60) && $expiryTime != 0){
                         if(!isset($usersInfo[$uuid])){
                             $info['usersInfo'][$uuid] = "";
-                            sendMessage($Config['report_channel'], "زمان بسته ی کاربر $userId رو به اتمام است\nآیپی سرور: $serverIp\nuuid: $uuid");
+                            sendMessage($Config['report_channel'], "زمان بسته ی کاربر $userId\nuuid: $uuid");
                         }
                     }else{
                         unset($arr['userInfo']['ryan']);
