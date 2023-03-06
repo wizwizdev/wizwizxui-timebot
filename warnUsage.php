@@ -91,13 +91,13 @@ while($rowUser = $usersList->fetch_assoc()){
                     $subLeft = "حجم بسته ی اشتراک شما رو به اتمام است، لطفا برای تمدید اشتراک خو اقدام کنید";
 
                     sendMessage($userId,$subLeft);
-                    sendMessage($Config['report_channel'], "حجم بسته ی کاربر $userId رو به اتمام است\nآیپی سرور: $serverIp\nuuid: $uuid");
+                    sendMessage($Config['report_channel'], "حجم بسته ی کاربر $userId\nuuid: $uuid");
                     setUser('warned','true',$userId);
                 }elseif($expiryTime - time() <= ($hourLeft * 60 * 60) && $expiryTime != 0){
                     $subLeft = "زمان اشتراک شما رو به پایان است، لطفا برای تمدید اشتراک خو اقدام کنید";
                     
                     sendMessage($userId,$subLeft);
-                    sendMessage($Config['report_channel'], "زمان بسته ی کاربر $userId رو به اتمام است\nآیپی سرور: $serverIp\nuuid: $uuid");
+                    sendMessage($Config['report_channel'], "زمان بسته ی کاربر $userId\nuuid: $uuid");
                     setUser('warned','true',$userId);
                 }
     
