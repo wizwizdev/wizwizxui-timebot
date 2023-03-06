@@ -8,7 +8,8 @@ error_reporting(E_ALL);
 $Config = [
     'api_token' => "",
     'admin' => [],
-    'report_channel' => -1000000 // -100xxxxxxx
+    'report_channel' => -1000000000, // -100xxxxxxx
+    'channel_lock' => ['']
 ];
 $Database = [
     'dbname' => "",
