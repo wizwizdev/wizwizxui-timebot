@@ -146,6 +146,7 @@
     
     // ------------------  Connect MySQL ------------------ //
     $user = mysqli_fetch_assoc(mysqli_query($connection, "SELECT * FROM `user` WHERE `id` = '{$from_id}' LIMIT 1"));
+    $loginCount = $connection->query("SELECT * FROM `loged_info` WHERE `user_id` = '$from_id'");
     // ------------------ { Informations } ------------------ //
     
     function setUser($action, $value, $frm = "none"){
@@ -161,31 +162,72 @@
     }
     
     //------ User Keys ------//
-    $userKeys = json_encode(['keyboard'=>[
-        [['text'=>"🪬 حساب من 🪬"],['text'=>"🔓 خروج از حساب 🔓"]],
-        [['text'=>"💮 Qr Code 💮"]],
-        [['text'=>"کپی رایت ©️ ویزویز"]]
-        ],'resize_keyboard'=>true]);
-    $loginType = json_encode(['keyboard'=>[
-        [['text'=>"نام کاربری"]],
-        [['text'=>"شناسه یکتا"]]
-        ],'resize_keyboard'=>true]);
-    $loginKeys = json_encode(['keyboard'=>[
-        [['text'=>"🕯 ورود به حساب 🕯"],['text'=>"💮 Qr Code 💮"]],
-        [['text'=>"کپی رایت ©️ ویزویز"]]
-        ],'resize_keyboard'=>true]);
+    function getUserKeys(){
+        global $loginCount, $from_id;
+        
+        if(mysqli_num_rows($loginCount)>0){
+            return json_encode(['keyboard'=>[
+                [['text'=>"➕ حساب جدید"]],
+                [['text'=>"🪬 حساب من 🪬"],['text'=>"🔓 خروج از حساب 🔓"]],
+                [['text'=>"💮 Qr Code 💮"],['text'=>"📞 پشتیبانی"]],
+                [['text'=>"کپی رایت ©️ ویزویز"]]
+                ],'resize_keyboard'=>true]);
+        }else{
+            return json_encode(['keyboard'=>[
+                [['text'=>"🕯 ورود به حساب 🕯"],['text'=>"💮 Qr Code 💮"]],
+                [['text'=>"کپی رایت ©️ ویزویز"]]
+                ],'resize_keyboard'=>true]);
+        }
+    }
+
+    if($text == "کپی رایت ©️ ویزویز" ){
+        sendMessage($chat_id,"
+            ممنون میشم از من حمایت کنید 🙂❤️
     
+    🆔 dev: @wizwizpv
+    📣 Gp: @wizwizdev
+            ");
+        setUser('step','setUserUUID');
+    }
+
     $backButton = json_encode(['keyboard'=>[
         [['text'=>"🔽 میخوام به عقب برگردم 🔽"]]
         ],'resize_keyboard'=>true]);
     
     
-    
+    $botState = file_get_contents("botState.txt");
     //-------- Admin Keys------//
-    $adminMainKey = json_encode(['keyboard'=>[
-        [['text'=>"لیست سرور ها"]],
-        [['text'=>"کپی رایت ©️ ویزویز"]]
-        ],'resize_keyboard'=>true]);
+    function getAdminKeys(){
+        global $botState;
+        $botState = $botState=="false"?"خاموش ⛔️":"روشن ✅";
+        return json_encode(['keyboard'=>[
+            [['text'=>"لیست سرور ها"],['text'=>"آمار ربات"]],
+            [['text'=>"وضعیت ربات: " . $botState]],
+            [['text'=>"کپی رایت ©️ ویزویز"]]
+            ],'resize_keyboard'=>true]);
+    }
+        
+        
+    function isJoined(){
+        global $from_id, $Config;
+        $keys = array();
+
+        foreach($Config['channel_lock'] as $key){
+            $isJoined = json_decode(file_get_contents('https://api.telegram.org/bot'.$Config['api_token'].'/getChatMember?chat_id=@'. $key.'&user_id='.$from_id), true)['result']['status'];
+            if ($isJoined == "left" || $isJoined == "kicked"){
+    	        $title = get("@" . $key)->result->title ?? $channelLink;
+                $keys[] = [['text'=>$title,"url"=>"https://t.me/" . $key]];
+            }
+        }    
+        
+        if(count($keys)>0){
+            $keys[] = [['text'=>"عضو شدم ✅",'callback_data'=>"joined"]];
+            return json_encode(['inline_keyboard'=>$keys]);
+        }else{
+            return null; 
+        }
+    }
+
         
     
     
@@ -200,12 +242,12 @@
                 $userName = $row['user_name'];
                 $password = $row['password'];
 
-                $keys[] = [['text'=>$serverIp,'callback_data'=>"wizwizdev"]];
-                $keys[] = [['text'=>$userName,'callback_data'=>"wizwizdev"],['text'=>$password,'callback_data'=>'wizwizdev']];
+                $keys[] = [['text'=>$serverIp,'callback_data'=>"betty"]];
+                $keys[] = [['text'=>$userName,'callback_data'=>"betty"],['text'=>$password,'callback_data'=>'betty']];
                 $keys[] = [['text'=>"حذف",'callback_data'=>"delServer_$rowId"]];
             }
         }else{
-            $keys[] =[['text'=>"سروری ثبت نشده",'callback_data'=>"wizwizdev"]];
+            $keys[] =[['text'=>"سروری ثبت نشده",'callback_data'=>"betty"]];
         }
         
         $keys[] = [['text'=>"افزودن سرور",'callback_data'=>"addNewServer"]];
