@@ -233,6 +233,12 @@ https://youdomain.com:8080/
 <br>
 
 
+
+### Features of version 4.0
+
+-bug fixes and performance improvements
+
+
 ### Features of version 3.0
 
 - Appearance inlining (config specifications)
@@ -245,6 +251,7 @@ https://youdomain.com:8080/
 - Possibility to register config to vless, vmess and trojan (except uuid)
 - Added the ability to send messages to support
 - Added the ability to turn off and turn on the robot (when necessary)
+
 
 ### Features of version 2.0
 
@@ -259,9 +266,7 @@ https://youdomain.com:8080/
 - Professional management panel
 
 
-
 ### Features version 1.0
-
 
 - Get configuration information (for single port)
 - Support for 4 x-ui panels (Vexilo-SD-Nidoka-Kafka {single port})
