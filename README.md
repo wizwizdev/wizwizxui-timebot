@@ -2,6 +2,10 @@
 
 <br>
 
+![](https://visitor-badge.glitch.me/badge?page_id=wizwizdev.wizwizdev)
+
+<br>
+
 ### [ترجمه به فارسی](README-persian.md)
 
 <br>
