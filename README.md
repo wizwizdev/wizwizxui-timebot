@@ -1,10 +1,8 @@
 ## Bot script to show subscription profile (x-ui panel) version 3.0
 
-<br>
 
 ![](https://visitor-badge.glitch.me/badge?page_id=wizwizdev.wizwizdev)
 
-<br>
 
 ### [ترجمه به فارسی](README-persian.md)
 
