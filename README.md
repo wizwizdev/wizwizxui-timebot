@@ -8,19 +8,6 @@
 
 <br>
 
-How to update the project:
-
-- Do not delete the previous project
-- Write down the information of your project's config.php file where you have it
-- To update the project, download all the files and replace the previous files
-- Replace the information in the config.php file
-- Run the createDB.php file in the browser once according to the instructions
-- In the end, according to the instructions, redo the set and hook stage and that's it
-
-Tip: Some friends have slowness problems in their phones, which is related to hosting, get it from a good place
-
-<br>
-
 
 ## Support for the following panels:
 
