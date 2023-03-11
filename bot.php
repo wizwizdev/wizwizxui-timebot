@@ -27,21 +27,29 @@ if (in_array($from_id, $Config['admin'])) {
         sendMessage($chat_id,"وضعیت ربات با موفقیت تغییر کرد",null,getAdminKeys());
     }
     elseif($text=="آمار ربات"){
-        $allUsers = mysqli_num_rows($connection->query("SELECT * FROM `user`"));
-        $logedUsers = mysqli_num_rows($connection->query("SELECT `user_id` FROM `loged_info` GROUP BY `user_id`"));
+        $stmt = $connection->prepare("SELECT * FROM `user`");
+        $stmt->execute();
+        $allUsers = $stmt->get_result()->num_rows;
+        $stmt->close();
+        
+        $stmt = $connection->prepare("SELECT `user_id` FROM `loged_info` GROUP BY `user_id`");
+        $stmt->execute();
+        $logedUsers = $stmt->get_result()->num_rows;
+        $stmt->close();
+        
         $notLogedUsers = $allUsers - $logedUsers;
         sendMessage($chat_id,"آمار ربات شما", null, json_encode(['inline_keyboard'=>[
             [
-                ['text'=>$allUsers??"0", 'callback_data'=>"wizwizdev"],
-                ['text'=>"تعداد کاربران", 'callback_data'=>"wizwizdev"]
+                ['text'=>$allUsers??"0", 'callback_data'=>"shoaib_ryan"],
+                ['text'=>"تعداد کاربران", 'callback_data'=>"shoaib_ryan"]
             ],
             [
-                ['text'=>$logedUsers??"0", 'callback_data'=>"wizwizdev"],
-                ['text'=>"وارد شده به حساب", 'callback_data'=>"wizwizdev"]
+                ['text'=>$logedUsers??"0", 'callback_data'=>"shoaib_ryan"],
+                ['text'=>"وارد شده به حساب", 'callback_data'=>"shoaib_ryan"]
             ],
             [
-                ['text'=>$notLogedUsers??"0", 'callback_data'=>"wizwizdev"],
-                ['text'=>"وارده نشده به حساب", 'callback_data'=>"wizwizdev"]
+                ['text'=>$notLogedUsers??"0", 'callback_data'=>"shoaib_ryan"],
+                ['text'=>"وارده نشده به حساب", 'callback_data'=>"shoaib_ryan"]
             ]
             ]]));
     }
@@ -52,34 +60,17 @@ if (in_array($from_id, $Config['admin'])) {
             sendMessage($chat_id,"سرور های ثبت شده",null,getServersList());
         }
     }
-    elseif(preg_match('/^editServerType_(\d+)/',$data,$match)){
-        $keys = json_encode(['inline_keyboard'=>[
-            [
-                ['text'=>"کانفیگ تکی",'callback_data'=>"serverTypeTogether_" . $match[1]],
-                ['text'=>"کانفیگ جدا",'callback_data'=>"serverTypeSeperate_" . $match[1]]
-            ],
-            [['text'=>"برگشت",'callback_data'=>"serversList"]]
-            ]]);
-        editText($chat_id,$message_id,"لطفا نوعیت سرور مورد نظر را انتخاب کنید",$keys);
-    }
-    elseif(preg_match('/^serverType(?<type>\w+)_(?<serverId>\d+)/',$data,$match)){
-        if($match['type'] == "Together"){
-            $connection->query("UPDATE `servers` SET `type` = 'together' WHERE `id` = '{$match['serverId']}'");
-            alert($callid,"با موفقیت ذخیره شد");
-            editText($chat_id,$message_id,"سرور های ثبت شده",getServersList());
-        }else{
-            $connection->query("UPDATE `servers` SET `type` = 'seperate' WHERE `id` = '{$match['serverId']}'");
-            alert($callid,"با موفقیت ذخیره شد");
-            editText($chat_id,$message_id,"سرور های ثبت شده",getServersList());
-        }
-    }
     elseif($data=="addNewServer"){
         file_put_contents("$from_id.txt",$message_id);
         sendMessage($chat_id,"لطفا آدرس سرور را وارد کنید");
         setUser('step','setServerIp');
     }
     elseif($user['step']=="setServerIp"){
-        $checkExist = $connection->query("SELECT * FROM `servers` WHERE `server_ip` = '$text'");
+        $stmt = $connection->prepare("SELECT * FROM `servers` WHERE `server_ip` = ?");
+        $stmt->bind_param("s", $text);
+        $stmt->execute();
+        $checkExist = $stmt->get_result();
+        $stmt->close();
         if(mysqli_num_rows($checkExist)>0){
             sendMessage($chat_id,"این آدرس از قبل ثبت است");
         }else{
@@ -100,7 +91,10 @@ if (in_array($from_id, $Config['admin'])) {
         
         $response = getJson($serverIp, $userName, $text, $from_id);
         if($response['success']){
-            $connection->query("INSERT INTO `servers` (`server_ip`, `user_name`, `password`) VALUES ('$serverIp', '$userName', '$text')");
+            $stmt = $connection->prepare("INSERT INTO `servers` (`server_ip`, `user_name`, `password`) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $serverIp, $userName, $text);
+            $stmt->execute();
+            $stmt->close();
             sendMessage($chat_id,"سرور جدید با موفقیت ذخیره شد");
             $msgId = file_get_contents("$from_id.txt");
             wait();
@@ -109,7 +103,9 @@ if (in_array($from_id, $Config['admin'])) {
             editText($chat_id,$msgId,"سرور های ثبت شده",getServersList());
             unlink("$from_id.txt");
         }else{
-            sendMessage($chat_id,"ای وای ، اطلاعاتت اشتباهه 😔");
+            sendMessage($chat_id,"
+بیسواد ، اشتباه وارد کردی 😂
+            ");
             $msgId = file_get_contents("$from_id.txt");
             wait();
             delMessage($chat_id,($msgId + 1) . "-" . ($message_id+1));
@@ -118,7 +114,10 @@ if (in_array($from_id, $Config['admin'])) {
         }
     }
     elseif(preg_match('/^delServer_(.*)/',$data,$match)){
-        $connection->query("DELETE FROM `servers` WHERE `id` = {$match[1]}");
+        $stmt = $connection->prepare("DELETE FROM `servers` WHERE `id` =?");
+        $stmt->bind_param("i", $match[1]);
+        $stmt->execute();
+        $stmt->close();
         alert($callid,"با موفقیت حذف شد");
         editText($chat_id,$message_id,"سرور های ثبت شده",getServersList());
     }
@@ -153,7 +152,7 @@ elseif($tc=="private"){
 
     }
     elseif($text=="💮 Qr Code 💮"){
-        sendMessage($chat_id,"لطفا کلید شناسه تو بزن که QrCode بهت بدم 😌",null,$backButton);
+        sendMessage($chat_id,"لطفا لینک سرورتو بزن که QrCode بهت بدم 😌",null,$backButton);
         setUser('step','SendQrCode');
     }
     elseif($user['step'] == "SendQrCode"){
@@ -172,8 +171,8 @@ elseif($tc=="private"){
         sendMessage($chat_id,"کلید شناسه تو اینجا بزن بعدش وارد حسابت میشی 😁",null,$backButton);
         setUser('step','setUserUUID');
     }
-    elseif($text=="➕ حساب جدید" && mysqli_num_rows($loginCount) >0){
-        sendMessage($chat_id,"کلید شناسه تو اینجا بزن بعدش حساب جدیدت اضافه میشه 😁",null,$backButton);
+    elseif($text=="➕ حساب جدید" && $loginCount->num_rows >0){
+        sendMessage($chat_id,"کلید شناسه ( uuid ) یا لینک سرورت رو اینجا بزن برات یه حساب جدیدت اضافه کنم 🫠",null,$backButton);
         setUser('step','setUserUUID');
     }
     elseif($user['step']=="setUserUUID"){
@@ -187,14 +186,22 @@ elseif($tc=="private"){
             $text = $match[1];
             
         }
-        $checkExist = $connection->query("SELECT * FROM `loged_info` WHERE `uuid` = '$text' AND `user_id` = '$from_id'");
-        if(mysqli_num_rows($checkExist)>0){
+        $stmt = $connection->prepare("SELECT * FROM `loged_info` WHERE `uuid` = ? AND `user_id` = ?");
+        $stmt->bind_param("si", $text, $from_id);
+        $stmt->execute();
+        $checkExist = $stmt->get_result();
+        $stmt->close();
+        
+        if($checkExist->num_rows>0){
             sendMessage($chat_id,"این اکانت از قبل تو حسابت هستاا!",null,getUserKeys());
             setUser('step','none');
             exit();
         }
         sendMessage($chat_id,"گلم لطفا یکم منتظر بمون ...");
-        $serversList = $connection->query("SELECT * FROM `servers`");
+        $stmt = $connection->prepare("SELECT * FROM `servers`");
+        $stmt->execute();
+        $serversList = $stmt->get_result();
+        $stmt->close();
         $found = false;
         while($row = $serversList->fetch_assoc()){
             $serverIp = $row['server_ip'];
@@ -217,7 +224,8 @@ elseif($tc=="private"){
                         	    break;
                         	}
                         }
-                    }else{
+                    }
+                    else{
                         $keys = -1;
                         $settings = array_column($list,'settings');
                         foreach($settings as $key => $value){
@@ -248,13 +256,21 @@ elseif($tc=="private"){
                         }
                     }
 
-                    $connection->query("INSERT INTO `loged_info` (`user_id`, `remark`, `uuid`, `sub_server`) VALUES ('$from_id', '$remark', '$text' ,'$serverIp')");
-                    if(mysqli_num_rows($loginCount)==0){
+                    $insertRow = $connection->prepare("INSERT INTO `loged_info` (`user_id`, `remark`, `uuid`, `sub_server`) VALUES (?, ?, ? ,?)");
+                    $insertRow->bind_param("isss",$from_id, $remark, $text, $serverIp);
+                    $insertRow->execute();
+                    $insertRow->close();
+                    
+                    if($loginCount->num_rows==0){
                         $txt = "خیلی خوشومدی عزیزم چیزی میخوای؟ بگو !";
                     }else{
                         $txt = "🙃 یه حساب جدید برات باز کردم ";
                     }
-                    $loginCount = $connection->query("SELECT * FROM `loged_info` WHERE `user_id` = '$from_id'");
+                    $stmt = $connection->prepare("SELECT * FROM `loged_info` WHERE `user_id` = ?");
+                    $stmt->bind_param("i", $from_id);
+                    $stmt->execute();
+                    $loginCount = $stmt->get_result();
+                    $stmt->close();
                     
                     sendMessage($chat_id,$txt,null,getUserKeys());
                     $found = true;
@@ -268,14 +284,14 @@ elseif($tc=="private"){
         }
         setUser('step','none');
     }
-    elseif($text=="🔓 خروج از حساب 🔓" && mysqli_num_rows($loginCount) >0){
+    elseif($text=="🔓 خروج از حساب 🔓" && $loginCount->num_rows >0){
         $keys = array();
         while($row = $loginCount->fetch_assoc()){
             $keys[] = [
                 ['text'=>$row['remark'],'callback_data'=>"logout" . $row['id']]];
         }
         $keys = json_encode(['inline_keyboard'=>$keys]);
-        $txt = "🙂 یکی از اکانت هارو انتخاب کن";
+        $txt = "یکی از حساب هات رو انتخاب کن 🙃";
         if(isset($data)){
             editText($chat_id,$message_id,$txt,$keys);
         }else{
@@ -283,19 +299,27 @@ elseif($tc=="private"){
         }
     }
     elseif(preg_match('/^logout(\d+)/',$data,$match)){
-        $connection->query("DELETE FROM `loged_info` WHERE `id` = '{$match[1]}'");
+        $delete = $connection->prepare("DELETE FROM `loged_info` WHERE `id` = ?");
+        $delete->bind_param("i", $match[1]);
+        $delete->execute();
+        $delete->close();
+        
         delMessage($chat_id,$message_id);  
-        $loginCount = $connection->query("SELECT * FROM `loged_info` WHERE `user_id` = '$from_id'");
+        $stmt = $connection->prepare("SELECT * FROM `loged_info` WHERE `user_id` = ?");
+        $stmt->bind_param("i", $from_id);
+        $stmt->execute();
+        $loginCount = $stmt->get_result();
+        $stmt->close();
         sendMessage($chat_id,"مارو دور ننداز ، ما انقدارم به درد نخور نیستیم 🥺",null,getUserKeys());
     }
-    elseif(($data == 'backToAccounts' || $text=="🪬 حساب من 🪬") &&  mysqli_num_rows($loginCount) >0){
+    elseif(($data == 'backToAccounts' || $text=="🪬 حساب من 🪬") &&  $loginCount->num_rows >0){
         $keys = array();
         while($row = $loginCount->fetch_assoc()){
             $keys[] = [
                 ['text'=>$row['remark'],'callback_data'=>"showAccount" . $row['id']]];
         }
         $keys = json_encode(['inline_keyboard'=>$keys]);
-        $txt = "🙂 یکی از اکانت هارو انتخاب کن";
+        $txt = "یکی از حساب هات رو انتخاب کن 🙃";
         if(isset($data)){
             editText($chat_id,$message_id,$txt,$keys);
         }else{
@@ -304,8 +328,18 @@ elseif($tc=="private"){
     }
     elseif(preg_match('/^showAccount(.*)/',$data,$match)){
         alert($callid,"گلم لطفا یکم منتظر بمون ...");
-        $accinfo = $connection->query("SELECT * FROM `loged_info` WHERE `id`  = '{$match[1]}'")->fetch_assoc();
-        $serversList = $connection->query("SELECT * FROM `servers` WHERE `server_ip` = '{$accinfo['sub_server']}'");
+        $stmt = $connection->prepare("SELECT * FROM `loged_info` WHERE `id`  = ?");
+        $stmt->bind_param("i", $match[1]);
+        $stmt->execute();
+        $accinfo = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        
+        $stmt = $connection->prepare("SELECT * FROM `servers` WHERE `server_ip` = ?");
+        $stmt->bind_param("s", $accinfo['sub_server']);
+        $stmt->execute();
+        $serversList = $stmt->get_result();
+        $stmt->close();
+        
         $row = $serversList->fetch_assoc();
         $serverIp = $row['server_ip'];
         $serverName = $row['user_name'];
@@ -360,7 +394,14 @@ elseif($tc=="private"){
                 if($clientState[$emailKey]['total'] != 0 || $clientState[$emailKey]['up'] != 0  ||  $clientState[$emailKey]['down'] != 0 || $clientState[$emailKey]['expiryTime'] != 0){
                     $upload = sumerize($clientState[$emailKey]['up']);
                     $download = sumerize($clientState[$emailKey]['down']);
-                    $leftMb = $clientState[$emailKey]['total']!=0?sumerize($clientState[$emailKey]['total'] - $clientState[$emailKey]['up'] - $clientState[$emailKey]['down']):"نامحدود";
+                    $leftMb = $clientState[$emailKey]['total']!=0?($clientState[$emailKey]['total'] - $clientState[$emailKey]['up'] - $clientState[$emailKey]['down']):"نامحدود";
+                    if(is_numeric($leftMb)){
+                        if($leftMb<0){
+                            $leftMb = 0;
+                        }else{
+                            $leftMb = sumerize($clientState[$emailKey]['total'] - $clientState[$emailKey]['up'] - $clientState[$emailKey]['down']);
+                        }
+                    }
                     $totalUsed = sumerize($clientState[$emailKey]['up'] + $clientState[$emailKey]['down']);
                     $total = $clientState[$emailKey]['total']!=0?sumerize($clientState[$emailKey]['total']):"نامحدود";
                     $expiryTime = $clientState[$emailKey]['expiryTime'] != 0?date("Y-m-d H:i:s",substr($clientState[$emailKey]['expiryTime'],0,-3)):"نامحدود";
@@ -369,13 +410,23 @@ elseif($tc=="private"){
                             ((substr($clientState[$emailKey]['expiryTime'],0,-3)-time())/(60 * 60 * 24))
                             ):
                             "نامحدود";
+                    if(is_numeric($expiryDay)){
+                        if($expiryDay<0) $expiryDay = 0;
+                    }
                     $state = $clientState[$emailKey]['enable'] == true?"فعال 🟢":"غیر فعال 🔴";
                     $remark = $email;
                 }
                 elseif($list[$keys]['total'] != 0 || $list[$keys]['up'] != 0  ||  $list[$keys]['down'] != 0 || $list[$keys]['expiryTime'] != 0){
                     $upload = sumerize($list[$keys]['up']);
                     $download = sumerize($list[$keys]['down']);
-                    $leftMb = $list[$keys]['total']!=0?sumerize($list[$keys]['total'] - $list[$keys]['up'] - $list[$keys]['down']):"نامحدود";
+                    $leftMb = $list[$keys]['total']!=0?($list[$keys]['total'] - $list[$keys]['up'] - $list[$keys]['down']):"نامحدود";
+                    if(is_numeric($leftMb)){
+                        if($leftMb<0){
+                            $leftMb = 0;
+                        }else{
+                            $leftMb = sumerize($list[$keys]['total'] - $list[$keys]['up'] - $list[$keys]['down']);
+                        }
+                    }
                     $totalUsed = sumerize($list[$keys]['up'] + $list[$keys]['down']);
                     $total = $list[$keys]['total']!=0?sumerize($list[$keys]['total']):"نامحدود";
                     $expiryTime = $list[$keys]['expiryTime'] != 0?date("Y-m-d H:i:s",substr($list[$keys]['expiryTime'],0,-3)):"نامحدود";
@@ -384,6 +435,9 @@ elseif($tc=="private"){
                             ((substr($list[$keys]['expiryTime'],0,-3)-time())/(60 * 60 * 24))
                             ):
                             "نامحدود";
+                    if(is_numeric($expiryDay)){
+                        if($expiryDay<0) $expiryDay = 0;
+                    }
                     $state = $list[$keys]['enable'] == true?"فعال 🟢":"غیر فعال 🔴";
                     $remark = $list[$keys]['remark'];
                 }
@@ -392,46 +446,45 @@ elseif($tc=="private"){
             
             $keys = json_encode(['inline_keyboard'=>[
                 [
-                    ['text'=>$remark??" ",'callback_data'=>"wizwizdev"],
-                    ['text'=>"👦 اسم اکانت",'callback_data'=>"wizwizdev"],
+                    ['text'=>$remark??" ",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>"👦 اسم اکانت",'callback_data'=>"shoaib_ryan"],
                     ],
                 [
-                    ['text'=>$state??" ",'callback_data'=>"wizwizdev"],
-                    ['text'=>"📡 وضعیت حساب",'callback_data'=>"wizwizdev"],
+                    ['text'=>$state??" ",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>"📡 وضعیت حساب",'callback_data'=>"shoaib_ryan"],
                     ],
                 [
-                    ['text'=>$upload?? " ",'callback_data'=>"wizwizdev"],
-                    ['text'=>"📥 آپلود",'callback_data'=>"wizwizdev"],
+                    ['text'=>$upload?? " ",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>"📥 آپلود",'callback_data'=>"shoaib_ryan"],
                     ],
                 [
-                    ['text'=>$download??" ",'callback_data'=>"wizwizdev"],
-                    ['text'=>"📤 دانلود",'callback_data'=>"wizwizdev"],
+                    ['text'=>$download??" ",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>"📤 دانلود",'callback_data'=>"shoaib_ryan"],
                     ],
                 [
-                    ['text'=>$total??" ",'callback_data'=>"wizwizdev"],
-                    ['text'=>"🔋حجم کلی",'callback_data'=>"wizwizdev"],
+                    ['text'=>$total??" ",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>"🔋حجم کلی",'callback_data'=>"shoaib_ryan"],
                     ],
                 [
-                    ['text'=>$leftMb??" ",'callback_data'=>"wizwizdev"],
-                    ['text'=>"⏳ حجم باقیمانده",'callback_data'=>"wizwizdev"],
+                    ['text'=>$leftMb??" ",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>"⏳ حجم باقیمانده",'callback_data'=>"shoaib_ryan"],
                     ],
                 [
-                    ['text'=>$expiryTime??" ",'callback_data'=>"wizwizdev"],
-                    ['text'=>"📆 تاریخ اتمام",'callback_data'=>"wizwizdev"],
+                    ['text'=>$expiryTime??" ",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>"📆 تاریخ اتمام",'callback_data'=>"shoaib_ryan"],
                     ],
                 [
-                    ['text'=>$expiryDay??" ",'callback_data'=>"wizwizdev"],
-                    ['text'=>"🧭 تعداد روز باقیمانده",'callback_data'=>"wizwizdev"],
+                    ['text'=>$expiryDay??" ",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>"🧭 تعداد روز باقیمانده",'callback_data'=>"shoaib_ryan"],
                     ],
-                [
-                    ['text'=>"🔑 کلید ورود شما ( بزن کپی شه ) 👇",'callback_data'=>"wizwizdev"]],
-                    [['text'=>$accinfo['uuid']??" ",'callback_data'=>"copy" . $accinfo['uuid']]],
+                [['text'=>"🔑 کلید ورود شما ( بزن کپی شه ) 👇",'callback_data'=>"shoaib_ryan"]],
+                [['text'=>$accinfo['uuid']??" ",'callback_data'=>"copy" . $accinfo['uuid']]],
                 [['text'=>"برگشت",'callback_data'=>"backToAccounts"]]
                 ]]);
             editText($chat_id,$message_id,"🔰مشخصات حسابت:",$keys,"MarkDown");
         }
     }
-    elseif($text=="📞 پشتیبانی" && mysqli_num_rows($loginCount)>0){
+    elseif($text=="📞 پشتیبانی" && $loginCount->num_rows>0){
         sendMessage($chat_id,"چه مشکلی برات پیش اومده؟ هر مشکلی داری بفرس کمکت کنم",null,$backButton);
         setUser('step','sendMessagetoAdmin');
     }
