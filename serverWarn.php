@@ -17,7 +17,10 @@ if(file_exists("info.json")){
     $usersOffset = 0;
     $usersInfo = array();
 }
-$servers = $connection->query("SELECT * FROM `servers` LIMIT 1 OFFSET $serverOffset ");
+$stmt = $connection->prepare("SELECT * FROM `servers` LIMIT 1 OFFSET ? ");
+$stmt->bind_param("i", $serverOffset);
+$stmt->execute();
+$servers = $stmt->get_result();
 while($row = $servers->fetch_assoc()){
     $serverIp = $row['server_ip'];
     $serverName = $row['user_name'];
@@ -49,12 +52,12 @@ while($row = $servers->fetch_assoc()){
                 if($totalUsed >= $total - 1024 && $total != 0){
                     if(!isset($usersInfo[$uuid])){
                         $info['usersInfo'][$uuid] = "";
-                        sendMessage($Config['report_channel'], "حجم بسته ی کاربر زیر رو به اتمام است\nآیپی سرور: $serverIp\nuuid: $uuid\nیوزرنیم: $remark\nرمز: $port");
+                        sendMessage($Config['report_channel'], "حجم بسته ی کاربر زیر رو به اتمام است\nآیپی سرور: $serverIp\nuuid: $uuid\nیوزرنیم: $remark\nپورت: $port");
                     }
                 }elseif($expiryTime - time() <= (24 * 60 * 60) && $expiryTime != 0){
                     if(!isset($usersInfo[$uuid])){
                         $info['usersInfo'][$uuid] = "";
-                        sendMessage($Config['report_channel'], "زمان بسته ی کاربر زیر رو به اتمام است\nآیپی سرور: $serverIp\nuuid: $uuid\nیوزرنیم: $remark\nرمز: $port");
+                        sendMessage($Config['report_channel'], "زمان بسته ی کاربر زیر رو به اتمام است\nآیپی سرور: $serverIp\nuuid: $uuid\nیوزرنیم: $remark\nپورت: $port");
                     }
                 }else{
                     unset($arr['userInfo']['ryan']);
@@ -160,4 +163,3 @@ if(mysqli_num_rows($servers) > 0){
 //-----------------------------//
 unlink("error_log");
 ?>
-
