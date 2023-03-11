@@ -301,12 +301,12 @@
                 $userName = $row['user_name'];
                 $password = $row['password'];
 
-                $keys[] = [['text'=>$serverIp,'callback_data'=>"betty"]];
-                $keys[] = [['text'=>$userName,'callback_data'=>"betty"],['text'=>$password,'callback_data'=>'betty']];
+                $keys[] = [['text'=>$serverIp,'callback_data'=>"wizwizdev"]];
+                $keys[] = [['text'=>$userName,'callback_data'=>"wizwizdev"],['text'=>$password,'callback_data'=>'wizwizdev']];
                 $keys[] = [['text'=>"حذف",'callback_data'=>"delServer_$rowId"]];
             }
         }else{
-            $keys[] =[['text'=>"سروری ثبت نشده",'callback_data'=>"betty"]];
+            $keys[] =[['text'=>"سروری ثبت نشده",'callback_data'=>"wizwizdev"]];
         }
         
         $keys[] = [['text'=>"افزودن سرور",'callback_data'=>"addNewServer"]];
