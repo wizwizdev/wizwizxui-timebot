@@ -1,4 +1,4 @@
-## اسکریپت ربات نمایش مشخصات اشتراک (پنل x-ui) نسخه 4.0
+## اسکریپت ربات wizwiz برای پنل x-ui نسخه 4.0
 
 ![](https://visitor-badge.glitch.me/badge?page_id=wizwizdev.wizwizdev)
 
