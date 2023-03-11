@@ -1,6 +1,8 @@
 ## اسکریپت ربات نمایش مشخصات اشتراک (پنل x-ui) نسخه 3.0
 
-<br>
+![](https://visitor-badge.glitch.me/badge?page_id=wizwizdev.wizwizdev)
+
+
 
 آموزش آپدیت کردن پروژه :
 
