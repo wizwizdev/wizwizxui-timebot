@@ -236,7 +236,7 @@ https://youdomain.com:8080/
 
 ### Features of version 4.0
 
--bug fixes and performance improvements
+- bug fixes and performance improvements
 
 
 ### Features of version 3.0
