@@ -12,26 +12,26 @@
 ## Support for the following panels:
 
 
-- (Sanai) single yurt, multi-port
+- (Sanai) single port, multi-port
 
 ````
 https://github.com/MHSanaei/3x-ui
 ````
-- (Alireza) single yurt, multi-port
+- (Alireza) single port, multi-port
 ````
 https://github.com/alireza0/x-ui
 ````
 
-- (Vaksilo) only single yurt
+- (Vaksilo) only single port
 ````
 https://github.com/vaxilu/x-ui
 ````
-- (SD) single yurt, multi-port
+- (SD) single port, multi-port
 
 ````
 https://github.com/HexaSoftwareTech/x-ui
 ````
-- (Nidoka Kalanka) single yurt, multi-port
+- (Nidoka Kalanka) single port, multi-port
 
 ````
 https://github.com/NidukaAkalanka/x-ui-english
