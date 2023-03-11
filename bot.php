@@ -40,16 +40,16 @@ if (in_array($from_id, $Config['admin'])) {
         $notLogedUsers = $allUsers - $logedUsers;
         sendMessage($chat_id,"آمار ربات شما", null, json_encode(['inline_keyboard'=>[
             [
-                ['text'=>$allUsers??"0", 'callback_data'=>"shoaib_ryan"],
-                ['text'=>"تعداد کاربران", 'callback_data'=>"shoaib_ryan"]
+                ['text'=>$allUsers??"0", 'callback_data'=>"wizwizdev"],
+                ['text'=>"تعداد کاربران", 'callback_data'=>"wizwizdev"]
             ],
             [
-                ['text'=>$logedUsers??"0", 'callback_data'=>"shoaib_ryan"],
-                ['text'=>"وارد شده به حساب", 'callback_data'=>"shoaib_ryan"]
+                ['text'=>$logedUsers??"0", 'callback_data'=>"wizwizdev"],
+                ['text'=>"وارد شده به حساب", 'callback_data'=>"wizwizdev"]
             ],
             [
-                ['text'=>$notLogedUsers??"0", 'callback_data'=>"shoaib_ryan"],
-                ['text'=>"وارده نشده به حساب", 'callback_data'=>"shoaib_ryan"]
+                ['text'=>$notLogedUsers??"0", 'callback_data'=>"wizwizdev"],
+                ['text'=>"وارده نشده به حساب", 'callback_data'=>"wizwizdev"]
             ]
             ]]));
     }
@@ -446,38 +446,38 @@ elseif($tc=="private"){
             
             $keys = json_encode(['inline_keyboard'=>[
                 [
-                    ['text'=>$remark??" ",'callback_data'=>"shoaib_ryan"],
-                    ['text'=>"👦 اسم اکانت",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>$remark??" ",'callback_data'=>"wizwizdev"],
+                    ['text'=>"👦 اسم اکانت",'callback_data'=>"wizwizdev"],
                     ],
                 [
-                    ['text'=>$state??" ",'callback_data'=>"shoaib_ryan"],
-                    ['text'=>"📡 وضعیت حساب",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>$state??" ",'callback_data'=>"wizwizdev"],
+                    ['text'=>"📡 وضعیت حساب",'callback_data'=>"wizwizdev"],
                     ],
                 [
-                    ['text'=>$upload?? " ",'callback_data'=>"shoaib_ryan"],
-                    ['text'=>"📥 آپلود",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>$upload?? " ",'callback_data'=>"wizwizdev"],
+                    ['text'=>"📥 آپلود",'callback_data'=>"wizwizdev"],
                     ],
                 [
-                    ['text'=>$download??" ",'callback_data'=>"shoaib_ryan"],
-                    ['text'=>"📤 دانلود",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>$download??" ",'callback_data'=>"wizwizdev"],
+                    ['text'=>"📤 دانلود",'callback_data'=>"wizwizdev"],
                     ],
                 [
-                    ['text'=>$total??" ",'callback_data'=>"shoaib_ryan"],
-                    ['text'=>"🔋حجم کلی",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>$total??" ",'callback_data'=>"wizwizdev"],
+                    ['text'=>"🔋حجم کلی",'callback_data'=>"wizwizdev"],
                     ],
                 [
-                    ['text'=>$leftMb??" ",'callback_data'=>"shoaib_ryan"],
-                    ['text'=>"⏳ حجم باقیمانده",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>$leftMb??" ",'callback_data'=>"wizwizdev"],
+                    ['text'=>"⏳ حجم باقیمانده",'callback_data'=>"wizwizdev"],
                     ],
                 [
-                    ['text'=>$expiryTime??" ",'callback_data'=>"shoaib_ryan"],
-                    ['text'=>"📆 تاریخ اتمام",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>$expiryTime??" ",'callback_data'=>"wizwizdev"],
+                    ['text'=>"📆 تاریخ اتمام",'callback_data'=>"wizwizdev"],
                     ],
                 [
-                    ['text'=>$expiryDay??" ",'callback_data'=>"shoaib_ryan"],
-                    ['text'=>"🧭 تعداد روز باقیمانده",'callback_data'=>"shoaib_ryan"],
+                    ['text'=>$expiryDay??" ",'callback_data'=>"wizwizdev"],
+                    ['text'=>"🧭 تعداد روز باقیمانده",'callback_data'=>"wizwizdev"],
                     ],
-                [['text'=>"🔑 کلید ورود شما ( بزن کپی شه ) 👇",'callback_data'=>"shoaib_ryan"]],
+                [['text'=>"🔑 کلید ورود شما ( بزن کپی شه ) 👇",'callback_data'=>"wizwizdev"]],
                 [['text'=>$accinfo['uuid']??" ",'callback_data'=>"copy" . $accinfo['uuid']]],
                 [['text'=>"برگشت",'callback_data'=>"backToAccounts"]]
                 ]]);
