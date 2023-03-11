@@ -1,10 +1,13 @@
 <?php
 
-
+    
     if ( !is_dir( "cookies" ) ) {
         mkdir( "cookies" );       
     }
-    $connection = mysqli_connect('localhost', $Database['username'], $Database['password'], $Database['dbname']);
+    $connection = new mysqli('localhost', $Database['username'], $Database['password'], $Database['dbname']);
+    if($connection->connect_error){
+        exit("error " . $connection->connect_error);  
+    }
     // ------------------ Functions ------------------ //
     function Bot($method, $datas = []) {
         global $Config;
@@ -90,12 +93,45 @@
         curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
         curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 5); 
         curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postFields));
         curl_setopt($ch, CURLOPT_COOKIEJAR, "cookies/$cookie.txt");
         $loginResponse = json_decode(curl_exec($ch),true);
         if (curl_errno($ch)) {
+            require_once 'config.php';
+            global $connection, $Config;
             $error_msg = curl_error($ch);
-            sendMessage($cookie, $error_msg);
+            sendMessage($Config['admin'][0], $error_msg);
+
+            if (in_array($cookie, $Config['admin'])) {
+                sendMessage($cookie, "یه مشکلی پیش اومده", null, getAdminKeys());
+            }else{
+                $stmt = $connection->prepare("SELECT * FROM `loged_info` WHERE `user_id` = ?");
+                $stmt->bind_param("i", $cookie);
+                $stmt->execute();
+                $loginCount = $stmt->get_result();
+                $stmt->close();
+
+                $keys = "";
+                if($loginCount->num_rows>0){
+                    $keys = json_encode(['keyboard'=>[
+                        [['text'=>"➕ حساب جدید"]],
+                        [['text'=>"🪬 حساب من 🪬"],['text'=>"🔓 خروج از حساب 🔓"]],
+                        [['text'=>"💮 Qr Code 💮"],['text'=>"📞 پشتیبانی"]],
+                        [['text'=>"کپی رایت ©️ ویزویز"]]
+                        ],'resize_keyboard'=>true]);
+                }else{
+                    $keys = json_encode(['keyboard'=>[
+                        [['text'=>"🕯 ورود به حساب 🕯"],['text'=>"💮 Qr Code 💮"]],
+                        [['text'=>"کپی رایت ©️ ویزویز"]]
+                        ],'resize_keyboard'=>true]);
+                }
+    
+                sendMessage($cookie, "یه مشکلی پیش اومده، لطفا به پشتیبانی پیام بده",null,$keys);
+            }
+            setUser('step','none', $cookie);
+            exit();
         }
         if($loginResponse['success']){
             $listUrl = $site . "/xui/inbound/list";
@@ -145,27 +181,47 @@
     }
     
     // ------------------  Connect MySQL ------------------ //
-    $user = mysqli_fetch_assoc(mysqli_query($connection, "SELECT * FROM `user` WHERE `id` = '{$from_id}' LIMIT 1"));
-    $loginCount = $connection->query("SELECT * FROM `loged_info` WHERE `user_id` = '$from_id'");
+    $stmt = $connection->prepare("SELECT * FROM `user` WHERE `id` = ? LIMIT 1");
+    $stmt->bind_param("i", $from_id);
+    $stmt->execute();
+    $user = $stmt->get_result();
+    $user = $user->fetch_assoc();
+    $stmt->close();
+
+    $stmt = $connection->prepare("SELECT * FROM `loged_info` WHERE `user_id` = ?");
+    $stmt->bind_param("i", $from_id);
+    $stmt->execute();
+    $loginCount = $stmt->get_result();
+    $stmt->close();
     // ------------------ { Informations } ------------------ //
     
     function setUser($action, $value, $frm = "none"){
         global $from_id, $connection;
         $frm_id = $frm!="none"?$frm:$from_id;
         
-        $checkExists = $connection->query("SELECT * FROM `user` WHERE `id` = $frm_id");
-        if(mysqli_num_rows($checkExists)==0){
+        $stmt = $connection->prepare("SELECT * FROM `user` WHERE `id` = ? LIMIT 1");
+        $stmt->bind_param("i", $frm_id);
+        $stmt->execute();
+        $checkExists = $stmt->get_result();
+        $stmt->close();
+        if($checkExists->num_rows==0){
             $time = time();
-            $connection->query("INSERT INTO `user` (`id`, `step`) VALUES ('{$frm_id}', 'none')");
+            $insertRow = $connection->prepare("INSERT INTO `user` (`id`, `step`) VALUES (?,?)");
+            $insertRow->bind_param("is", $frm_id, $value);
+            $insertRow->execute();
+            $insertRow->close();
         }
-        $connection->query("UPDATE `user` SET `$action` = '$value' WHERE `id` = '{$frm_id}' LIMIT 1");
+        $updateRow = $connection->prepare("UPDATE `user` SET `$action` = ? WHERE `id` = ? LIMIT 1");
+        $updateRow->bind_param("si",  $value, $frm_id);
+        $updateRow->execute();
+        $updateRow ->close();
     }
     
     //------ User Keys ------//
     function getUserKeys(){
         global $loginCount, $from_id;
         
-        if(mysqli_num_rows($loginCount)>0){
+        if($loginCount->num_rows>0){
             return json_encode(['keyboard'=>[
                 [['text'=>"➕ حساب جدید"]],
                 [['text'=>"🪬 حساب من 🪬"],['text'=>"🔓 خروج از حساب 🔓"]],
@@ -180,16 +236,7 @@
         }
     }
 
-    if($text == "کپی رایت ©️ ویزویز" ){
-        sendMessage($chat_id,"
-            ممنون میشم از من حمایت کنید 🙂❤️
     
-    🆔 dev: @wizwizpv
-    📣 Gp: @wizwizdev
-            ");
-        setUser('step','setUserUUID');
-    }
-
     $backButton = json_encode(['keyboard'=>[
         [['text'=>"🔽 میخوام به عقب برگردم 🔽"]]
         ],'resize_keyboard'=>true]);
@@ -203,8 +250,17 @@
         return json_encode(['keyboard'=>[
             [['text'=>"لیست سرور ها"],['text'=>"آمار ربات"]],
             [['text'=>"وضعیت ربات: " . $botState]],
-            [['text'=>"کپی رایت ©️ ویزویز"]]
+            [['text'=>"کپی رایت ©️ ویزویز"]],
             ],'resize_keyboard'=>true]);
+    }
+    
+        if($text == "کپی رایت ©️ ویزویز" ){
+        sendMessage($chat_id,"
+        ممنون میشم از من حمایت کنید 🙂❤️
+
+🆔 dev: @wizwizpv
+📣 Gp: @wizwizdev
+        ");
     }
         
         
@@ -233,9 +289,12 @@
     
     function getServersList(){
         global $connection;
-        $serversList = $connection->query("SELECT * FROM `servers`");
+        $stmt = $connection->prepare("SELECT * FROM `servers`");
+        $stmt->execute();
+        $serversList = $stmt->get_result();
+        $stmt->close();
         $keys = array();
-        if(mysqli_num_rows($serversList)>0){
+        if($serversList->num_rows>0){
             while($row = $serversList->fetch_assoc()){
                 $rowId = $row['id'];
                 $serverIp = $row['server_ip'];
