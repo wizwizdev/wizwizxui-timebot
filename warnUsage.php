@@ -9,7 +9,10 @@ $offset = 0;
 if(file_exists("offset.txt")){
     $offset = file_get_contents("offset.txt");
 }
-$usersList = $connection->query("SELECT * FROM `user` WHERE `uuid` IS NOT NULL AND (UNIX_TIMESTAMP() > `warned` OR `warned` IS NULL) LIMIT 30 OFFSET $offset ");
+$stmt = $connection->prepare("SELECT * FROM `user` WHERE `uuid` IS NOT NULL AND (UNIX_TIMESTAMP() > `warned` OR `warned` IS NULL) LIMIT 30 OFFSET ? ");
+$stmt->bind_param("i", $offset);
+$stmt->execute();
+$usersList = $stmt->get_result();
 
 while($rowUser = $usersList->fetch_assoc()){
     $userId = $rowUser['id'];
