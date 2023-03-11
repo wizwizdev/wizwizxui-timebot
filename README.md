@@ -1,4 +1,4 @@
-## Bot script to show subscription profile (x-ui panel) version 3.0
+## Bot script to show subscription profile (x-ui panel) version 4.0
 
 
 ![](https://visitor-badge.glitch.me/badge?page_id=wizwizdev.wizwizdev)
