@@ -19,7 +19,7 @@ if (in_array($from_id, $Config['admin'])) {
         sendMessage($match[1],$text,null,json_encode(['inline_keyboard'=>[
             [['text'=>"پاسخ",'callback_data'=>"sendMessageToAdmin"]]
             ]]));
-        setUser('step',null);
+        setUser('step',"none");
     }
     elseif(preg_match('/^وضعیت ربات:/',$text)){
         $botState = $botState=="false"?"true":"false";
