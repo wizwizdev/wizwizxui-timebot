@@ -257,7 +257,7 @@ https://youdomain.com:8080/
 
 - Account feature for users
 - Fixed bugs in the previous version
-- Display the notification when the subscription ends (to the user and admin)
+- Display the notification when the subscription ends (to the admin)
 - Get configuration information (for several ports)
 - Convert link to QrCode
 - Display account name
@@ -269,7 +269,7 @@ https://youdomain.com:8080/
 ### Features version 1.0
 
 - Get configuration information (for single port)
-- Support for 4 x-ui panels (Vexilo-SD-Nidoka-Kafka {single port})
+- Support for 4 x-ui panels (Vexilo-Assadi-Nidoka-Kafka {single port})
 - Status display
 - Display the total volume
 - Show download consumption
