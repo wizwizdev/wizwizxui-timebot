@@ -3,7 +3,7 @@ require 'config.php';
 require 'core.php';
 
 $hourLeft = 24;
-$mbLeft = 1000;
+$mbLeft = 1024;
 
 if(file_exists("info.json")){
     $info = json_decode(file_get_contents("info.json"),true);
@@ -118,7 +118,7 @@ while($row = $servers->fetch_assoc()){
                         $expiryTime = substr($list[$keys]['expiryTime'],0,-3);
                     }
                     
-                    if($total - $totalUsed <  - ($mbLeft * 1024 * 1024) && $total != 0){
+                    if($total - $totalUsed <= ($mbLeft * 1024 * 1024) && $total != 0){
                         if(!isset($usersInfo[$uuid])){
                             $info['usersInfo'][$uuid] = "";
                             sendMessage($Config['report_channel'], "
