@@ -52,12 +52,12 @@ while($row = $servers->fetch_assoc()){
                 if($totalUsed >= $total - 1024 && $total != 0){
                     if(!isset($usersInfo[$uuid])){
                         $info['usersInfo'][$uuid] = "";
-                        sendMessage($Config['report_channel'], "حجم بسته ی کاربر زیر رو به اتمام است\nآیپی سرور: $serverIp\nuuid: $uuid\nیوزرنیم: $remark\nپورت: $port");
+                        sendMessage($Config['report_channel'], "");
                     }
                 }elseif($expiryTime - time() <= (24 * 60 * 60) && $expiryTime != 0){
                     if(!isset($usersInfo[$uuid])){
                         $info['usersInfo'][$uuid] = "";
-                        sendMessage($Config['report_channel'], "زمان بسته ی کاربر زیر رو به اتمام است\nآیپی سرور: $serverIp\nuuid: $uuid\nیوزرنیم: $remark\nپورت: $port");
+                        sendMessage($Config['report_channel'], "");
                     }
                 }else{
                     unset($arr['userInfo']['ryan']);
@@ -121,12 +121,30 @@ while($row = $servers->fetch_assoc()){
                     if($total - $totalUsed <  - ($mbLeft * 1024 * 1024) && $total != 0){
                         if(!isset($usersInfo[$uuid])){
                             $info['usersInfo'][$uuid] = "";
-                            sendMessage($Config['report_channel'], "حجم بسته ی کاربر $userId\nuuid: $uuid");
+                            sendMessage($Config['report_channel'], "
+❌ | ☑️ کاربر زیر 85 درصد از حجم خورد را مصرف کرده است :
+
+🔅کلید کاربر:  $uuid
+🔅نام کاربر:  $remark
+👽 پورت کاربر :  $port
+
+🆔 @wizwizdev
+
+");
                         }
                     }elseif($expiryTime - time() <= ($hourLeft * 60 * 60) && $expiryTime != 0){
                         if(!isset($usersInfo[$uuid])){
                             $info['usersInfo'][$uuid] = "";
-                            sendMessage($Config['report_channel'], "زمان بسته ی کاربر $userId\nuuid: $uuid");
+                            sendMessage($Config['report_channel'], "
+⏰ | 🔌 زمان بسته کاربر رو به پایان است:
+
+🔑کلید کاربر:  $uuid
+🧑‍💼نام کاربر:  $remark
+💡 پورت کاربر :  $port
+
+🆔 @wizwizdev
+
+");
                         }
                     }else{
                         unset($arr['userInfo']['ryan']);
