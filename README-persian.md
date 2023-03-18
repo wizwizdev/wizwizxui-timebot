@@ -208,6 +208,8 @@ https://youdomain.com:8080/
 
 ### تنظیم سرتیفیکیت داخل ربات
 
+- به جای keyFile و certificateFile لطفا آدرس سرتیفیکیت خودتان را وارد کنید و موارد پایین یک مثال است:  
+
 ````
 {"serverName": "","certificates": [{"certificateFile": "","keyFile": ""}]}
 ````
