@@ -206,6 +206,22 @@ https://youdomain.com:8080/xui/inbounds
 https://youdomain.com:8080/
 ````
 
+<br>
+
+### Setting the certificate inside the robot
+
+- Instead of keyFile and certificateFile, please enter the address of your certificate and the following is an example:
+
+````
+{"serverName": "","certificates": [{"certificateFile": "","keyFile": ""}]}
+````
+
+- serverName: yourdomain
+- certificateFile: /root/cert.crt
+- keyFile: /root/private.key
+
+<br>
+
 
 <br>
 
