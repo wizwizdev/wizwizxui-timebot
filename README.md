@@ -1,7 +1,9 @@
-## wizwiz bot script for x-ui panel version 4.0
 
+## script wizwiz
 
+![](https://img.shields.io/github/v/release/wizwizdev/wizwizxui-timebot.svg)
 ![](https://visitor-badge.glitch.me/badge?page_id=wizwizdev.wizwizdev)
+![Downloads](https://img.shields.io/github/downloads/wizwizdev/wizwizxui-timebot/total.svg)
 
 
 ### [ترجمه به فارسی](README-persian.md)
@@ -9,161 +11,70 @@
 <br>
 
 
-## Support for the following panels:
+## Installation
 
-
-- (Sanai) single port, multi-port
-
-````
-https://github.com/MHSanaei/3x-ui
-````
-- (Alireza) single port, multi-port
-````
-https://github.com/alireza0/x-ui
-````
-
-- (Vaksilo) only single port
-````
-https://github.com/vaxilu/x-ui
-````
-- (Asaadi) single port, multi-port
-
-````
-https://github.com/HexaSoftwareTech/x-ui
-````
-- (Nidoka Kalanka) single port, multi-port
-
-````
-https://github.com/NidukaAkalanka/x-ui-english
-````
-
-
-- (Kafka) only single port
-
-````
-https://github.com/FranzKafkaYu/x-ui
-````
-
-
-<br>
-
-
-### Prerequisite
-
-- External hosting (cpanel)
+- cpanel host or external server
 - domain + ssl
 
-
 <br>
-
-## Important note about the address of the xui login panel:
-
-- Due to the limitation in some shared hosts, it is not possible to send requests from the script side to ports other than 80, 443, 8080 and some other ports for cPanel that are for http and https.
-- Try to set port 8080 to be sure that it is active on the host, if it does not work, send a message to the hosting support to activate it for you.
 
 
 
 <br>
 
+## default settings
 
-## learn inistallation
+- Panel port and host or server must be 80-8080-54321
+- If you encounter the following message or if the server inside the robot is not registered, please give a ticket to the hosting to open the desired ports.
+
+````
+Failed to connect to yourdomain.com port 80 after 340 ms: Couldn't connect to server
+````
+
+This error means that port 8080 of your panel is not open on the host or server and you need to open it
 
 
-#### 1. Open the following link in the browser and download the project
+<br>
 
+## Installation
 
 ````
 https://github.com/wizwizdev/wizwizxui-timebot/archive/refs/heads/main.zip
 ````
 
 
-<br>
-
-
-#### 2. Log in to the cpanel management panel and create a database according to [Database creation tutorial] (README-DB.md)
-
-#### 3. After creating the database, go back to the main page of cpanel administration
-
-#### 4. Click on File Manager
-
-#### 5. Upload the project you downloaded and then exit the extract mode
-
-
-#### 6. Edit the config.php file
-
-<br>
-
-Get the database information, bot token from Botfather and admin numeric ID and telegram channel (to send user volume notification) from get_id_bot bot.
-
-
-Get the original ID of the channel without @ (to forcefully lock the channel) and replace it with:
-
-<br>
-
-````
-$Config = [
-     'api_token' => "",
-     'admin' => [],
-     'report_channel' => - , // -100xxxxxx
-     'channel_lock' => ['']
-];
-$Database = [
-     'dbname' => "",
-     'username' => "",
-     'password' => ''
-];
-````
-
-for example:
-
-````
-$Config = [
-     'api_token' => "365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQvv",
-     'admin' => [2525252525],
-     'report_channel' => -3656542000 , // -100xxxxxx
-     'channel_lock' => ['wizwizdev']
-];
-$Database = [
-     'dbname' => "wizwiz_wizbot",
-     'username' => "wizwiz_hajmbot",
-     'password' => '123456789'
-];
-````
-
+> **Important note: After extracting the whole project, upload it directly from the wizwizxui-timebot-main folder to public_html**
 
 <br>
 
 
-#### 7. Enter the address where the createDB.php file is located along with the domain in the browser and it should be a white page, in this case your database will be created:
+### Setting the baseInfo.php file
 
 
-````
-https://yordomain.com/wizwizxui-timebot-main/createDB.php
+
+  ````
+error_reporting(0);
+$botToken = ''; //Replace the bot token
+$dbUserName = ''; //Replace the database username
+$dbPassword = ''; //Replace the database password
+$dbName = ''; //Enter the database name
+$admin = ; // Get the numeric ID or user ID of the admin account from this bot and replace it with get_id_bot
+$channelLock = ""; //Replace the channel id with @ to force lock
+$botUrl = "https://yourdomain.com/"; //Replace your domain
+$walletwizwiz = ""; //Replace your card or wallet number
 ````
 
-Or if it is a subdomain:
-````
-https://sub.yordomain.com/wizwizxui-timebot-main/createDB.php
-````
+- To create a bot and receive a token via @bothfather bot, create a bot and replace the token
+- To get an ID, get a number from the @chatIDrobot robot and then replace it
+- For the channel, please replace the channel ID with @ (must be the channel manager robot to lock the channel)
+- Also replace your domain with yourdomain.com
+- And you can also put your Volt card or wallet number in "".
+
 
 
 <br>
 
-
-#### 8. Now you need to set the webhook, edit the following address and replace the token and address information, then run it in the browser:
-
-
-````
-https://api.telegram.org/bot1/setWebhook?url=2/bot.php
-````
-Instead of 1, you must enter the robot token and instead of 2, the address: Example
-````
-https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQvv/setWebhook?url=https://yordomain.com/wizwizxui-timebot-main/bot.php
-````
-
-<br>
-
-#### 9. Go back to the cpanel home page and click on the Cron Jobs button:
+### cron job setting:
 
 
 - Select Once Per Minute (* * * * *) mode in the Common Settings section
@@ -171,32 +82,105 @@ https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQv
 ````
 /usr/bin/php -q address1 >/dev/null 2>&1
 ````
-- Instead of addres1, you should put the address of the serverWarn.php file and save it. Example:
+- Instead of addres1, you should put the address of the messagewizwiz.php file and save it. Example:
 ````
-/usr/bin/php -q /home/yourfolder/public_html/yordomain.com/wizwizxui-timebot-main/serverWarn.php >/dev/null 2>&1
+/usr/bin/php -q /home/yourfolder/public_html/yordomain.com/messagewizwiz.php >/dev/null 2>&1
+````
+or
+````
+/usr/bin/php -q /home/yourfolder/public_html/messagewizwiz.php >/dev/null 2>&1
 ````
 
 <br>
 
 
-#### 10. Repeat the same steps for the warnUsage.php file:
+- Repeat the same steps for the warnUsage.php file:
 
 ````
 /usr/bin/php -q address2 >/dev/null 2>&1
 ````
-- Instead of addres2, you should put the address of the serverWarn.php file and save it. Example:
+- Instead of addres2, you should put the address of the warnUsage.php file and save it. Example:
 ````
-/usr/bin/php -q /home/yourfolder/public_html/yordomain.com/wizwizxui-timebot-main/warnUsage.php >/dev/null 2>&1
+/usr/bin/php -q /home/yourfolder/public_html/yordomain.com/warnUsage.php >/dev/null 2>&1
+````
+or
+````
+/usr/bin/php -q /home/yourfolder/public_html/warnUsage.php >/dev/null 2>&1
 ````
 
 <br>
 
 
+### set and hook
 
-#### 11. Then start the robot, give the uuid key or VMESS-VLESS link and enjoy
+
+````
+https://api.telegram.org/bot1/setWebhook?url=2/bot.php
+````
+Instead of 1, you should replace the robot token and instead of 2, enter the project address: eg
+````
+https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQvv/setWebhook?url=https://yordomain.com/wizwizxui-timebot-main/bot.php
+````
+
+- If the following text is displayed in the output, then congratulations, you have executed the robot correctly
+
+````
+{"ok":true,"result":true,"description":"Webhook was set"}
+````
 
 
-##### For the notification section of the end of the user volume, the user must log in to his account in the robot to receive notifications, and the administrator must make the robot the channel manager so that the notifications will be notified in the channel.
+<br>
+
+## Setting the htaccess file to increase security
+
+- After extracting the project files, you may not be able to see the htaccess file, first click on Settings in the upper right corner
+- In the window that opens, activate the option Show Hidden Files (dotfiles) and then click save
+- Finally, remove the .htaccess file from the bot folder and place it directly in public_html
+
+
+<br>
+
+## Important points after installation:
+
+- To forcefully lock the bot, you must be the channel administrator
+- Lookish host or server must be outside of Iran
+- If you use the Trojan protocol (the panel must have the ability to create Trojans, otherwise you will face problems)
+- The validity of the notification becomes zero after 2 days (after two days, if the volume or time is low, it will be sent again)
+- If the public message or notification is not sent when setting the cron job (when setting the cron job, just delete the domain address from inside the command)
+- To create a test configuration, set the price to 0 (each account can use the free test account only once
+
+
+<br>
+
+
+## Support for the following panels:
+
+
+
+- (Senai) single-port, multi-port
+````
+https://github.com/MHSanaei/3x-ui
+````
+- (Alireza) single port, multi port
+````
+https://github.com/alireza0/x-ui
+````
+- (Vexilo) only single port
+````
+https://github.com/vaxilu/x-ui
+````
+- (SD) single-port, multi-port
+````
+https://github.com/HexaSoftwareTech/x-ui
+````
+- (Nidoka Kalanka) single port, multi port
+````
+https://github.com/NidukaAkalanka/x-ui-english
+````
+
+
+<br>
+
 
 ### When adding a server to the robot, please enter the following address
 ````
@@ -223,53 +207,42 @@ https://youdomain.com:8080/
 ````
 
 
-
 <br>
 
-### Important:
-
-- Do not share database, cPanel, and robot token information with anyone
-
-<br>
+### Vizviz facilities
 
 
-
-### Features of version 4.0
-
-- bug fixes and performance improvements
-
-
-### Features of version 3.0
-
-- Appearance inlining (config specifications)
-- View user statistics (general, log in to the panel, only robot members)
-- Mandatory locking of one or more channels
-- Added MHSanaei panel
-- The addition of Alireza's panel (alireza0)
+- Automatic sale of vless - vmess - trojan
+- Setting and creating a configuration with the ability to:
+- (volume - day - network - protocol - single user {depends on the panel})
+- Server creation and management:
+- (name-flag-remark-capacity-header-request-request-tls-sni-ip)
+- Create category and manage it
+- Creating a plan and managing it
+- Create configuration of shared port and dedicated port
+- Create test configuration for users (before purchase)
+- Ability to pay by card (confirmed by the manager)
+- Automatic sending of configuration along with link + configuration name + qrcode to the user
+- View the complete specifications of the purchased configuration
+- Show the sold accounts of each plan
+- Advanced ticketing system section (ticketing)
+- Display capability (software link)
+- Sending public messages with CronJob
+- Enable or disable (Sales - Configuration specifications or both)
+- Notification of completion of volume and configuration time (only to the user)
+- Inline (config specifications)
+- Forced channel lock
+- Senate panel support
+- Alireza panel support
+- Vexilo panel support
+- SDI panel support
+- Niduka panel support
 - The possibility of adding an account by the user
 - The ability to manage and delete the account by the user
-- Possibility to register config to vless, vmess and trojan (except uuid)
-- Added the ability to send messages to support
-- Added the ability to turn off and turn on the robot (when necessary)
-
-
-### Features of version 2.0
-
-- Account feature for users
-- Fixed bugs in the previous version
-- Display the notification when the subscription ends (to the admin)
-- Get configuration information (for several ports)
-- Convert link to QrCode
+- The possibility of registering the configuration to vless-vmess-uuid (Trojan does not support it well)
+- Get configuration information (for single port and multiple ports)
 - Display account name
-- Add channel for notification message
 - Show input key
-- Professional management panel
-
-
-### Features version 1.0
-
-- Get configuration information (for single port)
-- Support for 4 x-ui panels (Vexilo-Assadi-Nidoka-Kafka {single port})
 - Status display
 - Display the total volume
 - Show download consumption
@@ -278,7 +251,6 @@ https://youdomain.com:8080/
 - Display the remaining volume
 - Display the number of remaining days
 - Show subscription expiration date
-- Server management (create-delete-display)
 
 <br>
 
