@@ -1,4 +1,4 @@
-## اسکریپت wizwiz
+# ویزویز
 ![](https://img.shields.io/github/v/release/wizwizdev/wizwizxui-timebot.svg)
 ![](https://visitor-badge.glitch.me/badge?page_id=wizwizdev.wizwizdev)
 ![Downloads](https://img.shields.io/github/downloads/wizwizdev/wizwizxui-timebot/total.svg)
@@ -10,7 +10,7 @@
 
 ## نصب 
 
-- هاست cpanel یا سرور خارجی 
+- هاست cpanel یا سرور لیونکس 
 - دامنه + ssl
 
 <br>
@@ -205,6 +205,19 @@ https://youdomain.com:8080/
 
 
 <br>
+
+### تنظیم سرتفیکت داخل ربات
+
+````
+{"serverName": "","certificates": [{"certificateFile": "","keyFile": ""}]}
+````
+
+- serverName: yourdomain
+- certificateFile: /root/cert.crt
+- keyFile: /root/private.key
+
+<br>
+
 
 
 ### امکانات ویزویز
