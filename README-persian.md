@@ -220,6 +220,15 @@ https://youdomain.com:8080/
 
 <br>
 
+### عکس
+
+![wizwiz1](https://user-images.githubusercontent.com/27927279/226134944-4ec8396a-64ea-4fcb-bc4c-a84f5fb4b5b5.JPG)
+
+
+
+
+<br>
+
 
 
 ### امکانات ویزویز
