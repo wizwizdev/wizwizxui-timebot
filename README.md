@@ -13,7 +13,7 @@
 
 ## Installation
 
-- cpanel host or external server
+- cpanel host or Linux VPS
 - domain + ssl
 
 <br>
