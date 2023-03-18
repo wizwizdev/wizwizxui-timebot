@@ -206,7 +206,7 @@ https://youdomain.com:8080/
 
 <br>
 
-### تنظیم سرتفیکت داخل ربات
+### تنظیم سرتیفیکیت داخل ربات
 
 ````
 {"serverName": "","certificates": [{"certificateFile": "","keyFile": ""}]}
