@@ -1,5 +1,5 @@
 
-## wizwiz
+# WizWiz
 
 ![](https://img.shields.io/github/v/release/wizwizdev/wizwizxui-timebot.svg)
 ![](https://visitor-badge.glitch.me/badge?page_id=wizwizdev.wizwizdev)
