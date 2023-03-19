@@ -183,7 +183,7 @@ https://github.com/alireza0/x-ui
 ````
 https://github.com/vaxilu/x-ui
 ````
-- (SD) single-port, multi-port
+- (Assadi) single-port, multi-port
 ````
 https://github.com/HexaSoftwareTech/x-ui
 ````
