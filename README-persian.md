@@ -42,6 +42,13 @@ https://github.com/wizwizdev/wizwizxui-timebot/archive/refs/heads/main.zip
 
 > **نکته مهم: بعد از اکسترک کردن کل پروژه را از پوشه اصلی ربات wizwizxui-timebot-main خارج و مستقیم داخل public_html آپلود کنید** 
 
+
+<br>
+
+## فایل wizwiz.sql
+
+- ابتده بعد از ایجاد دیتابیس فایل wizwiz.sql رو در دیتابیس ایجاد شده ایمپورت کنید
+
 <br>
 
 
