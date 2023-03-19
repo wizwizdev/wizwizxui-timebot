@@ -11,8 +11,8 @@ if ($joniedState== "kicked" || $joniedState== "left"){
 
 ✅ بعد از اینکه عضو شدید مجدد ربات رو /start کنید و لذت ببرید
 
-🌀 @wizwizdev ( Support us 💕 )
-");
+🌀 @ ( Support us 💕 )
+", null,"HTML");
     exit;
 }
 
