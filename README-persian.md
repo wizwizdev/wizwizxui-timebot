@@ -185,7 +185,13 @@ https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQv
 - اگر از پروتکل تروجان استفاده می کنید ( پنل باید قابلیت ساخت تروجان را داشته باشد در غیر اینصورت به مشکل بر میخورید )
 - اعتبار اعلان بعد از 2 روز صفر می شود ( بعد از دو روز اگر مجدد حجم یا زمان کم باشه ارسال می شود )
 - اگر موقع تنظیم کرون جاب پیام همگانی یا اعلان ارسال نشد ( هنگام تنظیم کرون جاب فقط ادرس دامنه را از داخل command پاک کنید )
-- برای ایجاد کانفیگ تست قیمت را 0 قرار دهید ( هر اکانت فقط یک بار میتواند اکانت تست رایگان استفاده کند 
+- برای ایجاد کانفیگ تست قیمت را 0 قرار دهید ( هر اکانت فقط یک بار میتواند اکانت تست رایگان استفاده کند
+- رفع مشکل تاریخ سرویس ها که برای چند سال قبل میزنه : به هاستینگ بگید که این رو روی سرور یا هاست اجرا کنه
+
+
+```` 
+timedatectl set-timezone Asia/Tehran 
+```` 
 
 
 <br>
@@ -255,7 +261,15 @@ https://youdomain.com:8080/
 {"serverName": "","certificates": [{"certificateFile": "","keyFile": ""}]}
 ````
 
-- serverName: yourdomain
+مثال: 
+
+- نکته مهم: بین آدرس ssl فاصله نزارید و بدون فاصله باشد در غیر اینصورت کل پنل x-ui از کار می افتد
+
+````
+{"serverName": "yourdomain.com","certificates": [{"certificateFile": "/root/cert.crt","keyFile": "/root/private.key"}]}
+````
+
+- serverName: yourdomain.com
 - certificateFile: /root/cert.crt
 - keyFile: /root/private.key
 
