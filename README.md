@@ -8,6 +8,26 @@
 ### [ترجمه به فارسی](README-persian.md)
 
 <br>
+<br>
+
+از من حمایت کنید
+
+Tron:(TRX)
+````
+TY8j7of18gbMtneB8bbL7SZk5gcntQEemG
+````
+
+Bitcoin:
+````
+bc1qcnkjnqvs7kyxvlfrns8t4ely7x85dhvz5gqge4
+````
+
+Dogecoin:
+````
+DMyGMghEh4W55P3VeVHntCN3vYAFtshvVH
+````
+
+<br>
 
 
 ## Installation
