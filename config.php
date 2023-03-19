@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 
 $connection = new mysqli('localhost',$dbUserName,$dbPassword,$dbName);
 if($connection->connect_error){
@@ -113,7 +113,7 @@ if(isset($update->message)){
     $first_name = $update->message->from->first_name;
     $caption = $message->caption;
     $last_name = $update->message->from->last_name;
-    $username = $update->message->from->username;
+    $username = $update->message->from->username?? " ندارد ";
     $message_id = $update->message->message_id;
     $forward_from_name = $update->message->reply_to_message->forward_sender_name;
     $forward_from_id = $update->message->reply_to_message->forward_from->id;
@@ -126,7 +126,7 @@ if(isset($update->callback_query)){
     $message_id = $update->callback_query->message->message_id;
     $chat_id = $update->callback_query->message->chat->id;
     $chat_type = $update->callback_query->message->chat->type;
-    $username = $update->callback_query->from->username;
+    $username = $update->callback_query->from->username?? " ندارد ";
     $from_id = $update->callback_query->from->id;
     $first_name = $update->callback_query->from->first_name;
 }
