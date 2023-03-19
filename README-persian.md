@@ -195,7 +195,7 @@ https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQv
 
 
 
-- ( سنایی ) تک پورتی ، چند پورتی
+- ( سنایی ) تک پورتی ، چند پورتی  ( ورژن 1.0.9 و پایین تر کار میکند )
 ```` 
 https://github.com/MHSanaei/3x-ui
 ```` 
