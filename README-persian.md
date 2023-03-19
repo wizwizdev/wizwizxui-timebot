@@ -45,7 +45,7 @@ https://github.com/wizwizdev/wizwizxui-timebot/archive/refs/heads/main.zip
 
 <br>
 
-## فایل wizwiz.sql
+## دیتابیس wizwiz.sql
 
 - ابتده بعد از ایجاد دیتابیس فایل wizwiz.sql رو در دیتابیس ایجاد شده ایمپورت کنید
 
