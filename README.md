@@ -147,6 +147,13 @@ https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQv
 
 <br>
 
+## Set config port count
+
+- Edit the temp.txt file and write your desired value
+
+<br>
+
+
 ## Important points after installation:
 
 - To forcefully lock the bot, you must be the channel administrator
