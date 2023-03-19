@@ -191,7 +191,11 @@ https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQv
 - The validity of the notification becomes zero after 2 days (after two days, if the volume or time is low, it will be sent again)
 - If the public message or notification is not sent when setting the cron job (when setting the cron job, just delete the domain address from inside the command)
 - To create a test configuration, set the price to 0 (each account can use the free test account only once
+- Fixing the problem of service history that goes back several years: Tell the hosting to run this on the server or host.
 
+````
+timedatectl set-timezone Asia/Tehran
+````
 
 <br>
 
@@ -200,7 +204,7 @@ https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQv
 
 
 
-- (Senai) single-port, multi-port
+- (Senai) single-port, multi-port (version 1.0.9 and lower works)
 ````
 https://github.com/MHSanaei/3x-ui
 ````
@@ -259,9 +263,18 @@ https://youdomain.com:8080/
 {"serverName": "","certificates": [{"certificateFile": "","keyFile": ""}]}
 ````
 
-- serverName: yourdomain
+Example:
+
+- Important note: do not leave a space between the ssl address and it should be without space, otherwise the entire x-ui panel will fail.
+
+````
+{"serverName": "yourdomain.com","certificates": [{"certificateFile": "/root/cert.crt","keyFile": "/root/private.key"}]}
+````
+
+- serverName: yourdomain.com
 - certificateFile: /root/cert.crt
 - keyFile: /root/private.key
+
 
 <br>
 
