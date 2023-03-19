@@ -70,9 +70,9 @@ CREATE TABLE `needed_sofwares` (
 
 INSERT INTO `needed_sofwares` (`id`, `title`, `link`, `status`) VALUES
 (1, 'ios fair-vpn', 'https://apps.apple.com/us/app/fair-vpn/id1533873488', 1),
-(2, 'ios napsternetv', 'https://play.google.com/store/apps/details?id=com.v2ray.ang&hl=en&gl=US', 1),
-(3, 'ios oneclick', 'https://site.site', 1),
-(4, 'android v2rayng', 'https://play.google.com/store/apps/details?id=com.napsternetlabs.napsternetv&hl=de&gl=US&pli=1', 1),
+(2, 'ios napsternetv', 'https://play.google.com/store/apps/details?id=com.napsternetlabs.napsternetv&hl=de&gl=US&pli=1', 1),
+(3, 'ios oneclick', 'https://apps.apple.com/us/app/oneclick-safe-easy-fast/id1545555197', 1),
+(4, 'android v2rayng', 'https://play.google.com/store/apps/details?id=com.v2ray.ang&hl=en&gl=US', 1),
 (5, 'android sagernet', 'https://play.google.com/store/apps/details?id=io.nekohasekai.sagernet&hl=de&gl=US', 1),
 (6, 'android onclick', 'https://play.google.com/store/apps/details?id=earth.oneclick', 1),
 (7, 'windows v2rayng', 'https://holoo.pro/v2ray-windows/', 1),
