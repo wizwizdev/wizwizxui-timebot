@@ -10,9 +10,9 @@
 <br>
 <br>
 
-از من حمایت کنید
+support me
 
-Tron:(TRX)
+Tron: (TRX)
 ````
 TY8j7of18gbMtneB8bbL7SZk5gcntQEemG
 ````
