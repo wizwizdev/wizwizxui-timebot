@@ -3,7 +3,6 @@
 
 ![](https://img.shields.io/github/v/release/wizwizdev/wizwizxui-timebot.svg)
 ![](https://visitor-badge.glitch.me/badge?page_id=wizwizdev.wizwizdev)
-![Downloads](https://img.shields.io/github/downloads/wizwizdev/wizwizxui-timebot/total.svg)
 
 
 ### [ترجمه به فارسی](README-persian.md)
