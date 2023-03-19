@@ -45,6 +45,13 @@ https://github.com/wizwizdev/wizwizxui-timebot/archive/refs/heads/main.zip
 
 > **Important note: After extracting the whole project, upload it directly from the wizwizxui-timebot-main folder to public_html**
 
+
+<br>
+
+## Database wizwiz.sql
+
+- First, after creating the database, import the wizwiz.sql file into the created database
+
 <br>
 
 
