@@ -13,7 +13,7 @@
 5892101222351344
 ```
 
-Tron: (TRX)
+ترون: (TRX)
 
 ```
 TY8j7of18gbMtneB8bbL7SZk5gcntQEemG
