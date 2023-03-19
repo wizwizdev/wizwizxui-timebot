@@ -13,7 +13,7 @@
 ### support me
 <br>
 
-Bank sepah:
+Bank sepah: توران
 
 ````
 5892101222351344
