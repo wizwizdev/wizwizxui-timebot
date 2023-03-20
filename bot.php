@@ -2492,7 +2492,7 @@ if(preg_match('/^addServerPanelUrl(.*)/',$userInfo['step'],$match) and $text != 
     $data = json_decode($match[1],true);
     $data['panel_url'] = $text;
     setUser('addServerIp' . json_encode($data,JSON_UNESCAPED_UNICODE));
-    sendMessage( "🔅 لطفا آیپی پنل را وارد کنید:\n\n🔻برای خالی گذاشتن متن /empty را وارد کنید");
+    sendMessage( "🔅 لطفا آیپی پنل را وارد کنید: n\ ❗️ نکته مهم: اگر از تانل یا کلود استفاده می کنید میتوانید ای پی یا دامنه مورد نظرتون رو وارد کنید تا به جای آدرس سرور شما تحویل مشتری داده بشه   \n\n🔻برای خالی گذاشتن متن /empty را وارد کنید");
 }
 if(preg_match('/^addServerIp(.*)/',$userInfo['step'],$match) and $text != $cancelText) {
     $data = json_decode($match[1],true);
