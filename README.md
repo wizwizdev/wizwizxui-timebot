@@ -13,36 +13,36 @@
 ### support me
 <br>
 
-Bank sepah: توران
+Bank Sepe: Turan
 
-````
+```
 5892101222351344
-````
+```
 
 Tron: (TRX)
 
-````
+```
 TY8j7of18gbMtneB8bbL7SZk5gcntQEemG
-````
+```
 
 Bitcoin:
 
-````
+```
 bc1qcnkjnqvs7kyxvlfrns8t4ely7x85dhvz5gqge4
-````
+```
 
 Dogecoin:
 
-````
+```
 DMyGMghEh4W55P3VeVHntCN3vYAFtshvVH
-````
+```
 
 <br>
 
 
 ## Installation
 
-- cpanel host or Linux VPS
+- cpanel host or lionex server
 - domain + ssl
 
 <br>
@@ -183,6 +183,7 @@ https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQv
 <br>
 
 
+
 ## Important points after installation:
 
 - To forcefully lock the bot, you must be the channel administrator
@@ -197,6 +198,12 @@ https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQv
 timedatectl set-timezone Asia/Tehran
 ````
 
+- If you encounter the message (Glam, the connection to the server is not established), remember that the path is next to the address of the panel, remove the path and restart the panel, the problem will be solved.
+
+
+
+
+
 <br>
 
 
@@ -204,25 +211,21 @@ timedatectl set-timezone Asia/Tehran
 
 
 
-- (Senai) multi-port
+- (Nidoka Kalanka) single-port, multi-port (the best option for the robot)
+````
+https://github.com/NidukaAkalanka/x-ui-english
+````
+- (Senai) multi-port - single-port
 ````
 https://github.com/MHSanaei/3x-ui
 ````
-- (Alireza) multi port
+- (Alireza) multi-port - single port
 ````
 https://github.com/alireza0/x-ui
 ````
 - (Vexilo) only single port
 ````
 https://github.com/vaxilu/x-ui
-````
-- (Assadi) single-port, multi-port
-````
-https://github.com/HexaSoftwareTech/x-ui
-````
-- (Nidoka Kalanka) single port, multi port
-````
-https://github.com/NidukaAkalanka/x-ui-english
 ````
 
 
@@ -253,6 +256,7 @@ https://youdomain.com:8080/xui/inbounds
 https://youdomain.com:8080/
 ````
 
+
 <br>
 
 ### Setting the certificate inside the robot
@@ -279,7 +283,6 @@ Example:
 <br>
 
 
-<br>
 
 ### Vizviz facilities
 
