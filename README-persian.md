@@ -201,11 +201,11 @@ timedatectl set-timezone Asia/Tehran
 
 
 
-- ( سنایی ) تک پورتی ، چند پورتی  ( ورژن 1.0.9 و پایین تر کار میکند )
+- ( سنایی ) چند پورتی 
 ```` 
 https://github.com/MHSanaei/3x-ui
 ```` 
-- ( علیرضا ) تک پورتی ، چند پورتی
+- ( علیرضا ) چند پورتی
 ```` 
 https://github.com/alireza0/x-ui
 ```` 
