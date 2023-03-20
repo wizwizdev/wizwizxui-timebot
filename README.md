@@ -310,7 +310,6 @@ Example:
 - Senate panel support
 - Alireza panel support
 - Vexilo panel support
-- SDI panel support
 - Niduka panel support
 - The possibility of adding an account by the user
 - The ability to manage and delete the account by the user
