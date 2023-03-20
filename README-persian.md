@@ -188,10 +188,14 @@ https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQv
 - برای ایجاد کانفیگ تست قیمت را 0 قرار دهید ( هر اکانت فقط یک بار میتواند اکانت تست رایگان استفاده کند
 - رفع مشکل تاریخ سرویس ها که برای چند سال قبل میزنه : به هاستینگ بگید که این رو روی سرور یا هاست اجرا کنه
 
-
 ```` 
 timedatectl set-timezone Asia/Tehran 
 ```` 
+
+- اگر با پیغام ( گلم، اتصال به سرور برقرار نیست ) روبرو شدید به خاطر داشت path کنار آدرس پنل هست path رو بردارید و پنل را ریستارت کنید مشکل حل میشه
+
+
+
 
 
 <br>
@@ -201,25 +205,21 @@ timedatectl set-timezone Asia/Tehran
 
 
 
-- ( سنایی ) چند پورتی 
+- ( نیدوکا کالانکا ) تک پورتی ، چند پورتی ( بهترین گزینه برای ربات )
+```` 
+https://github.com/NidukaAkalanka/x-ui-english
+```` 
+- ( سنایی ) چند پورتی - تک پورتی 
 ```` 
 https://github.com/MHSanaei/3x-ui
 ```` 
-- ( علیرضا ) چند پورتی
+- ( علیرضا ) چند پورتی - تک پورتی
 ```` 
 https://github.com/alireza0/x-ui
 ```` 
 - ( وکسیلو ) فقط تک پورتی
 ```` 
 https://github.com/vaxilu/x-ui
-```` 
-- ( اسدی ) تک پورتی ، چند پورتی
-```` 
-https://github.com/HexaSoftwareTech/x-ui
-````
-- ( نیدوکا کالانکا ) تک پورتی ، چند پورتی
-```` 
-https://github.com/NidukaAkalanka/x-ui-english
 ```` 
 
 
