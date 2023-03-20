@@ -204,11 +204,11 @@ timedatectl set-timezone Asia/Tehran
 
 
 
-- (Senai) single-port, multi-port (version 1.0.9 and lower works)
+- (Senai) multi-port
 ````
 https://github.com/MHSanaei/3x-ui
 ````
-- (Alireza) single port, multi port
+- (Alireza) multi port
 ````
 https://github.com/alireza0/x-ui
 ````
