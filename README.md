@@ -203,23 +203,19 @@ https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQv
 
 ## Support for the following panels:
 
-
+#### Important note: install only the version of Senai panel that we have included
 
 - (Nidoka Kalanka) single-port, multi-port (the best option for the robot)
 ````
-https://github.com/NidukaAkalanka/x-ui-english
+bash <(curl -Ls https://raw.githubusercontent.com/NidukaAkalanka/x-ui-english/master/install.sh)
 ````
 - (Senai) multi-port - single-port
 ````
-https://github.com/MHSanaei/3x-ui
-````
-- (Alireza) multi-port - single port
-````
-https://github.com/alireza0/x-ui
+bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.0.9
 ````
 - (Vexilo) only single port
 ````
-https://github.com/vaxilu/x-ui
+bash <(curl -Ls https://raw.githubusercontent.com/vaxilu/x-ui/master/install.sh)
 ````
 
 
