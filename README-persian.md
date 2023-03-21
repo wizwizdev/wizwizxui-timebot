@@ -198,23 +198,27 @@ https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQv
 ## پشتیبانی از پنل های زیر:
 
 
+#### نکته مهم: پنل سنایی نسخه 1.0.9 و پنل علیرضا نسخه 0.4.0 را که قرار داده ایم نصب کنید
+
+
 
 - ( نیدوکا کالانکا ) تک پورتی ، چند پورتی ( بهترین گزینه برای ربات )
 ```` 
-https://github.com/NidukaAkalanka/x-ui-english
+bash <(curl -Ls https://raw.githubusercontent.com/NidukaAkalanka/x-ui-english/master/install.sh)
 ```` 
-- ( سنایی ) چند پورتی - تک پورتی 
+- ( سنایی ) چند پورتی - تک پورتی  
 ```` 
-https://github.com/MHSanaei/3x-ui
+bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.0.9
 ```` 
-- ( علیرضا ) چند پورتی - تک پورتی
+- ( علیرضا ) چند پورتی - تک پورتی  
 ```` 
-https://github.com/alireza0/x-ui
+bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 0.4.0
 ```` 
 - ( وکسیلو ) فقط تک پورتی
 ```` 
-https://github.com/vaxilu/x-ui
+bash <(curl -Ls https://raw.githubusercontent.com/vaxilu/x-ui/master/install.sh)
 ```` 
+
 
 
 <br>
