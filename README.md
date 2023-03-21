@@ -42,7 +42,7 @@ DMyGMghEh4W55P3VeVHntCN3vYAFtshvVH
 
 ## Installation
 
-- cpanel host or lionex server
+- cpanel host or Linux server
 - domain + ssl
 
 <br>
