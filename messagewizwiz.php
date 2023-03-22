@@ -76,4 +76,3 @@ if( $usersList->num_rows > 1 ) {
     $msgInfo['offset'] = -1;
     file_put_contents("messagewizwiz.json",json_encode($msgInfo));
 }
-
