@@ -1,13 +1,14 @@
 -- phpMyAdmin SQL Dump
--- version 5.0.4
+-- version 4.9.7
 -- https://www.phpmyadmin.net/
 --
--- Host: localhost
--- Generation Time: Mar 16, 2023 at 08:15 AM
--- Server version: 5.7.40-log
+-- Host: localhost:3306
+-- Generation Time: Mar 22, 2023 at 09:15 PM
+-- Server version: 10.5.19-MariaDB
 -- PHP Version: 7.4.33
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+SET AUTOCOMMIT = 0;
 START TRANSACTION;
 SET time_zone = "+00:00";
 
@@ -35,7 +36,7 @@ CREATE TABLE `chats` (
   `category` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `state` int(5) NOT NULL,
   `rate` int(5) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
 
@@ -49,7 +50,7 @@ CREATE TABLE `chats_info` (
   `sent_date` int(255) NOT NULL,
   `msg_type` varchar(50) DEFAULT NULL,
   `text` varchar(2000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
 
@@ -61,8 +62,8 @@ CREATE TABLE `needed_sofwares` (
   `id` int(11) NOT NULL,
   `title` varchar(100) NOT NULL,
   `link` varchar(250) NOT NULL,
-  `status` int(11) NOT NULL DEFAULT '1'
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+  `status` int(11) NOT NULL DEFAULT 1
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 --
 -- Dumping data for table `needed_sofwares`
@@ -86,19 +87,19 @@ INSERT INTO `needed_sofwares` (`id`, `title`, `link`, `status`) VALUES
 
 CREATE TABLE `orders_list` (
   `id` int(11) NOT NULL,
-  `userid` varchar(30) COLLATE utf8mb4_persian_ci NOT NULL,
-  `transid` varchar(150) COLLATE utf8mb4_persian_ci NOT NULL,
+  `userid` varchar(30) NOT NULL,
+  `transid` varchar(150) NOT NULL,
   `fileid` int(11) NOT NULL,
   `server_id` int(11) NOT NULL,
-  `inbound_id` int(11) NOT NULL DEFAULT '0',
-  `remark` varchar(100) COLLATE utf8mb4_persian_ci NOT NULL,
-  `protocol` varchar(20) COLLATE utf8mb4_persian_ci NOT NULL,
+  `inbound_id` int(11) NOT NULL DEFAULT 0,
+  `remark` varchar(100) NOT NULL,
+  `protocol` varchar(20) NOT NULL,
   `expire_date` int(11) NOT NULL,
-  `link` text COLLATE utf8mb4_persian_ci NOT NULL,
+  `link` text NOT NULL,
   `amount` int(11) NOT NULL,
   `status` int(11) NOT NULL,
-  `date` varchar(50) COLLATE utf8mb4_persian_ci NOT NULL,
-  `notif` int(11) NOT NULL DEFAULT '0'
+  `date` varchar(50) NOT NULL,
+  `notif` int(11) NOT NULL DEFAULT 0
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
 -- --------------------------------------------------------
@@ -111,9 +112,9 @@ CREATE TABLE `server_accounts` (
   `id` int(11) NOT NULL,
   `fid` int(11) NOT NULL,
   `text` text NOT NULL,
-  `sold` int(11) NOT NULL DEFAULT '0',
-  `active` int(11) NOT NULL DEFAULT '1'
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+  `sold` int(11) NOT NULL DEFAULT 0,
+  `active` int(11) NOT NULL DEFAULT 1
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
 
@@ -123,11 +124,11 @@ CREATE TABLE `server_accounts` (
 
 CREATE TABLE `server_categories` (
   `id` int(11) NOT NULL,
-  `server_id` varchar(20) COLLATE utf8mb4_persian_ci NOT NULL,
-  `title` varchar(50) COLLATE utf8mb4_persian_ci NOT NULL,
-  `parent` int(11) NOT NULL DEFAULT '0',
+  `server_id` varchar(20) NOT NULL,
+  `title` varchar(50) NOT NULL,
+  `parent` int(11) NOT NULL DEFAULT 0,
   `step` int(11) NOT NULL,
-  `active` int(11) NOT NULL DEFAULT '0'
+  `active` int(11) NOT NULL DEFAULT 0
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
 -- --------------------------------------------------------
@@ -146,8 +147,9 @@ CREATE TABLE `server_config` (
   `response_header` text NOT NULL,
   `security` enum('tls','none') NOT NULL,
   `tlsSettings` text NOT NULL,
-  `cookie` text NOT NULL
-) ENGINE=MyISAM DEFAULT CHARSET=latin1;
+  `cookie` text NOT NULL,
+  `type` varchar(100) DEFAULT NULL
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
 
 -- --------------------------------------------------------
 
@@ -158,10 +160,10 @@ CREATE TABLE `server_config` (
 CREATE TABLE `server_info` (
   `id` int(11) NOT NULL,
   `title` varchar(200) CHARACTER SET utf8 COLLATE utf8_persian_ci NOT NULL,
-  `ucount` varchar(20) CHARACTER SET latin1 NOT NULL,
-  `remark` varchar(100) COLLATE utf8mb4_persian_ci NOT NULL,
-  `flag` varchar(100) COLLATE utf8mb4_persian_ci NOT NULL,
-  `active` int(11) NOT NULL DEFAULT '0'
+  `ucount` varchar(20) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
+  `remark` varchar(100) NOT NULL,
+  `flag` varchar(100) NOT NULL,
+  `active` int(11) NOT NULL DEFAULT 0
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
 -- --------------------------------------------------------
@@ -172,23 +174,23 @@ CREATE TABLE `server_info` (
 
 CREATE TABLE `server_plans` (
   `id` int(11) NOT NULL,
-  `fileid` varchar(250) COLLATE utf8mb4_persian_ci NOT NULL,
+  `fileid` varchar(250) NOT NULL,
   `catid` int(11) NOT NULL,
   `server_id` int(11) NOT NULL,
-  `inbound_id` int(11) NOT NULL DEFAULT '0',
+  `inbound_id` int(11) NOT NULL DEFAULT 0,
   `acount` bigint(20) NOT NULL,
-  `limitip` int(11) NOT NULL DEFAULT '1',
-  `title` varchar(150) COLLATE utf8mb4_persian_ci NOT NULL,
-  `protocol` varchar(100) COLLATE utf8mb4_persian_ci NOT NULL,
+  `limitip` int(11) NOT NULL DEFAULT 1,
+  `title` varchar(150) NOT NULL,
+  `protocol` varchar(100) NOT NULL,
   `days` float NOT NULL,
   `volume` float NOT NULL,
-  `type` varchar(50) COLLATE utf8mb4_persian_ci NOT NULL,
+  `type` varchar(50) NOT NULL,
   `price` int(11) NOT NULL,
-  `descr` text COLLATE utf8mb4_persian_ci NOT NULL,
-  `pic` varchar(100) COLLATE utf8mb4_persian_ci NOT NULL,
-  `active` int(11) NOT NULL DEFAULT '0',
+  `descr` text NOT NULL,
+  `pic` varchar(100) NOT NULL,
+  `active` int(11) NOT NULL DEFAULT 0,
   `step` int(11) NOT NULL,
-  `date` varchar(50) COLLATE utf8mb4_persian_ci NOT NULL
+  `date` varchar(50) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
 -- --------------------------------------------------------
@@ -201,7 +203,15 @@ CREATE TABLE `setting` (
   `id` int(255) NOT NULL,
   `type` varchar(500) NOT NULL,
   `value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+
+--
+-- Dumping data for table `setting`
+--
+
+INSERT INTO `setting` (`id`, `type`, `value`) VALUES
+(1, 'TICKETS_CATEGORY', 'شکایت'),
+(2, 'TICKETS_CATEGORY', 'تخفیفات');
 
 -- --------------------------------------------------------
 
@@ -211,12 +221,12 @@ CREATE TABLE `setting` (
 
 CREATE TABLE `users` (
   `id` int(11) NOT NULL,
-  `userid` varchar(40) COLLATE utf8mb4_persian_ci NOT NULL,
-  `name` varchar(100) COLLATE utf8mb4_persian_ci NOT NULL,
-  `username` varchar(100) COLLATE utf8mb4_persian_ci NOT NULL,
-  `refcode` varchar(50) COLLATE utf8mb4_persian_ci NOT NULL,
-  `wallet` int(11) NOT NULL DEFAULT '0',
-  `date` varchar(50) COLLATE utf8mb4_persian_ci NOT NULL
+  `userid` varchar(40) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `username` varchar(100) NOT NULL,
+  `refcode` varchar(50) NOT NULL,
+  `wallet` int(11) NOT NULL DEFAULT 0,
+  `date` varchar(50) NOT NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci;
 
 --
@@ -352,7 +362,7 @@ ALTER TABLE `server_plans`
 -- AUTO_INCREMENT for table `setting`
 --
 ALTER TABLE `setting`
-  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(255) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `users`
