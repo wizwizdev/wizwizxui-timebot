@@ -628,7 +628,7 @@ function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $re
 
     $panel_url = $server_info['panel_url'];
     $cookie = 'Cookie: session='.$server_info['cookie'];
-
+    $serverType = $server_info['type'];
     $volume = ($volume == 0) ? 0 : $volume * 1073741824;
 
     $response = getJson($server_id);
@@ -665,32 +665,61 @@ function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $re
 
     $curl = curl_init();
     $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
-    curl_setopt_array($curl, array(
-        CURLOPT_URL => "$panel_url/xui/inbound/update/$iid",
-        CURLOPT_RETURNTRANSFER => true,
-        CURLOPT_ENCODING => '',
-        CURLOPT_MAXREDIRS => 10,
-        CURLOPT_CONNECTTIMEOUT => 15,
-        CURLOPT_TIMEOUT => 15,
-        CURLOPT_FOLLOWLOCATION => true,
-        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-        CURLOPT_CUSTOMREQUEST => 'POST',
-        CURLOPT_POSTFIELDS => $dataArr,
-        CURLOPT_SSL_VERIFYHOST => false,
-        CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_HTTPHEADER => array(
-            'Host: '.$phost,
-            'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
-            'Accept:  application/json, text/plain, */*',
-            'Accept-Language:  en-US,en;q=0.5',
-            'Accept-Encoding:  gzip, deflate',
-            'X-Requested-With:  XMLHttpRequest',
-            $cookie
-        ),
-    ));
+    if($serverType == "sanaei"){
+        $dataArr = array(
+            "id"=>$inbound_id,
+            "settings" => $settings
+            );
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => "$panel_url/xui/inbound/addClient/",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_CONNECTTIMEOUT => 15,
+            CURLOPT_TIMEOUT => 15,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $dataArr,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_HTTPHEADER => array(
+                'Host: '.$phost,
+                'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                'Accept:  application/json, text/plain, */*',
+                'Accept-Language:  en-US,en;q=0.5',
+                'Accept-Encoding:  gzip, deflate',
+                'X-Requested-With:  XMLHttpRequest',
+                $cookie
+            ),
+        ));
+    }else{
+        curl_setopt_array($curl, array(
+            CURLOPT_URL => "$panel_url/xui/inbound/update/$iid",
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_ENCODING => '',
+            CURLOPT_MAXREDIRS => 10,
+            CURLOPT_CONNECTTIMEOUT => 15,
+            CURLOPT_TIMEOUT => 15,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+            CURLOPT_CUSTOMREQUEST => 'POST',
+            CURLOPT_POSTFIELDS => $dataArr,
+            CURLOPT_SSL_VERIFYHOST => false,
+            CURLOPT_SSL_VERIFYPEER => false,
+            CURLOPT_HTTPHEADER => array(
+                'Host: '.$phost,
+                'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                'Accept:  application/json, text/plain, */*',
+                'Accept-Language:  en-US,en;q=0.5',
+                'Accept-Encoding:  gzip, deflate',
+                'X-Requested-With:  XMLHttpRequest',
+                $cookie
+            ),
+        ));
+    }
 
     $response = curl_exec($curl);
-
     curl_close($curl);
     return $response = json_decode($response);
 
