@@ -1199,7 +1199,7 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
     unlink($file);
 
 	$stmt = $connection->prepare("INSERT INTO `orders_list` VALUES (NULL,  ?, '', ?, ?, ?, ?, ?, ?, ?, ?,1, ?, 0);");
-    $stmt->bind_param("iiiissisii", $from_id, $id, $server_id, $inbound_id, $remark, $protocol, $expire_date, $vray_link, $price, $data);
+    $stmt->bind_param("iiiissisii", $from_id, $id, $server_id, $inbound_id, $remark, $protocol, $expire_date, $vray_link, $price, $date);
     $stmt->execute();
     $order = $stmt->get_result();
     $stmt->close();
@@ -2379,11 +2379,11 @@ if(preg_match('/wizwizcategorydelete(.*)/',$text, $match) and ($from_id==$admin)
 
     sendMessage("دسته بندی رو برات حذفش کردم ☹️☑️");
 }
-if(preg_match('/wizwizcategoryedit/',$text) and ($from_id==$admin)){
+if(preg_match('/wizwizcategoryedit/',$text) and ($from_id==$admin) && $text != $cancelText){
     setUser($text);
-    sendMessage("〽️ یه اسم جدید برا دسته بندی انتخاب کن:");exit;
+    sendMessage("〽️ یه اسم جدید برا دسته بندی انتخاب کن:",$cancelKey);exit;
 }
-if(preg_match('/wizwizcategoryedit(.*)/',$userInfo['step'], $match)){
+if(preg_match('/wizwizcategoryedit(.*)/',$userInfo['step'], $match) && $text != $cancelText){
     $stmt = $connection->prepare("UPDATE `server_categories` SET `title`=? WHERE `id`=?");
     $stmt->bind_param("si", $text, $match[1]);
     $stmt->execute();
@@ -2410,6 +2410,13 @@ if($data=='serversSetting' and ($from_id==$admin)){
             $flagwizwiz = $cty['flag'];
             $remarkwizwiz = $cty['remark'];
             $ucount = $cty['ucount'];
+            $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
+            $stmt->bind_param("i", $id);
+            $stmt->execute();
+            $serverTypeInfo= $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+
+            $serverType = $serverTypeInfo['type']=="sanaei"?"سنایی":"ساده";
             $msg .= "
 ❕نام سرور : $cname 
 ➖➖➖➖➖➖➖➖
@@ -2418,6 +2425,8 @@ if($data=='serversSetting' and ($from_id==$admin)){
 📣 ریمارک سرور : $remarkwizwiz 
 ➖➖➖➖➖➖➖➖
 〽️ تعداد : $ucount
+➖➖➖➖➖➖➖➖
+🔅نوعیت سرور : $serverType /changeServerType$id
 ➖➖➖➖➖➖➖➖
 🔅ویرایش نام سرور : /editServerName$id
 ➖➖➖➖➖➖➖➖
@@ -2438,8 +2447,24 @@ if($data=='serversSetting' and ($from_id==$admin)){
     }
     sendMessage($msg);
 }
+if(preg_match('/^\/changeServerType(\d+)/',$text,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+    sendMessage("❗️نکته مهم:
 
-if($data=='addNewServer' and ($from_id == $admin)){
+⚠️ اگر از پنل سنایی نسخه v1.1.1 و بالاتر استفاده میکنید لطفا نوع پنل را ( سنایی ) انتخاب کنید ، ولی اگر از پنل سنایی نسخه 1.0.9 به قبل و پنل های نیدوکا - وکسیلو ( چینی ) و ... استفاده میکنید نوع پنل را ( ساده ) انتخاب کنید
+⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
+",json_encode(['inline_keyboard'=>[
+        [['text'=>"ساده",'callback_data'=>"chhangeServerTypenormal_" . $match[1]],['text'=>"سنایی",'callback_data'=>"chhangeServerTypesanaei_" . $match[1]]]
+        ]]));
+    exit();
+}
+if(preg_match('/^chhangeServerType(\w+)_(\d+)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+    editText($message_id, "با موفقیت ذخیره شد");
+    $stmt = $connection->prepare("UPDATE `server_config` SET `type` = ? WHERE `id`=?");
+    $stmt->bind_param("si",$match[1], $match[2]);
+    $stmt->execute();
+    $stmt->close();
+}
+if($data=='addNewServer' and (($from_id == $admin || $userInfo['isAdmin'] == true))){
     setUser('addserverName');
     sendMessage("مرحله اول: 
 ▪️یه اسم برا سرورت انتخاب کن:",$cancelKey);
@@ -2492,7 +2517,7 @@ if(preg_match('/^addServerPanelUrl(.*)/',$userInfo['step'],$match) and $text != 
     $data = json_decode($match[1],true);
     $data['panel_url'] = $text;
     setUser('addServerIp' . json_encode($data,JSON_UNESCAPED_UNICODE));
-    sendMessage( "🔅 لطفا آیپی پنل را وارد کنید: \n\n❗️ نکته مهم: اگر از تانل یا کلود استفاده می کنید میتوانید ای پی یا دامنه مورد نظرتون رو وارد کنید تا به جای آدرس سرور شما تحویل مشتری داده بشه   \n\n🔻برای خالی گذاشتن متن /empty را وارد کنید");
+    sendMessage( "🔅 لطفا آیپی پنل را وارد کنید:\n\n🔻برای خالی گذاشتن متن /empty را وارد کنید");
 }
 if(preg_match('/^addServerIp(.*)/',$userInfo['step'],$match) and $text != $cancelText) {
     $data = json_decode($match[1],true);
@@ -2620,9 +2645,18 @@ if(preg_match('/^addServerPanePassword(.*)/',$userInfo['step'],$match) and $text
                                            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
     $stmt->bind_param("isssssssss", $rowId, $panel_url, $ip, $sni, $header_type, $request_header, $response_header, $security, $tlsSettings, $cookie);
     $stmt->execute();
+    $rowId = $stmt->insert_id;
     $stmt->close();
 
     sendMessage(" تبریک ; سرورت رو ثبت کردی 🥹",$removeKeyboard);
+
+    sendMessage("✅ سرور با نوع ساده ثبت شد 
+
+🔺 اگر از پنل سنایی نسخه v1.1.1 و بالاتر استفاده میکنید لطفا نوع پنل را ( سنایی ) انتخاب کنید ، ولی اگر از پنل سنایی نسخه 1.0.9 به قبل و پنل های نیدوکا - وکسیلو ( چینی ) و ... استفاده میکنید نوع پنل را ( ساده ) انتخاب کنید:
+⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
+",json_encode(['inline_keyboard'=>[
+        [['text'=>"ساده",'callback_data'=>"chhangeServerTypenormal_" . $rowId],['text'=>"سنایی",'callback_data'=>"chhangeServerTypesanaei_" . $rowId]]
+        ]]));
     sendMessage('🏵 روی گزینه مورد نظرت کلیک کن:',$adminKeys);
     setUser();
 }
@@ -2639,7 +2673,7 @@ if(preg_match('/wizwizdeleteserver(\d+)/',$text,$match) and ($from_id==$admin)){
 
     sendMessage("🙂 سرور رو چرا حذف کردی اخه ...");
 }
-if(preg_match('/^\/editServer(\D+)(\d+)/',$text,$match)){
+if(preg_match('/^\/editServer(\D+)(\d+)/',$text,$match) && $text != $cancelText){
     switch($match[1]){
         case "Name":
             $txt ="اسم";
@@ -2656,8 +2690,9 @@ if(preg_match('/^\/editServer(\D+)(\d+)/',$text,$match)){
     }
     sendMessage("لطفا " . $txt . " جدید را وارد کنید",$cancelKey);
     setUser($text);
+        
 }
-if(preg_match('/^\/editServer(\D+)(\d+)/',$userInfo['step'],$match)){
+if(preg_match('/^\/editServer(\D+)(\d+)/',$userInfo['step'],$match) && $text != $cancelText){
     switch($match[1]){
         case "Name":
             $txt ="title";
@@ -2677,9 +2712,7 @@ if(preg_match('/^\/editServer(\D+)(\d+)/',$userInfo['step'],$match)){
     $stmt->bind_param("si",$text, $match[2]);
     $stmt->execute();
     $stmt->close();
-
-    
-    sendMessage("با موفقیت ذخیره شد",$removeKeyboard);
+    sendMessage("با موفقیت ذخیره شد");
     setUser();
 }
 
