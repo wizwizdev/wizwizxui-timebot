@@ -206,11 +206,17 @@ https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQv
 ```` 
 bash <(curl -Ls https://raw.githubusercontent.com/NidukaAkalanka/x-ui-english/master/install.sh)
 ```` 
-- ( سنایی ) چند پورتی - تک پورتی  
+- ( سنایی ) چند پورتی - تک پورتی
+```` 
+bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+````   
 ```` 
 bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.0.9
 ```` 
-- ( علیرضا ) چند پورتی - تک پورتی  
+- ( علیرضا ) چند پورتی - تک پورتی
+```` 
+bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
+````   
 ```` 
 bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 0.4.0
 ```` 
