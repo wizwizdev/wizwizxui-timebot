@@ -53,18 +53,20 @@ if($orders){
                 }
             }
         } 
-        $leftgb = round( ($total - $up - $down) / 1073741824, 2);
-        $now_microdate = floor(microtime(true) * 1000);
-        if($expiryTime < $now_microdate + 86400) $send = "روز"; elseif($leftgb < 1) $send = "گیگ";
-        if($send){  
-            $msg = "❌ |  مشترک گرامی 
-از اشتراک $remark تنها (۱ $send) باقی مانده است لطفا هر چه سریع تر سرویس خود را تمدید کنید ...";
-            sendMessage( $msg, null, null, $from_id);
-            $newTIme = $time + 86400 * 2;
-            $stmt = $connection->prepare("UPDATE `orders_list` SET `notif`= ? WHERE `remark`=?");
-            $stmt->bind_param("is", $newTIme, $remark);
-            $stmt->execute();
-            $stmt->close();
+            $leftgb = round( ($total - $up - $down) / 1073741824, 2);
+            $now_microdate = floor(microtime(true) * 1000);
+            if($expiryTime != null && $total != null){
+            if($expiryTime < $now_microdate + 86400) $send = "روز"; elseif($leftgb < 1) $send = "گیگ";
+            if($send){  
+                $msg = "❌ |  مشترک گرامی 
+    از اشتراک $remark تنها (۱ $send) باقی مانده است لطفا هر چه سریع تر سرویس خود را تمدید کنید ...";
+                sendMessage( $msg, null, null, $from_id);
+                $newTIme = $time + 86400 * 2;
+                $stmt = $connection->prepare("UPDATE `orders_list` SET `notif`= ? WHERE `remark`=?");
+                $stmt->bind_param("is", $newTIme, $remark);
+                $stmt->execute();
+                $stmt->close();
+            }
         }
     }
   }
