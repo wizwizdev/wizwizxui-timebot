@@ -42,8 +42,10 @@ DMyGMghEh4W55P3VeVHntCN3vYAFtshvVH
 <br>
 
 ## برای نصب آسان فقط فایل 
-
+```
 installer.php
+```
+<br>
 را اجرا کنید و اطلاعات مورد نیاز را وارد کنید تا ربات نصب شود
 
 
