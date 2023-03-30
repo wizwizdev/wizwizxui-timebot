@@ -1,4 +1,4 @@
-# ویزویز
+# ویزویز با نصب کننده آسان
 ![](https://img.shields.io/github/v/release/wizwizdev/wizwizxui-timebot.svg)
 ![](https://visitor-badge.glitch.me/badge?page_id=wizwizdev.wizwizdev)
 
@@ -40,7 +40,10 @@ DMyGMghEh4W55P3VeVHntCN3vYAFtshvVH
 - دامنه + ssl
 
 <br>
+## برای نصب آسان فقط فایل 
 
+installer.php
+را اجرا کنید و اطلاعات مورد نیاز را وارد کنید تا ربات نصب شود
 
 
 <br>
