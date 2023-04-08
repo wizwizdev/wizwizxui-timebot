@@ -1,0 +1,19 @@
+<files “.htaccess”>
+order allow,deny
+deny from all
+</files>
+
+Options +FollowSymlinks
+ RewriteEngine On
+ rewritecond %{REQUEST_FILENAME} !^(.+).css$
+ rewritecond %{REQUEST_FILENAME} !^(.+).js$
+ rewritecond %{REQUEST_FILENAME} !file.php$
+
+
+RewriteEngine On
+ RewriteCond %{HTTP_REFERER} !^$
+ RewriteCond %{HTTP_REFERER} !^http://(www\.)?site.com/ .*$ [NC]
+ RewriteRule \.(gif|jpg|swf|flv|png)$ /feed/ [R=302,L]
+
+
+Options All -Indexes
