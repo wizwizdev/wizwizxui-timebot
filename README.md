@@ -1,3 +1,7 @@
+### [ترجمه به فارسی](README-persian.md)
+
+<br>
+
 <p align="center">
   <a href="https://github.com/gozargah/marzban" target="_blank" rel="noopener noreferrer">
     <picture>
