@@ -394,12 +394,29 @@ if($userInfo['step'] == "increaseMyWallet" && $text != $cancelText){
 
     
     sendMessage("🪄 لطفا صبور باشید ...",$removeKeyboard);
-	$keys = json_encode(['inline_keyboard'=>[
-	    [($botState['cartToCartState'] == "on"?['text' => "💳 کارت به کارت ",  'callback_data' => "increaseWalletWithCartToCart" . $text]:[]),
-	    ($botState['nowPaymentWallet'] == "on"?['text' => "💳 درگاه NowPayment ",  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]:[])],
-	    ($botState['zarinpal'] == "on"?[['text' => "💳 درگاه زرین پال ",  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]]:[]),
-	    [['text' => $cancelText,  'callback_data' => "mainMenu"]]
-	    ]]);
+    $keyboard = array();
+    $temp = array();
+    if($botState['cartToCartState'] == "on"){
+	    $temp[] = ['text' => "💳 کارت به کارت ",  'callback_data' => "increaseWalletWithCartToCart" . $text];
+    }
+    if($botState['nowPaymentWallet'] == "on"){
+	    $temp[] = ['text' => "💳 درگاه NowPayment ",  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id];
+    }
+    if(count($temp) == 2){
+        array_push($keyboard, $temp);
+        $temp = array();
+    }
+    if($botState['zarinpal'] == "on"){
+	    $temp[] = ['text' => "💳 درگاه زرین پال ",  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id];
+    }
+    if(count($temp) > 0){
+        array_push($keyboard, $temp);
+        $temp = array();
+    }
+    $keyboard[] = [['text'=>$cancelText, 'callback_data'=> "mainMenu"]];
+
+    
+	$keys = json_encode(['inline_keyboard'=>$keyboard]);
     sendMessage("اطلاعات شارژ:\nمبلغ ". number_format($text) . " تومان\n\nلطفا روش پرداخت را انتخاب کنید\n\n ❗️نکته مهم: برای درگاه NowPayment مبلغ شارژ باید بالای 3.5 دلار باشد",$keys);
     setUser();
 }
@@ -1065,7 +1082,7 @@ if(preg_match('/selectPlan(\d+)_(\d+)/',$data, $match) && ($botState['sellState'
 	$sid = $respd['server_id'];
 	$keyboard = array();
     if($price == 0 or ($from_id == $admin)){
-        $keyboard = [['text' => '📥 دریافت رایگان', 'callback_data' => "freeTrial$id"]];
+        $keyboard[] = [['text' => '📥 دریافت رایگان', 'callback_data' => "freeTrial$id"]];
     }else{
         $token = base64_encode("{$from_id}.{$id}");
         $temp = array();
@@ -1148,7 +1165,7 @@ if(preg_match('/payWithWallet(\d+)/',$data, $match)){
     $protocol = $file_detail['protocol'];
     $price = $file_detail['price'];
     
-    if($userinfo < $price){
+    if($userinfo['wallet'] < $price){
         alert("موجودی حساب شما کم است");
         exit();
     }
@@ -1258,14 +1275,12 @@ $acc_text = "
 
 😍 سفارش جدید شما
 📡 پروتکل: $protocol
-🎴 پورت: $port
 💰 قیمت: $price تومان
 🔮 نام سرویس: $remark
 
-🔗 <code> $vray_link </code> 
-
-\n
-";
+🔮 $remark \n <code>$vray_link</code>
+    
+    ";
     
         $file = RandomString() .".png";
         $ecc = 'L';
@@ -1471,7 +1486,7 @@ if(preg_match('/accept(\d+)_(\d+)/',$data, $match) and $text != $cancelText){
 
     // $remark = "{$srv_remark}-{$last_num}";
     $rnd = RandomString(4);
-    $remark = "{$srv_remark}-{$from_id}-{$rnd}";
+    $remark = "{$srv_remark}-{$uid}-{$rnd}";
     if($portType == "auto"){
         file_put_contents('temp.txt',$port.'-'.$last_num);
     }else{
@@ -1511,14 +1526,12 @@ $acc_text = "
 
 😍 سفارش جدید شما
 📡 پروتکل: $protocol
-🎴 پورت: $port
 💰 قیمت: $price تومان
 🔮 نام سرویس: $remark
 
-🔗 <code> $vray_link </code> 
-
-\n
-";
+🔮 $remark \n <code>$vray_link</code>
+    
+    ";
     
         $file = RandomString() .".png";
         $ecc = 'L';
@@ -2327,14 +2340,12 @@ $acc_text = "
 
 😍 سفارش جدید شما
 📡 پروتکل: $protocol
-🎴 پورت: $port
 💰 قیمت: $price تومان
 🔮 نام سرویس: $remark
 
-🔗 <code> $vray_link </code> 
-
-\n
-";
+🔮 $remark \n <code>$vray_link</code>
+    
+    ";
     
         $file = RandomString().".png";
         $ecc = 'L';
@@ -3432,7 +3443,8 @@ if(preg_match('/orderDetails(\d+)/', $data, $match) && ($botState['sellState']==
         $server_id = $order['server_id'];
         $inbound_id = $order['inbound_id'];
         $link_status = $order['expire_date'] > time()  ? 'فعال' : 'غیرفعال';
-
+        $price = $order['amount'];
+        
         $response = getJson($server_id)->obj;
         if($inbound_id == 0) {
             foreach($response as $row){
@@ -3476,83 +3488,83 @@ if($inbound_id == 0){
         if($security == "xtls"){
             $keyboard = [
                 [
-    			    ['text' => "$name", 'callback_data' => "wizwiz"],
-                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwiz"],
+    			    ['text' => "$name", 'callback_data' => "wizwizch"],
+                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$remark", 'callback_data' => "wizwiz"],
-                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwiz"],
+    			    ['text' => "$remark", 'callback_data' => "wizwizch"],
+                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$expire_date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => " $leftgb", 'callback_data' => "wizwiz"],
-                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwiz"],
+    			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
+                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwizch"],
     			],
     			[
-                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwiz"],
+                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwizch"],
     			],
     			[
                     ['text' => $netType , 'callback_data' => "cantEditTrojan"],
-                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwiz"],
+                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwizch"],
             ],
                 [
-                    ['text' => "پروتکل فعال", 'callback_data' => "wizwiz"],
+                    ['text' => "پروتکل فعال", 'callback_data' => "wizwizch"],
                 ],
                 [
                     ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "changeAccProtocol{$fid}_{$id}_trojan"],
                     ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "changeAccProtocol{$fid}_{$id}_vless"],
                 ],
-                [
+                ($price != 0?[
                     ['text' => '♻ تمدید سرویس', 'callback_data' => "renewAccount$id" ],
-                ]
+                ]:[])
             ];
         }else{
             $keyboard = [
-                [
-    			    ['text' => "$name", 'callback_data' => "wizwiz"],
-                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwiz"],
-                ],
-                [
-    			    ['text' => "$remark", 'callback_data' => "wizwiz"],
-                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwiz"],
-                ],
             [
-			    ['text' => "$date ", 'callback_data' => "wizwiz"],
-                ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwiz"],
+			    ['text' => "$name", 'callback_data' => "wizwizch"],
+                ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwizch"],
             ],
             [
-			    ['text' => "$expire_date ", 'callback_data' => "wizwiz"],
-                ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwiz"],
+			    ['text' => "$remark", 'callback_data' => "wizwizch"],
+                ['text' => "🔮 نام سرویس", 'callback_data' => "wizwizch"],
             ],
             [
-			    ['text' => " $leftgb", 'callback_data' => "wizwiz"],
-                ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwiz"],
+			    ['text' => "$date ", 'callback_data' => "wizwizch"],
+                ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwizch"],
+            ],
+            [
+			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
+                ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwizch"],
+            ],
+            [
+			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
+                ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwizch"],
     			],
-    			[
-                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwiz"],
-    			],
-    			[
+			[
+                ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwizch"],
+			],
+			[
                 ['text' => $netType , 'callback_data' => "cantEditTrojan"],
-                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwiz"],
+                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwizch"],
             ],
             [
-                ['text' => "پروتکل فعال", 'callback_data' => "wizwiz"],
+                ['text' => "پروتکل فعال", 'callback_data' => "wizwizch"],
             ],
             [
                 ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "changeAccProtocol{$fid}_{$id}_trojan"],
                 ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => "changeAccProtocol{$fid}_{$id}_vmess"],
                 ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "changeAccProtocol{$fid}_{$id}_vless"],
             ],
-            [
+            ($price!=0?[
                 ['text' => '♻ تمدید سرویس', 'callback_data' => "renewAccount$id" ],
-            ]
+            ]:[])
 
         ];
         }
@@ -3560,84 +3572,84 @@ if($inbound_id == 0){
         if($netType == "grpc"){
             $keyboard = [
                 [
-    			    ['text' => "$name", 'callback_data' => "wizwiz"],
-                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwiz"],
+    			    ['text' => "$name", 'callback_data' => "wizwizch"],
+                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$remark", 'callback_data' => "wizwiz"],
-                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwiz"],
+    			    ['text' => "$remark", 'callback_data' => "wizwizch"],
+                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$expire_date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => " $leftgb", 'callback_data' => "wizwiz"],
-                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwiz"],
+    			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
+                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwizch"],
     			],
     			[
-                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwiz"],
+                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwizch"],
     			],
     			[
                     ['text' => $netType , 'callback_data' => "cantEditGrpc"],
-                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwiz"],
+                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwizch"],
             ],
                 [
-                    ['text' => "پروتکل فعال", 'callback_data' => "wizwiz"],
+                    ['text' => "پروتکل فعال", 'callback_data' => "wizwizch"],
                 ],
                 [
                     ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => "changeAccProtocol{$fid}_{$id}_vmess"],
                     ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "changeAccProtocol{$fid}_{$id}_vless"],
                 ],
-                [
+                ($price != 0?[
                     ['text' => '♻ تمدید سرویس', 'callback_data' => "renewAccount$id" ],
-                ]
+                ]:[])
     
             ];
         }
         elseif($netType == "tcp" && $security == "xtls"){
             $keyboard = [
                 [
-    			    ['text' => "$name", 'callback_data' => "wizwiz"],
-                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwiz"],
+    			    ['text' => "$name", 'callback_data' => "wizwizch"],
+                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$remark", 'callback_data' => "wizwiz"],
-                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwiz"],
+    			    ['text' => "$remark", 'callback_data' => "wizwizch"],
+                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$expire_date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => " $leftgb", 'callback_data' => "wizwiz"],
-                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwiz"],
+    			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
+                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwizch"],
     			],
     			[
-                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwiz"],
+                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwizch"],
     			],
     			[
                     ['text' => $netType , 'callback_data' => ($security=="xtls"?"cantEditGrpc":"changeNetworkType{$fid}_{$id}")],
-                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwiz"],
+                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwizch"],
             ],
                 [
-                    ['text' => "پروتکل فعال", 'callback_data' => "wizwiz"],
+                    ['text' => "پروتکل فعال", 'callback_data' => "wizwizch"],
                 ],
                 [
                     ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "changeAccProtocol{$fid}_{$id}_trojan"],
                     ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "changeAccProtocol{$fid}_{$id}_vless"],
                 ],
-                [
+                ($price != 0?[
                     ['text' => '♻ تمدید سرویس', 'callback_data' => "renewAccount$id" ],
-                ]
+                ]:[])
     
             ];
         }
@@ -3645,43 +3657,43 @@ if($inbound_id == 0){
 
             $keyboard = [
                 [
-    			    ['text' => "$name", 'callback_data' => "wizwiz"],
-                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwiz"],
+    			    ['text' => "$name", 'callback_data' => "wizwizch"],
+                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$remark", 'callback_data' => "wizwiz"],
-                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwiz"],
+    			    ['text' => "$remark", 'callback_data' => "wizwizch"],
+                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$expire_date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => " $leftgb", 'callback_data' => "wizwiz"],
-                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwiz"],
+    			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
+                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwizch"],
     			],
     			[
-                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwiz"],
+                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwizch"],
     			],
     			[
                     ['text' => $netType , 'callback_data' => ($security=="xtls"?"cantEditGrpc":"changeNetworkType{$fid}_{$id}")],
-                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwiz"],
+                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwizch"],
             ],
                 [
-                    ['text' => "پروتکل فعال", 'callback_data' => "wizwiz"],
+                    ['text' => "پروتکل فعال", 'callback_data' => "wizwizch"],
                 ],
                 [
                     ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "changeAccProtocol{$fid}_{$id}_trojan"],
                     ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => "changeAccProtocol{$fid}_{$id}_vmess"],
                     ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "changeAccProtocol{$fid}_{$id}_vless"],
                 ],
-                [
+                ($price != 0?[
                     ['text' => '♻ تمدید سرویس', 'callback_data' => "renewAccount$id" ],
-                ]
+                ]:[])
     
             ];
         }
@@ -3689,37 +3701,37 @@ if($inbound_id == 0){
 }else{
             $keyboard = [
                 [
-    			    ['text' => "$name", 'callback_data' => "wizwiz"],
-                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwiz"],
+    			    ['text' => "$name", 'callback_data' => "wizwizch"],
+                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$remark", 'callback_data' => "wizwiz"],
-                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwiz"],
+    			    ['text' => "$remark", 'callback_data' => "wizwizch"],
+                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwizch"],
                 ],
             [
-			    ['text' => "$date ", 'callback_data' => "wizwiz"],
-                ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwiz"],
+			    ['text' => "$date ", 'callback_data' => "wizwizch"],
+                ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwizch"],
             ],
             [
-			    ['text' => "$expire_date ", 'callback_data' => "wizwiz"],
-                ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwiz"],
+			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
+                ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwizch"],
             ],
             [
-			    ['text' => " $leftgb", 'callback_data' => "wizwiz"],
-                ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwiz"],
+			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
+                ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwizch"],
     			],
     			[
-                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwiz"],
+                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwizch"],
     			],
     			[
-                ['text' => "پروتکل فعال", 'callback_data' => "wizwiz"],
+                ['text' => "پروتکل فعال", 'callback_data' => "wizwizch"],
             ],
             [
-            ['text' => " $protocol ☑️", 'callback_data' => "wizwiz"],
+            ['text' => " $protocol ☑️", 'callback_data' => "wizwizch"],
             ],
-            [
+            ($price != 0?[
                 ['text' => '♻ تمدید سرویس', 'callback_data' => "renewAccount$id" ],
-            ]
+            ]:[])
     ];
 }
         $stmt= $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
@@ -3780,7 +3792,8 @@ if(preg_match('/changeNetworkType(\d+)_(\d+)/', $data, $match)){
     $acc_link = json_decode($order['link'],true);
     $protocol = $order['protocol'];
     $server_id = $order['server_id'];
-
+    $price = $order['amount'];
+    
     $response = getJson($server_id)->obj;
     foreach($response as $row){
         if($row->remark == $remark) {
@@ -3808,43 +3821,43 @@ $msg .= "\n";
 
             $keyboard = [
                 [
-    			    ['text' => "$name", 'callback_data' => "wizwiz"],
-                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwiz"],
+    			    ['text' => "$name", 'callback_data' => "wizwizch"],
+                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$remark", 'callback_data' => "wizwiz"],
-                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwiz"],
+    			    ['text' => "$remark", 'callback_data' => "wizwizch"],
+                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwizch"],
                 ],
             [
-			    ['text' => "$date ", 'callback_data' => "wizwiz"],
-                ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwiz"],
+			    ['text' => "$date ", 'callback_data' => "wizwizch"],
+                ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwizch"],
             ],
             [
-			    ['text' => "$expire_date ", 'callback_data' => "wizwiz"],
-                ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwiz"],
+			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
+                ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwizch"],
             ],
             [
-			    ['text' => " $leftgb", 'callback_data' => "wizwiz"],
-                ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwiz"],
+			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
+                ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwizch"],
     			],
     			[
-                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwiz"],
+                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwizch"],
     			],
     			[
                 ['text' => $netType , 'callback_data' => ($security=="xtls"?"cantEditGrpc":"changeNetworkType{$fid}_{$id}")],
-                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwiz"],
+                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwizch"],
             ],
             [
-                ['text' => "پروتکل فعال", 'callback_data' => "wizwiz"],
+                ['text' => "پروتکل فعال", 'callback_data' => "wizwizch"],
             ],
             [
             ['text' => $protocol == 'trojan' ? '  ☑️ trojan' : 'trojan', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_trojan"],
             ['text' => $protocol == 'vmess' ? '  ☑️ vmess' : 'vmess', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_vmess"],
             ['text' => $protocol == 'vless' ? '  ☑️ vless' : 'vless', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_vless"],
             ],
-            [
+            ($price != 0?[
                 ['text' => '♻ تمدید سرویس', 'callback_data' => "renewAccount$id" ],
-            ]
+            ]:[])
 
     ];
     
@@ -3917,7 +3930,8 @@ if(preg_match('/changeAccProtocol(\d+)_(\d+)_(.*)/', $data,$match)){
     $remark = $order['remark'];
     $acc_link = $order['link'];
     $server_id = $order['server_id'];
-
+    $price = $order['amount'];
+    
     $response = getJson($server_id)->obj;
     foreach($response as $row){
         if($row->remark == $remark) {
@@ -3947,84 +3961,84 @@ if(preg_match('/changeAccProtocol(\d+)_(\d+)_(.*)/', $data,$match)){
         if($security == "xtls"){
             $keyboard = [
                 [
-    			    ['text' => "$name", 'callback_data' => "wizwiz"],
-                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwiz"],
+    			    ['text' => "$name", 'callback_data' => "wizwizch"],
+                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$remark", 'callback_data' => "wizwiz"],
-                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwiz"],
+    			    ['text' => "$remark", 'callback_data' => "wizwizch"],
+                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$expire_date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => " $leftgb", 'callback_data' => "wizwiz"],
-                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwiz"],
+    			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
+                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwizch"],
     			],
     			[
-                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwiz"],
+                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwizch"],
     			],
     			[
                     ['text' => $netType , 'callback_data' => "cantEditTrojan"],
-                   ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwiz"],
+                   ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-                    ['text' => "پروتکل فعال", 'callback_data' => "wizwiz"],
+                    ['text' => "پروتکل فعال", 'callback_data' => "wizwizch"],
                 ],
                 [
                     ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_trojan"],
                     ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_vless"],
                 ],
-                [
+                ($price != 0?[
                     ['text' => '♻ تمدید سرویس', 'callback_data' => "renewAccount$oid" ],
-                ]
+                ]:[])
     
             ];
         }else{
             $keyboard = [
                 [
-    			    ['text' => "$name", 'callback_data' => "wizwiz"],
-                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwiz"],
+    			    ['text' => "$name", 'callback_data' => "wizwizch"],
+                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$remark", 'callback_data' => "wizwiz"],
-                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwiz"],
+    			    ['text' => "$remark", 'callback_data' => "wizwizch"],
+                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwizch"],
                 ],
             [
-			    ['text' => "$date ", 'callback_data' => "wizwiz"],
-                ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwiz"],
+			    ['text' => "$date ", 'callback_data' => "wizwizch"],
+                ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwizch"],
             ],
             [
-			    ['text' => "$expire_date ", 'callback_data' => "wizwiz"],
-                ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwiz"],
+			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
+                ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwizch"],
             ],
             [
-			    ['text' => " $leftgb", 'callback_data' => "wizwiz"],
-                ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwiz"],
+			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
+                ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwizch"],
     			],
     			[
-                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwiz"],
+                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwizch"],
     			],
     			[
                 ['text' => $netType , 'callback_data' => "cantEditTrojan"],
-                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwiz"],
+                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwizch"],
             ],
             [
-                ['text' => "پروتکل فعال", 'callback_data' => "wizwiz"],
+                ['text' => "پروتکل فعال", 'callback_data' => "wizwizch"],
             ],
             [
                 ['text' => $protocol == 'trojan' ? '  ☑️ trojan' : 'trojan', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_trojan"],
                 ['text' => $protocol == 'vmess' ? '  ☑️ vmess' : 'vmess', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_vmess"],
                 ['text' => $protocol == 'vless' ? '  ☑️ vless' : 'vless', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_vless"],
             ],
-            [
+            ($price != 0?[
                 ['text' => '♻ تمدید سرویس', 'callback_data' => "renewAccount$oid" ],
-            ]
+            ]:[])
         
         ];
         }
@@ -4032,127 +4046,127 @@ if(preg_match('/changeAccProtocol(\d+)_(\d+)_(.*)/', $data,$match)){
         if($netType == "grpc"){
             $keyboard = [
                 [
-    			    ['text' => "$name", 'callback_data' => "wizwiz"],
-                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwiz"],
+    			    ['text' => "$name", 'callback_data' => "wizwizch"],
+                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$remark", 'callback_data' => "wizwiz"],
-                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwiz"],
+    			    ['text' => "$remark", 'callback_data' => "wizwizch"],
+                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$expire_date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => " $leftgb", 'callback_data' => "wizwiz"],
-                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwiz"],
+    			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
+                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwizch"],
     			],
     			[
-                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwiz"],
+                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwizch"],
     			],
     			[
                     ['text' => $netType , 'callback_data' => "cantEditGrpc"],
-                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwiz"],
+                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwizch"],
             ],
                 [
-                    ['text' => "پروتکل فعال", 'callback_data' => "wizwiz"],
+                    ['text' => "پروتکل فعال", 'callback_data' => "wizwizch"],
                 ],
                 [
                     ['text' => $protocol == 'vmess' ? '  ☑️ vmess' : 'vmess', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_vmess"],
                     ['text' => $protocol == 'vless' ? '  ☑️ vless' : 'vless', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_vless"],
                 ],
-                [
+                ($price != 0?[
                     ['text' => '♻ تمدید سرویس', 'callback_data' => "renewAccount$oid" ],
-                ]
+                ]:[])
     
     
             ];
         }elseif($netType == "tcp" && $security == "xtls"){
             $keyboard = [
                 [
-    			    ['text' => "$name", 'callback_data' => "wizwiz"],
-                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwiz"],
+    			    ['text' => "$name", 'callback_data' => "wizwizch"],
+                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$remark", 'callback_data' => "wizwiz"],
-                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwiz"],
+    			    ['text' => "$remark", 'callback_data' => "wizwizch"],
+                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$expire_date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => " $leftgb", 'callback_data' => "wizwiz"],
-                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwiz"],
+    			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
+                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwizch"],
     			],
     			[
-                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwiz"],
+                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwizch"],
     			],
     			[
                     ['text' => $netType , 'callback_data' => ($security=="xtls"?"cantEditGrpc":"changeNetworkType{$fid}_{$id}")],
-                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwiz"],
+                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwizch"],
             ],
                 [
-                    ['text' => "پروتکل فعال", 'callback_data' => "wizwiz"],
+                    ['text' => "پروتکل فعال", 'callback_data' => "wizwizch"],
                 ],
                 [
                     ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_trojan"],
                     ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_vless"],
                 ],
-                [
+                ($price != 0?[
                     ['text' => '♻ تمدید سرویس', 'callback_data' => "renewAccount$oid" ],
-                ]
+                ]:[])
     
             ];
         }
         else{
             $keyboard = [
                 [
-    			    ['text' => "$name", 'callback_data' => "wizwiz"],
-                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwiz"],
+    			    ['text' => "$name", 'callback_data' => "wizwizch"],
+                    ['text' => " 🚀 نام پلن:", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$remark", 'callback_data' => "wizwiz"],
-                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwiz"],
+    			    ['text' => "$remark", 'callback_data' => "wizwizch"],
+                    ['text' => "🔮 نام سرویس", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ خرید: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => "$expire_date ", 'callback_data' => "wizwiz"],
-                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwiz"],
+    			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
+                    ['text' => "⏰  تاریخ انقضاء: ", 'callback_data' => "wizwizch"],
                 ],
                 [
-    			    ['text' => " $leftgb", 'callback_data' => "wizwiz"],
-                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwiz"],
+    			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
+                    ['text' => "⏳ حجم باقیمانده:", 'callback_data' => "wizwizch"],
     			],
     			[
-                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwiz"],
+                    ['text' => "➖ میتونید نوع شبکه و پروتکل را تغییر بدید  ➖", 'callback_data' => "wizwizch"],
     			],
     			[
                     ['text' => $netType , 'callback_data' => ($security=="xtls"?"cantEditGrpc":"changeNetworkType{$fid}_{$order['id']}")],
-                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwiz"],
+                ['text' => "📡 نوع شبکه: ", 'callback_data' => "wizwizch"],
             ],
                 [
-                    ['text' => "پروتکل فعال", 'callback_data' => "wizwiz"],
+                    ['text' => "پروتکل فعال", 'callback_data' => "wizwizch"],
                 ],
                 [
                     ['text' => $protocol == 'trojan' ? '  ☑️ trojan' : 'trojan', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_trojan"],
                     ['text' => $protocol == 'vmess' ? '  ☑️ vmess' : 'vmess', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_vmess"],
                     ['text' => $protocol == 'vless' ? '  ☑️ vless' : 'vless', 'callback_data' => "changeAccProtocol{$fid}_{$oid}_vless"],
                 ],
-                [
+                ($price != 0?[
                     ['text' => '♻ تمدید سرویس', 'callback_data' => "renewAccount$oid" ],
-                ]
+                ]:[])
     
             ];
         }
