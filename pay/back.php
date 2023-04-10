@@ -308,18 +308,17 @@ function doAction($payRowId, $gateType){
         foreach($vraylink as $vray_link){
 $acc_text = "
 
+
 😍 سفارش جدید شما
 📡 پروتکل: $protocol
-🎴 پورت: $port
 💰 قیمت: $amount تومان
 🔮 نام سرویس: $remark
 
-🔗 <code> $vray_link </code> 
-
-\n
-";
+🔮 $remark \n <code>$vray_link</code>
+    
+    ";
         
-            $file = RandomString() .".png";
+            $file = RandomString().".png";
             $ecc = 'L';
             $pixel_Size = 10;
             $frame_Size = 10;
