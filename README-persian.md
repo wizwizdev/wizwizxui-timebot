@@ -155,7 +155,7 @@ https://yourdomain.com/wizwizxui-timebot-main/install/install.php
 
 
 ````
-/usr/bin/php -q /home/wizwizro/public_html/messagewizwiz.php >/dev/null 2>&1
+/usr/bin/php -q /home/wizwizro/public_html/wizwizxui-timebot-main/messagewizwiz.php >/dev/null 2>&1
 ````
 
 
@@ -209,13 +209,39 @@ https://yourdomain.com/wizwizxui-timebot-main/install/install.php
 - ربات نمی تواند فایل createDB.php را پیدا کند از بودن آن داخل پروژه مطمئن باشید سپس نصب کنید 
 
 
-
+### خطای: 500 بعد از نصب ربات
 
 <br>
+    <a align="center">
+        <img src="https://user-images.githubusercontent.com/27927279/230745829-73c323f7-46ff-4680-8f86-25ab1f026734.PNG" />
+    </a>     
+<br>
+
+
+##### داخل هاست cpanel روی گزینه Select PHPVersion کلیک کنید و در بخش extension گزینه های زیر را فعال کنید:
+- pdo_mysql
+- mysqlnd 
+- nd_mysqli 
+##### گزینه های زیر را غیر فعال کنید:
+- mysqli
+- nd_pdo_mysql 
+
+##### گزینه زیر اگر به رنگ آبی بود لطفا فعال کنید:
+
+<br>
+    <a align="center">
+        <img src="https://user-images.githubusercontent.com/27927279/230842783-16f6d1a5-e726-4533-a57b-98cb04fa8dfc.PNG" />
+    </a>     
+<br>
+
+
+
+
+
 
 ## نکات مهم
 
-
+- بعد از نصب لطفا اسم فایل install.php را تغییر دهید تا کسی به ادرس نصب شما دسترسی نداشته باشد
 - برای قفل اجباری کانال حتما ربات را مدیر کانال کنید و تمام دسترسی ها را فعال کنید
 - قبل از نصب حتما ورژن php روی 7.4 باشد برای تنظیم داخل هاست cpanel روی گزینه PHP Selector کلیک کنید و دامنه مربوط به ربات را تنظیم کنید  
 - داخل هاست cpanel روی گزینه Select PHPVersion کلیک کنید و در بخش extension حتما Soap را فعال کنید  
