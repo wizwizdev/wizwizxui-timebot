@@ -300,9 +300,6 @@ function doAction($payRowId, $gateType){
         }
         showForm('پرداخت شما با موفقیت انجام شد 🚀 | 😍 در حال ارسال کانفیگ به تلگرام شما ...',$payDescription, true);
         
-        $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` - ? WHERE `userid` = ?");
-        $stmt->bind_param("ii", $amount, $user_id);
-        $stmt->execute();
         include '../phpqrcode/qrlib.php';
         $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id);
         foreach($vraylink as $vray_link){
@@ -317,7 +314,7 @@ $acc_text = "
 🔮 $remark \n <code>$vray_link</code>
     
     ";
-        
+            
             $file = RandomString().".png";
             $ecc = 'L';
             $pixel_Size = 10;
