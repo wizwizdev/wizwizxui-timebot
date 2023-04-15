@@ -241,12 +241,13 @@ function doAction($payRowId, $gateType){
         if($portType == "auto"){
             $port++;
         }else{
-            $port = rand(1111,65000);
+            $port = rand(12222,65000);
         }
 
-        // $remark = "{$srv_remark}-{$last_num}";
-        $rnd = RandomString(4);
-        $remark = "{$srv_remark}-{$user_id}-{$rnd}";
+        //$remark = "{$srv_remark}-{$last_num}";
+        //$rnd = RandomString(2);
+        $randadad = rand(1000,99000);
+        $remark = "{$srv_remark}-{$randadad}";
 
         file_put_contents('../temp.txt',$port.'-'.$last_num);
         
