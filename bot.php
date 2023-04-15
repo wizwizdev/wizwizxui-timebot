@@ -865,13 +865,14 @@ if(preg_match('/createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &&
         if($portType == "auto"){
             $port++;
         }else{
-            $port = rand(1111,65000);
+            $port = rand(12222,65000);
         }
         $last_num++;
     
         //$remark = "{$srv_remark}-{$last_num}";
-        $rnd = RandomString(4);
-        $remark = "{$srv_remark}-{$from_id}-{$rnd}";
+        //$rnd = RandomString(2);
+        $randadad = rand(1000,99000);
+        $remark = "{$srv_remark}-{$randadad}";
         if($inbound_id == 0){    
             $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType); 
         }else {
@@ -1229,13 +1230,15 @@ if(preg_match('/payWithWallet(\d+)/',$data, $match)){
     $srv_remark = $stmt->get_result()->fetch_assoc()['remark'];
     $stmt->close();
 
-    //$remark = "{$srv_remark}-{$last_num}";
-    $rnd = RandomString(4);
-    $remark = "{$srv_remark}-{$from_id}-{$rnd}";
+        //$remark = "{$srv_remark}-{$last_num}";
+        //$rnd = RandomString(2);
+        $randadad = rand(1000,99000);
+        $remark = "{$srv_remark}-{$randadad}";
+        
     if($portType == "auto"){
         file_put_contents('temp.txt',$port.'-'.$last_num);
     }else{
-        $port = rand(1111,65000);
+        $port = rand(12222,65000);
     }
     
     if($inbound_id == 0){    
@@ -1484,13 +1487,15 @@ if(preg_match('/accept(\d+)_(\d+)/',$data, $match) and $text != $cancelText){
     $portType = $stmt->get_result()->fetch_assoc()['port_type'];
     $stmt->close();
 
-    // $remark = "{$srv_remark}-{$last_num}";
-    $rnd = RandomString(4);
-    $remark = "{$srv_remark}-{$uid}-{$rnd}";
+        //$remark = "{$srv_remark}-{$last_num}";
+        //$rnd = RandomString(2);
+        $randadad = rand(1000,99000);
+        $remark = "{$srv_remark}-{$randadad}";
+        
     if($portType == "auto"){
         file_put_contents('temp.txt',$port.'-'.$last_num);
     }else{
-        $port = rand(1111,65000);
+        $port = rand(12222,65000);
     }
     
     if($inbound_id == 0){    
@@ -2300,14 +2305,15 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
     $stmt->close();
     
     
- // $remark = "{$srv_remark}-{$last_num}";
-    $rnd = RandomString(4);
-    $remark = "{$srv_remark}-{$from_id}-{$rnd}";
+        //$remark = "{$srv_remark}-{$last_num}";
+        //$rnd = RandomString(2);
+        $randadad = rand(1000,99000);
+        $remark = "{$srv_remark}-{$randadad}";
     
     if($portType == "auto"){
         file_put_contents('temp.txt',$port.'-'.$last_num);
     }else{
-        $port = rand(1111,65000);
+        $port = rand(12222,65000);
     }
     if($inbound_id == 0){    
         $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType); 
