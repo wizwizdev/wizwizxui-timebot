@@ -470,9 +470,13 @@ function editInboundTraffic($server_id, $remark, $volume, $days){
         $expire_microdate = ($now_microdate > $expiryTime) ? $now_microdate + $extend_date : $expiryTime + $extend_date;
     }
 
-    if($volume != 0) $total = $total + floor($volume * 1073741824);
+    if($volume != 0){
+        $leftGB = $total;// - $up - $down;
+        $extend_volume = floor($volume * 1073741824);
+        $total = ($leftGB > 0) ? $leftGB + $extend_volume : $extend_volume;
+    }
 
-    $dataArr = array('up' => 0,'down' => 0,'total' => is_null($total) ? $row->total : $total,'remark' => $row->remark,'enable' => 'true',
+    $dataArr = array('up' => $up,'down' => $down,'total' => is_null($total) ? $row->total : $total,'remark' => $row->remark,'enable' => 'true',
         'expiryTime' => is_null($expire_microdate) ? $row->expiryTime : $expire_microdate, 'listen' => '','port' => $row->port,'protocol' => $row->protocol,'settings' => $row->settings,
         'streamSettings' => $row->streamSettings, 'sniffing' => $row->sniffing);
     $serverName = $server_info['username'];
@@ -575,10 +579,12 @@ function editClientTraffic($server_id, $inbound_id, $remark, $volume, $days){
         }
     }
     if($volume != 0){
-        $client_total = $settings['clients'][$client_key]['totalGB'] - $up - $down;
+        /*if($serverType == "sanaei") $res = resetClientTraffic($server_id, $remark, $inbound_id);
+        else $res = resetClientTraffic($server_id, $remark);*/
+        $client_total = $settings['clients'][$client_key]['totalGB'];
+        //else $client_total = $settings['clients'][$client_key]['totalGB'] - $up - $down;
         $extend_volume = floor($volume * 1073741824);
         $volume = ($client_total > 0) ? $client_total + $extend_volume : $extend_volume;
-        resetClientTraffic($server_id, $remark);
         $settings['clients'][$client_key]['totalGB'] = $volume;
     }
 
@@ -786,7 +792,7 @@ function deleteInbound($server_id, $remark, $delete = 0){
     return $oldData;
 
 }
-function resetClientTraffic($server_id, $remark){
+function resetClientTraffic($server_id, $remark, $inboundId = null){
     global $connection;
     $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
     $stmt->bind_param("i", $server_id);
@@ -828,8 +834,10 @@ function resetClientTraffic($server_id, $remark){
     // unlink("tempCookie.txt");
 
     $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
+    if($inboundId == null) $url = "$panel_url/xui/inbound/resetClientTraffic/$remark";
+    else $url = "$panel_url/xui/inbound/$inboundId/resetClientTraffic/$remark";
     curl_setopt_array($curl, array(
-        CURLOPT_URL => "$panel_url/xui/inbound/resetClientTraffic/$remark",
+        CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
         CURLOPT_ENCODING => '',
         CURLOPT_MAXREDIRS => 10,
@@ -1119,6 +1127,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                         $alpn = $tlsSetting->certificates->alpn;
                     } 
                     $serviceName = json_decode($row->streamSettings)->grpcSettings->serviceName;
+                    $grpcSecurity = json_decode($row->streamSettings)->security;
                 }
                 if($tlsStatus == 'tls'){
                     $serverName = $tlsSetting->serverName;
@@ -1155,6 +1164,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                         $alpn = $tlsSetting->alpn;
                     }
                     $serviceName = json_decode($row->streamSettings)->grpcSettings->serviceName;
+                    $grpcSecurity = json_decode($row->streamSettings)->security;
                 }elseif($netType == 'kcp'){
                     $kcpSettings = json_decode($row->streamSettings)->kcpSettings;
                     $kcpType = $kcpSettings->header->type;
@@ -1229,7 +1239,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                 if($netType == 'grpc'){
                     if(!is_null($alpn) and json_encode($alpn) != '[]' and $alpn != '') $vmessArr['alpn'] = $alpn;
                     if(strlen($serviceName) > 1) $vmessArr['path'] = $serviceName;
-    				$vmessArr['type'] = 'gun';
+    				$vmessArr['type'] = $grpcSecurity;
                     $vmessArr['scy'] = 'auto';
                 }
                 if($netType == 'kcp'){
@@ -1284,7 +1294,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                 if($netType == 'grpc'){
                     if(!is_null($alpn) and json_encode($alpn) != '[]' and $alpn != '') $vmessArr['alpn'] = $alpn;
                     if(strlen($serviceName) > 1) $vmessArr['path'] = $serviceName;
-                    $vmessArr['type'] = 'gun';
+                    $vmessArr['type'] = $grpcSecurity;
                     $vmessArr['scy'] = 'auto';
                 }
                 if($netType == 'kcp'){
@@ -1377,7 +1387,7 @@ function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', 
           "clients": [
             {
               "id": "'.$uniqid.'",
-              "alterId": 0
+    		  "flow": "xtls-rprx-direct"
             }
           ],
           "decryption": "none",
@@ -1461,7 +1471,7 @@ function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', 
               "clients": [
                 {
                   "id": "'.$uniqid.'",
-                  "alterId": 0
+        		  "flow": "xtls-rprx-direct"
                 }
               ],
               "decryption": "none",
