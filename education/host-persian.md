@@ -1,47 +1,8 @@
-<p align="center">
-  <a href="https://github.com/gozargah/marzban" target="_blank" rel="noopener noreferrer">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/27927279/227711552-d2bc1089-5666-477b-9be7-d7e50a5286dc.png">
-      <img width="200" height="200" src="https://user-images.githubusercontent.com/27927279/227711552-d2bc1089-5666-477b-9be7-d7e50a5286dc.png">
-    </picture>
-  </a>
-</p>
 
-<h1 align="center"/>WizWiz</h1>
-
-<p align="center">
-     فروش آسان با <a href="https://github.com/wizwizdev/wizwizxui-timebot">ویزویز</a> ، با چند کلیک به راحتی نصب کنید
-</p>
-<br/>
-<p align="center">
-    <a>
-        <img src="https://img.shields.io/github/v/release/wizwizdev/wizwizxui-timebot.svg" />
-    </a>
-    <a>
-        <img src="https://visitor-badge.glitch.me/badge?page_id=wizwizdev.wizwizdev" />
-    </a>
-    <a href="#">
-        <img src="https://img.shields.io/github/license/wizwizdev/wizwizxui-timebot?style=flat-square" />
-    </a>
-    <a href="https://t.me/wizwizdev" target="_blank">
-        <img src="https://img.shields.io/badge/telegram-group-blue?style=flat-square&logo=telegram" />
-    </a>
-    <a href="https://t.me/wizwizch" target="_blank">
-        <img src="https://img.shields.io/badge/telegram-channel-blue?style=flat-square&logo=telegram" />
-    </a>
-</p>
+# نصب بر روی هاست سی پنل
 
 <br>
-    <a align="center">
-        <img src="https://user-images.githubusercontent.com/27927279/230026376-100851a4-07b4-4695-aac2-3734643dac3f.PNG" />
-    </a>     
-<br>
-  
-<br>
-    <a align="center">
-        <img src="https://user-images.githubusercontent.com/27927279/230034487-bb9abde0-95d5-4b76-b0cb-b4cfa8fde604.png" />
-    </a>     
-<br>
+
 
 
 
@@ -56,7 +17,7 @@
 - [نصب ( مرحله ششم ) ](#نصب-مرحله-ششم) 
 - [کرون جاب ( مرحله هفتم ) ](#کرون-جاب-مرحله-هفتم)
 - [فایل htaccess](#فایل-htaccess)
-- [خطاهای نصب](#خطاهای-نصب) 
+- [خطاهای نصب ربات](#خطاهای-نصب-ربات) 
 - [نکات مهم](#نکات-مهم)
 - [تنظیمات ربات](#تنظیمات-ربات)
 - [پورت اشتراکی](#پورت-اشتراکی)
@@ -155,7 +116,7 @@ https://yourdomain.com/wizwizxui-timebot-main/install/install.php
 
 
 ````
-/usr/bin/php -q /home/wizwizro/public_html/wizwizxui-timebot-main/messagewizwiz.php >/dev/null 2>&1
+/usr/bin/php -q /home/wizwizro/public_html/wizwizxui-timebot-main/settings/messagewizwiz.php >/dev/null 2>&1
 ````
 
 
@@ -184,7 +145,7 @@ https://yourdomain.com/wizwizxui-timebot-main/install/install.php
 
 
 
-## خطاهای نصب
+## خطاهای نصب ربات
 
 
 #### خطای: دیتابیس امکان برقراری اتصال به دیتابیس نیست 
@@ -506,6 +467,7 @@ bash <(curl -Ls https://raw.githubusercontent.com/vaxilu/x-ui/master/install.sh)
 - نمایش تعداد روزهای باقی مانده
 - نمایش تاریخ اتمام اشتراک
 
+<br>
 <br>
 
 

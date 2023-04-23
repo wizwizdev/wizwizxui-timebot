@@ -2,8 +2,8 @@
 include_once '../baseInfo.php';
 include_once '../config.php';
 
-if(file_exists("botState.json")){
-    $botState = json_decode(file_get_contents("botState.json"),true);
+if(file_exists("botstate.json")){
+    $botState = json_decode(file_get_contents("botstate.json"),true);
     $sellState=$botState['sellState']=="off"?"خاموش ❌":"روشن ✅";
     $searchState=$botState['searchState']=="off"?"خاموش ❌":"روشن ✅";
     $rewaredTime = ($botState['rewaredTime']??0);
@@ -19,7 +19,7 @@ if(file_exists("botState.json")){
             $totalRewards = number_format($stmt->get_result()->fetch_assoc()['total']) . " تومان";
             $stmt->close();
             $botState['lastRewardMessage']=time() + ($rewaredTime * 60 * 60);
-            file_put_contents("botState.json",json_encode($botState));
+            file_put_contents("botstate.json",json_encode($botState));
             $txt = "⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
 🔰درآمد من در $rewaredTime ساعت گذشته
 
