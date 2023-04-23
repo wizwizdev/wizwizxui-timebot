@@ -30,7 +30,7 @@
 
 ## Prerequisite 1
 
-- cpanel host or virtual server
+- cpanel host
 - Domain with ssl enabled
 
 <br>
