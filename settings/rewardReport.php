@@ -1,6 +1,6 @@
 <?php
-include_once 'baseInfo.php';
-include_once 'config.php';
+include_once '../baseInfo.php';
+include_once '../config.php';
 
 if(file_exists("botState.json")){
     $botState = json_decode(file_get_contents("botState.json"),true);

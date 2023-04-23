@@ -1,6 +1,6 @@
 <?php
-include_once 'baseInfo.php';
-include_once 'config.php';
+include_once '../baseInfo.php';
+include_once '../config.php';
 $time = time();
 
 $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `status`=1 AND `notif`=0");

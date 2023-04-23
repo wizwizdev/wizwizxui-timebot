@@ -1,7 +1,7 @@
 <?php
 include_once 'baseInfo.php';
 include_once 'config.php';
-include_once 'jdf.php';
+include_once 'settings/jdf.php';
 $robotState = $botState['botState']??"on";
 
 if($userInfo['step'] == "banned"){
@@ -208,11 +208,11 @@ if($userInfo['step'] == "addNewAdmin" && $from_id === $admin && $text != $cancel
     }
 }
 if(($data=="botSettings" or preg_match("/^changeBot(\w+)/",$data,$match)) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
-    $botState = json_decode(file_get_contents("botState.json"),true);
+    $botState = json_decode(file_get_contents("settings/botstate.json"),true);
     if($data!="botSettings"){
         $newValue = $botState[$match[1]]=="off"?"on":"off";
         $botState[$match[1]]= $newValue;
-        file_put_contents("botState.json",json_encode($botState));
+        file_put_contents("settings/botstate.json",json_encode($botState));
     }
     
     $cartToCartState=$botState['cartToCartState']=="off"?"خاموش ❌":"روشن ✅";
@@ -279,13 +279,13 @@ if($userInfo['step'] == "editRewardTime" && $from_id  == $admin && $text != $can
         sendMessage("مقدار وارد شده معتبر نیست");
         exit();
     }
-    $botState = json_decode(file_get_contents("botState.json"),true);
+    $botState = json_decode(file_get_contents("settings/botstate.json"),true);
     $botState['rewaredTime'] = $text;
-    file_put_contents("botState.json",json_encode($botState));
+    file_put_contents("settings/botstate.json",json_encode($botState));
     if($data!="botSettings"){
         $newValue = $botState[$match[1]]=="off"?"on":"off";
         $botState[$match[1]]= $newValue;
-        file_put_contents("botState.json",json_encode($botState));
+        file_put_contents("settings/botstate.json",json_encode($botState));
     }
     
 $cartToCartState=$botState['cartToCartState']=="off"?"خاموش ❌":"روشن ✅";
@@ -554,13 +554,13 @@ if($userInfo['step'] == "editRewardChannel" && $from_id  == $admin && $text != $
     $result = json_decode(file_get_contents("https://api.telegram.org/bot$botToken/getChatMember?chat_id=$text&user_id=$botId"));
     if($result->ok){
         if($result->result->status == "administrator"){
-            $botState = json_decode(file_get_contents("botState.json"),true);
+            $botState = json_decode(file_get_contents("settings/botstate.json"),true);
             $botState['rewardChannel'] = $text;
-            file_put_contents("botState.json",json_encode($botState));
+            file_put_contents("settings/botstate.json",json_encode($botState));
             if($data!="botSettings"){
                 $newValue = $botState[$match[1]]=="off"?"on":"off";
                 $botState[$match[1]]= $newValue;
-                file_put_contents("botState.json",json_encode($botState));
+                file_put_contents("settings/botstate.json",json_encode($botState));
             }
             sendMessage("☑️ | 😁 با موفقیت ذخیره شد",$removeKeyboard);
             
@@ -953,7 +953,7 @@ if($userInfo['step'] == "messageToSpeceficUser" && $text != $cancelText && ($fro
 
 
 if ($data == 'message2All' and ($from_id == $admin || $userInfo['isAdmin'] == true)){
-    $sendInfo = json_decode(file_get_contents("messagewizwiz.json"),true);
+    $sendInfo = json_decode(file_get_contents("settings/messagewizwiz.json"),true);
     $offset = $sendInfo['offset'];
     $msg = $sendInfo['text'];
     
@@ -993,10 +993,10 @@ if ($userInfo['step'] == 's2a' and $text != $cancelText){
     }
     $messageValue = json_encode(['type'=>$type,'value'=> $value]);
     
-    $sendInfo = json_decode(file_get_contents("messagewizwiz.json"),true);
+    $sendInfo = json_decode(file_get_contents("settings/messagewizwiz.json"),true);
     $sendInfo['offset'] = 0;
     $sendInfo['text'] = $messageValue;
-    file_put_contents("messagewizwiz.json",json_encode($sendInfo));
+    file_put_contents("settings/messagewizwiz.json",json_encode($sendInfo));
 }
 
 if(preg_match('/selectServer(\d+)/',$data, $match) && ($botState['sellState']=="on" || ($from_id == $admin || $userInfo['isAdmin'] == true)) ) {

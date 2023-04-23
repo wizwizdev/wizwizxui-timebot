@@ -6,8 +6,8 @@ $messageParam = json_decode($msgInfo['text']);
 
 if($offset == '-1') exit;
 
-include_once 'baseInfo.php';
-include_once 'config.php';
+include_once '../baseInfo.php';
+include_once '../config.php';
 include_once 'jdf.php';
 if($offset == '0'){
     bot('sendMessage',[

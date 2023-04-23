@@ -133,7 +133,7 @@ if(isset($update->callback_query)){
 
 $usersInfo = json_decode(file_get_contents("userInfo.json"),true);
 $userInfo = $usersInfo[$from_id];
-$botState =json_decode(file_get_contents("botState.json"),true);
+$botState =json_decode(file_get_contents("settings/botstate.json"),true);
 
 
 
