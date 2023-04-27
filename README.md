@@ -48,9 +48,9 @@ Easy to sell with <a href="https://github.com/wizwizdev/wizwizxui-timebot">wizwi
 
 <br>
 
-## Installation on Ubuntu
+## Installation
 
-- ### coming soon
+- If your server does not have root access, please use `sudo -i` and then install
 
 
 <br>
