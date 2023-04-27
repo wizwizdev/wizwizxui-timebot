@@ -474,8 +474,6 @@ https://yourdomain.com/wizwizxui-timebot-main/install/install.php
 - If the user does not renew the service within 48 hours, a service deletion notification will be sent to the user and the service will be deleted
 - If the public message or notification is not sent when setting the cron job (when setting the cron job, just delete the domain address from inside the command)
 - To create a test configuration, set the price to 0, each user is restricted to one test config per each telegram account
-- Panel type (Sanaei and Alireza0) is used for Sanaei version 1.1.1 and above and Alireza0 version 0.4.2
-- The panel type (simple) is used for Sanaei version 1.0.9 and below, Alireza 0.3.2 and below, Vaxilu x-ui, Niduka
 - To use HTTP and Header in the robot, you must set the value of Header Type to http and enter the value of Host:domain.ir for the request header.
 - To close sales on a server, you can set the server balance to 0
 - To set the income notification channel, click on the ID inside the glass keyboard and set the channel again
@@ -616,21 +614,21 @@ Example:
 
 - (Niduka Akalanka) single-port, multi-port (the best option for the robot)
 ````
-bash <(curl -Ls https://raw.githubusercontent.com/NidukaAkalanka/x-ui-english/master/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/NidukaAkalanka/x-ui-english/master/install.sh) 0.2.1.1
 ````
 - (Sanaei) multi-port - single-port
 ````
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.1.2
 ````
 ````
 bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.0.9
 ````
 - (Alireza0) multi-port - single port
 ````
-bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 0.4.2
 ````
 ````
-bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 0.4.0
+bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 0.3.2
 ````
 - (Vaxilu) only single port
 ````
@@ -735,8 +733,6 @@ bash <(curl -Ls https://raw.githubusercontent.com/vaxilu/x-ui/master/install.sh)
 - اگر کاربر تا 48 ساعت سرویس را تمدید نکند اعلان پاک شدن سرویس برای کاربر ارسال می شود و سرویس پاک می شود
 - اگر موقع تنظیم کرون جاب پیام همگانی یا اعلان ارسال نشد ( هنگام تنظیم کرون جاب فقط ادرس دامنه را از داخل command پاک کنید )
 - برای ایجاد کانفیگ تست قیمت را 0 قرار دهید ، هر اکانت فقط یک بار میتواند اکانت تست رایگان استفاده کند
-- نوع پنل ( سنای و علیرضا ) برای سنایی نسخه 1.1.1 به بالا و علیرضا نسخه 0.4.2 کاربرد دارد
--  نوع پنل ( ساده ) برای نسخه سنایی 1.0.9 و پایین تر ، علیرضا 0.3.2 و پایین تر ، پنل چینی وکسیلو ، نیدوکا کاربرد دارد
 -  برای استفاده از HTTP و Header در ربات باید مقدار Header Type رو مقدار http قرار بدید و برای request header هم مقدار Host:domain.ir وارد کنید
 -  برای جلوگیری از فروش یک سرور می توانید موجودی سرور را 0 قرار بدید
 -  برای تنظیم کانال اعلان درآمد روی آیدی داخل صفحه کلید شیشه ای کلیک کنید و کانال را مجدد تنظیم کنید
@@ -877,21 +873,21 @@ https://youdomain.com:54321/
 
 - ( نیدوکا کالانکا ) تک پورتی ، چند پورتی ( بهترین گزینه برای ربات )
 ```` 
-bash <(curl -Ls https://raw.githubusercontent.com/NidukaAkalanka/x-ui-english/master/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/NidukaAkalanka/x-ui-english/master/install.sh) 0.2.1.1
 ```` 
 - ( سنایی ) چند پورتی - تک پورتی
 ```` 
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.1.2
 ````   
 ```` 
 bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.0.9
 ```` 
 - ( علیرضا ) چند پورتی - تک پورتی
 ```` 
-bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
+bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 0.4.2
 ````   
 ```` 
-bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 0.4.0
+bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 0.3.2
 ```` 
 - ( وکسیلو ) فقط تک پورتی
 ```` 
