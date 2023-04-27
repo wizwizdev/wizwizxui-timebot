@@ -2710,8 +2710,8 @@ if(preg_match('/payRenewWithCartToCart(\d+)/',$userInfo['step'],$match) and $tex
     $keyboard = json_encode([
         'inline_keyboard' => [
             [
-                ['text' => 'تایید ✅', 'callback_data' => "approveRenewAcc{$from_id}_{$oid}"],
-                ['text' => 'عدم تایید ❌', 'callback_data' => "decRenewAcc{$from_id}_{$oid}"]
+                ['text' => 'تایید ✅', 'callback_data' => "approveRenewAcc{$uid}_{$match[1]}"],
+                ['text' => 'عدم تایید ❌', 'callback_data' => "decRenewAcc{$uid}_{$match[1]}"]
             ]
         ]
     ]);
