@@ -15,7 +15,7 @@ if($offset == '0'){
         'text'=>"عملیات ارسال پیام همگانی شروع شد"
         ]);
 }
-$stmt = $connection->prepare("SELECT * FROM `users`ORDER BY `id` LIMIT 250 OFFSET ?");
+$stmt = $connection->prepare("SELECT * FROM `users`ORDER BY `id` LIMIT 150 OFFSET ?");
 $stmt->bind_param("i", $offset);
 $stmt->execute();
 $usersList = $stmt->get_result();
