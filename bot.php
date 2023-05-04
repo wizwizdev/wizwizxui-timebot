@@ -2,6 +2,9 @@
 include_once 'baseInfo.php';
 include_once 'config.php';
 include_once 'settings/jdf.php';
+
+check();
+
 $robotState = $botState['botState']??"on";
 
 if($userInfo['step'] == "banned"){
