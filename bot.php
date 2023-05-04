@@ -852,7 +852,7 @@ if(preg_match('/createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &&
     $stmt->execute();
     $srv_remark = $stmt->get_result()->fetch_assoc()['remark'];
     $stmt->close();
-    $savedinfo = file_get_contents('temp.txt');
+    $savedinfo = file_get_contents('settings/temp.txt');
     $savedinfo = explode('-',$savedinfo);
     $port = $savedinfo[0];
     $last_num = $savedinfo[1];
@@ -912,7 +912,7 @@ if(preg_match('/createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &&
     }
     $stmt->close();
     if($portType == "auto"){
-        file_put_contents('temp.txt',$port.'-'.$last_num);
+        file_put_contents('settings/temp.txt',$port.'-'.$last_num);
     }
     sendMessage("☑️|❤️ اکانت های جدید با موفقیت ساخته شد",$mainKeys);
     setUser();
@@ -1214,7 +1214,7 @@ if(preg_match('/payWithWallet(\d+)/',$data, $match)){
 
     $uniqid = generateRandomString(42,$protocol); 
 
-    $savedinfo = file_get_contents('temp.txt');
+    $savedinfo = file_get_contents('settings/temp.txt');
     $savedinfo = explode('-',$savedinfo);
     $port = $savedinfo[0] + 1;
     $last_num = $savedinfo[1] + 1;
@@ -1239,7 +1239,7 @@ if(preg_match('/payWithWallet(\d+)/',$data, $match)){
         $remark = "{$srv_remark}-{$randadad}";
         
     if($portType == "auto"){
-        file_put_contents('temp.txt',$port.'-'.$last_num);
+        file_put_contents('settings/temp.txt',$port.'-'.$last_num);
     }else{
         $port = rand(12222,65000);
     }
@@ -1472,7 +1472,7 @@ if(preg_match('/accept(\d+)_(\d+)/',$data, $match) and $text != $cancelText){
 
     $uniqid = generateRandomString(42,$protocol); 
 
-    $savedinfo = file_get_contents('temp.txt');
+    $savedinfo = file_get_contents('settings/temp.txt');
     $savedinfo = explode('-',$savedinfo);
     $port = $savedinfo[0] + 1;
     $last_num = $savedinfo[1] + 1;
@@ -1496,7 +1496,7 @@ if(preg_match('/accept(\d+)_(\d+)/',$data, $match) and $text != $cancelText){
         $remark = "{$srv_remark}-{$randadad}";
         
     if($portType == "auto"){
-        file_put_contents('temp.txt',$port.'-'.$last_num);
+        file_put_contents('settings/temp.txt',$port.'-'.$last_num);
     }else{
         $port = rand(12222,65000);
     }
@@ -2290,7 +2290,7 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
     
     $uniqid = generateRandomString(42,$protocol); 
 
-    $savedinfo = file_get_contents('temp.txt');
+    $savedinfo = file_get_contents('settings/temp.txt');
     $savedinfo = explode('-',$savedinfo);
     $port = $savedinfo[0] + 1;
     $last_num = $savedinfo[1] + 1;
@@ -2314,7 +2314,7 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
         $remark = "{$srv_remark}-{$randadad}";
     
     if($portType == "auto"){
-        file_put_contents('temp.txt',$port.'-'.$last_num);
+        file_put_contents('settings/temp.txt',$port.'-'.$last_num);
     }else{
         $port = rand(12222,65000);
     }
