@@ -102,7 +102,57 @@ function alert($txt, $type = false, $callid = null){
     ]);
 }
 
+$range = [
+    '149.154.160.0/22',
+    '149.154.164.0/22',
+    '91.108.4.0/22',
+    '91.108.56.0/22',
+    '91.108.8.0/22',
+    '95.161.64.0/20',
+];
+function check($return = false)
+{
+global $range;
+foreach ($range as $rg) {
+    if (ip_in_range(GetRealIp(), $rg)) {
+        return true;
+    }
+}
+if ($return == true) {
+    return false;
+}
 
+die('You do not have access');
+
+}
+
+function GetRealIp()
+{
+if (!empty($_SERVER['HTTP_CLIENT_IP']))
+    //check ip from share internet
+    $ip = $_SERVER['HTTP_CLIENT_IP'];
+elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
+    //to check ip is pass from proxy
+    $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
+else
+    $ip = $_SERVER['REMOTE_ADDR'];
+return $ip;
+}
+
+
+function ip_in_range($ip, $range)
+{
+if (strpos($range, '/') == false) {
+    $range .= '/32';
+}
+// $range is in IP/CIDR format eg 127.0.0.1/24
+list($range, $netmask) = explode('/', $range, 2);
+$range_decimal = ip2long($range);
+$ip_decimal = ip2long($ip);
+$wildcard_decimal = pow(2, (32 - $netmask)) - 1;
+$netmask_decimal = ~$wildcard_decimal;
+return (($ip_decimal & $netmask_decimal) == ($range_decimal & $netmask_decimal));
+}
 
 $time = time();
 $update = json_decode(file_get_contents("php://input"));
