@@ -31,11 +31,14 @@ do
 			echo " "
 			if [ "$answer" != "${answer#[Yy]}" ]; then
 			echo -e "\n\e[92mUpdating ...\033[0m\n"
-			sleep 1
-			git config --global --add safe.directory /var/www/html/wizwizxui-timebot
+			mv /var/www/html/wizwizxui-timebot/baseInfo.php /root/
+			sleep 2
+# 			git config --global --add safe.directory /var/www/html/wizwizxui-timebot
 			cd /var/www/html/wizwizxui-timebot
-			git pull
-
+# 			git pull
+			git stash
+			sleep 1
+			mv /root/baseInfo.php /var/www/html/wizwizxui-timebot/
 			if [ $? -ne 0 ]; then
 			echo -e "\n\e[41mError: The update failed!\033[0m\n"
 			exit 1
