@@ -30,14 +30,16 @@ do
 			read -p "Are you sure you want to update?[y/n]: " answer
 			echo " "
 			if [ "$answer" != "${answer#[Yy]}" ]; then
-			echo -e "\n\e[92mUpdating ...\033[0m\n"
 			mv /var/www/html/wizwizxui-timebot/baseInfo.php /root/
-			sleep 2
-# 			git config --global --add safe.directory /var/www/html/wizwizxui-timebot
-			cd /var/www/html/wizwizxui-timebot
-# 			git pull
-			git stash
-			sleep 1
+			echo -e "\n\e[92mUpdating ...\033[0m\n"
+			sleep 4
+			rm -r /var/www/html/wizwizxui-timebot/
+			echo -e "\n\e[92mWait a few seconds ...\033[0m\n"
+			sleep 3
+			git clone https://github.com/wizwizdev/wizwizxui-timebot.git /var/www/html/wizwizxui-timebot
+			sudo chown -R www-data:www-data /var/www/html/wizwizxui-timebot/
+			sudo chmod -R 755 /var/www/html/wizwizxui-timebot/
+			sleep 3
 			mv /root/baseInfo.php /var/www/html/wizwizxui-timebot/
 			if [ $? -ne 0 ]; then
 			echo -e "\n\e[41mError: The update failed!\033[0m\n"
