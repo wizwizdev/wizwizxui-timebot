@@ -31,6 +31,7 @@ do
 			echo " "
 			if [ "$answer" != "${answer#[Yy]}" ]; then
 			mv /var/www/html/wizwizxui-timebot/baseInfo.php /root/
+			mv /var/www/html/wizwizxui-timebot/settings/botstate.json /root/
 			echo -e "\n\e[92mUpdating ...\033[0m\n"
 			sleep 4
 			rm -r /var/www/html/wizwizxui-timebot/
@@ -41,6 +42,7 @@ do
 			sudo chmod -R 755 /var/www/html/wizwizxui-timebot/
 			sleep 3
 			mv /root/baseInfo.php /var/www/html/wizwizxui-timebot/
+			mv /root/botstate.json /var/www/html/wizwizxui-timebot/settings
 			if [ $? -ne 0 ]; then
 			echo -e "\n\e[41mError: The update failed!\033[0m\n"
 			exit 1
