@@ -1,355 +1,309 @@
+<p align="center">
+  <a href="https://github.com/wizwizdev/wizwizxui-timebot" target="_blank" rel="noopener noreferrer">
+    <picture>
+      <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/27927279/227711552-d2bc1089-5666-477b-9be7-d7e50a5286dc.png">
+      <img width="200" height="200" src="https://user-images.githubusercontent.com/27927279/227711552-d2bc1089-5666-477b-9be7-d7e50a5286dc.png">
+    </picture>
+  </a>
+</p> 
 
-# WizWiz
+<p align="center">
+	<a href="./README.md">
+	English
+	</a>
+	/
+	<a href="./README-fa.md">
+	فارسی
+	</a>
 
-![](https://img.shields.io/github/v/release/wizwizdev/wizwizxui-timebot.svg)
-![](https://visitor-badge.glitch.me/badge?page_id=wizwizdev.wizwizdev)
+</p>
+
+<h1 align="center"/>Welcome to wizwiz</h1>
+
+<p align="center">
+Easy to sell with <a href="https://github.com/wizwizdev/wizwizxui-timebot">wizwizxui-timebot</a> easy install with few clicks
+</p>
+
+<p align="center">
+wizwiz is a powerful and professional robot that supports several types of panels and is the best option for sale, supports most protocols and has easy installation. This robot is optimized for the dear people of Iran. It is a great alternative to selling so that you can get to work.
+</p>
 
 
-### [ترجمه به فارسی](README-persian.md)
+<div align=center>
+
+[![Telegram Channel](https://img.shields.io/endpoint?label=Channel&style=flat-square&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Fwizwizch&color=blue)](https://telegram.dog/wizwizch)
+[![Telegram Group](https://img.shields.io/endpoint?color=neon&label=Support%20Group&style=flat-square&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Fwizwizdev)](https://telegram.dog/wizwizdev)
+<img src="https://img.shields.io/github/license/wizwizdev/wizwizxui-timebot?style=flat-square" />
+<img src="https://img.shields.io/github/v/release/wizwizdev/wizwizxui-timebot.svg" />
+<!-- <img src="https://visitor-badge.glitch.me/badge?page_id=wizwizdev.wizwizdev" />
+ -->
+</div>
+
+<br>
+<br>
+    <a align="center">
+        <img src="https://github.com/wizwizdev/wizwiz-xui-pro/assets/27927279/c8e45ef9-2b4d-4a3e-aa5a-40df4f61abf3" />
+    </a>     
+<br>
+<br>
+
+# Installation Ubuntu-20.4 
+
+
+- If your server does not have root access, please grant root access with "sudo -i" command and then install
+- Create a bot in @botfather and /start it
+- The first option asks you for a domain, you must set the ip server for the domain and then enter it according to the example
+> Enter the installation command in the console and enter the required items to complete the installation.
+```
+bash <(curl -s https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/main/wizwiz.sh)
+```
+- First enter "sub.domain.com" or "domain.com" without https
+- Enter email
+- Enter y
+- Enter 2
+- Enter username database
+- Enter password database
+- Enter token
+- Enter Numerical ID of admin from @userinfobot
+- Re-enter "sub.domain.com" or "domain.com" without https
+- Very good, the installation message ( ✅ The wizwiz bot has been successfully installed! ) is sent to the bot
 
 <br>
 <br>
 
-### support me
-<br>
+## Update bot - Update panel - backup - remove wizwiz
 
-Bank Sepe: Turan
-
+- With every update and backup, a notification is sent to the manager robot
 ```
-5892101222351344
-```
-
-Tron: (TRX)
-
-```
-TY8j7of18gbMtneB8bbL7SZk5gcntQEemG
-```
-
-Bitcoin:
-
-```
-bc1qcnkjnqvs7kyxvlfrns8t4ely7x85dhvz5gqge4
-```
-
-Dogecoin:
-
-```
-DMyGMghEh4W55P3VeVHntCN3vYAFtshvVH
+bash <(curl -s https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/main/update.sh)
 ```
 
 <br>
 
+<hr>
 
-## Installation
+<br>
 
-- cpanel host or Linux server
-- domain + ssl
+<h2 align="center">
+<a href="https://t.me/wizwizch/193">Installation tutorial on Ubuntu server</a>
+</h2>
 
+<br>
+
+<h2 align="center">
+<a href="https://t.me/wizwizch/192">Installation tutorial on cPanel host</a>
+</h2>
+
+
+
+<br>
+<hr>
 <br>
 
 
 
-<br>
-
-## default settings
-
-- Panel port and host or server must be 80-8080-54321
-- If you encounter the following message or if the server inside the robot is not registered, please give a ticket to the hosting to open the desired ports.
-
-````
-Failed to connect to yourdomain.com port 80 after 340 ms: Couldn't connect to server
-````
-
-This error means that port 8080 of your panel is not open on the host or server and you need to open it
-
-
-<br>
-
-## Installation
+## The instructions for installing on the host, download the project through the link below
 
 ````
 https://github.com/wizwizdev/wizwizxui-timebot/archive/refs/heads/main.zip
 ````
 
+<br>
 
-> **Important note: After extracting the whole project, upload it directly from the wizwizxui-timebot-main folder to public_html**
+
+# Important items in the host
+
+## 1- Error 500 in cPanel host
+
+> In the cpanel host, click on the Select PHPVersion option and activate the following options in the extension section:
+- pdo_mysql
+- mysqlnd
+- nd_mysqli
+> Disable the following options:
+- mysqli
+- nd_pdo_mysql
+### If the following option is blue, please activate it:
+
+<br>
+     <a align="center">
+         <img src="https://user-images.githubusercontent.com/27927279/230842783-16f6d1a5-e726-4533-a57b-98cb04fa8dfc.PNG" />
+     </a>
+<br>
+<br>
+
+## 2- Activation of the following extensions
+
+- soap (for the payment gateway)
+- ssh2 (to back up from the panel) for some hosts, this does not exist and you cannot use the backup function
+- fileinfo ( Token not found error )
 
 
 <br>
 
-## Database wizwiz.sql
 
-- First, after creating the database, import the wizwiz.sql file into the created database
+## 3- Notes after installation
 
-<br>
-
-
-### Setting the baseInfo.php file
-
-
-
-  ````
-error_reporting(0);
-$botToken = ''; //Replace the bot token
-$dbUserName = ''; //Replace the database username
-$dbPassword = ''; //Replace the database password
-$dbName = ''; //Enter the database name
-$admin = ; // Get the numeric ID or user ID of the admin account from this bot and replace it with get_id_bot
-$channelLock = ""; //Replace the channel id with @ to force lock
-$botUrl = "https://yourdomain.com/"; //Replace your domain
-$walletwizwiz = ""; //Replace your card or wallet number
-````
-
-- To create a bot and receive a token via @bothfather bot, create a bot and replace the token
-- To get an ID, get a number from the @chatIDrobot robot and then replace it
-- For the channel, please replace the channel ID with @ (must be the channel manager robot to lock the channel)
-- Also replace your domain with yourdomain.com
-- And you can also put your Volt card or wallet number in "".
-
+- After installation, be sure to completely delete the install folder and the create DB.php file inside the wizwizxui-timebot-main folder
 
 
 <br>
 
-### cron job setting:
+## 4- Kronjob for the following files
 
-
-- Select Once Per Minute (* * * * *) mode in the Common Settings section
-- In the Command field, please enter the following address:
-````
-/usr/bin/php -q address1 >/dev/null 2>&1
-````
-- Instead of addres1, you should put the address of the messagewizwiz.php file and save it. Example:
-````
-/usr/bin/php -q /home/yourfolder/public_html/yordomain.com/messagewizwiz.php >/dev/null 2>&1
-````
-or
-````
-/usr/bin/php -q /home/yourfolder/public_html/messagewizwiz.php >/dev/null 2>&1
-````
-
-<br>
-
-
-- Repeat the same steps for the warnUsage.php file:
+- messagewizwiz.php
+- rewardReport.php
+- warnusers.php
+- backupnutif.php
 
 ````
-/usr/bin/php -q address2 >/dev/null 2>&1
-````
-- Instead of addres2, you should put the address of the warnUsage.php file and save it. Example:
-````
-/usr/bin/php -q /home/yourfolder/public_html/yordomain.com/warnUsage.php >/dev/null 2>&1
-````
-or
-````
-/usr/bin/php -q /home/yourfolder/public_html/warnUsage.php >/dev/null 2>&1
+/usr/bin/php -q /home/wizwizro/public_html/wizwizxui-timebot-main/settings/messagewizwiz.php >/dev/null 2>&1
 ````
 
-<br>
+
+- instead of wizwizro, you should take the desired address from the host according to the image below and enter it
 
 
-### set and hook
+<p align="center">
+     <img src="https://user-images.githubusercontent.com/27927279/229339959-3da695e6-eee8-49b0-a520-37552d50090f.PNG" />
+</p>
+
+
+
+- You must create a separate cron job for each of the files warnusers.php - rewardReport.php - messagewizwiz.php, but it is different for the backupnutif.php file that you must do as follows
 
 
 ````
-https://api.telegram.org/bot1/setWebhook?url=2/bot.php
-````
-Instead of 1, you should replace the robot token and instead of 2, enter the project address: eg
-````
-https://api.telegram.org/bot365447414:AAFjkjKJHoLKJIOJKLK89jklYwuCU_1IzzCsKJHKQvv/setWebhook?url=https://yordomain.com/bot.php
-````
-
-- If the following text is displayed in the output, then congratulations, you have executed the robot correctly
-
-````
-{"ok":true,"result":true,"description":"Webhook was set"}
+/usr/bin/php -q /home/wizwizro/public_html/panel_folder_name/backupnutif.php >/dev/null 2>&1
 ````
 
 
 <br>
-
-## Setting the htaccess file to increase security
-
-- After extracting the project files, you may not be able to see the htaccess file, first click on Settings in the upper right corner
-- In the window that opens, activate the option Show Hidden Files (dotfiles) and then click save
-- Finally, remove the .htaccess file from the bot folder and place it directly in public_html
-
-
+<hr>
 <br>
 
-## Set config port count
+# Important Points
 
-- Edit the temp.txt file and write your desired value
-
-
-<br>
-
-## Setting shared configuration with a specific port for multiple users
-
-- Manually enter a config without volume - date and have a port for example 443
-- Please note that we do not use the first created user, which has unlimited volume and date, and defined it only for the robot
-- Then in the robot, select the add plan (shared configuration) section and give it the id of the connection line you created.
-- As a result, the robot automatically generates users... that's it
-
-<br>
-
-
-## Setting the panel type
-
-- Panel type (Senai and Alireza) is used for Sanai version 1.1.1 and above and Alireza version 0.4.2
-- The panel type (simple) is used for Sanai version 1.0.9 and below, Alireza 0.3.2 and below, Vexilo Chinese panel, Niduka
-
-
-<br>
-
-## Important points after installation:
-
-- To forcefully lock the bot, you must be the channel administrator
-- Lookish host or server must be outside of Iran
-- If you use the Trojan protocol (the panel must have the ability to create Trojans, otherwise you will face problems)
-- The validity of the notification becomes zero after 2 days (after two days, if the volume or time is low, it will be sent again)
-- If the public message or notification is not sent when setting the cron job (when setting the cron job, just delete the domain address from inside the command)
-- To create a test configuration, set the price to 0 (each account can use the free test account only once
-- If you encounter the message (Glam, the connection to the server is not established), remember that the path is next to the address of the panel, remove the path and restart the panel, the problem will be solved.
-
-
+- To force lock the channel, make sure the bot is the admin of the channel and give it full admin access (tick them all)
+- If you install the Vizuise panel on the host, be sure to activate the ssh2 extension to perform the backup work.
+- To use the NowPayment portal, the charge amount must be above 3.5 dollars because it cannot be paid below 3.5 dollars.
+- Lokishhost or Linux should not be hosted in Iran (because Telegram is restricted and censored in Iran)
+- If you use trojan protocol, your x-ui panel must support trojan, otherwise your panel will have problems.
+- If the remaining traffic of the service reaches one gigabyte and the remaining time reaches one day, a notification is sent to the user.
+- If the user does not renew the service within 48 hours, the service deletion notification will be sent to the user and the service will be deleted.
+- To create a test account, set the price to 0, each user can have a test account only once
+- To use HTTP and Header in the robot, you must set the value of Header Type to http and enter the value of Host:domain.ir for the request header.
+- If we use reality, after registering the plan, please edit the plan and enter the desired dest and servername value.
+- If you use the tunnel, be sure to read the <a href="https://t.me/wizwizch/177">text</a> inside the channel carefully.
+- If you encounter an error (your connection to the server is not established) while shopping, be sure to listen to <a href="https://t.me/wizwizch/186">Voice</a> inside the channel.
 
 
 
 <br>
-
-## Support for the following panels:
-
-
-#### Important note: Install Sanai panel version 1.0.9 and Alireza panel version 0.4.0 that we have installed
+<hr>
+<br>
 
 
 
-- (Nidoka Kalanka) single-port, multi-port (the best option for the robot)
+# Supported Panels
+
+
+- (Niduka Akalanka)
 ````
 bash <(curl -Ls https://raw.githubusercontent.com/NidukaAkalanka/x-ui-english/master/install.sh)
 ````
-- (Senai) multi-port - single-port
+- (Sanaei)
 ````
 bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh)
 ````
-````
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.0.9
-````
-- (Alireza) multi-port - single port
+- (Alireza)
 ````
 bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh)
 ````
-````
-bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 0.4.0
-````
-- (Vexilo) only single port
+- (Vaxilu)
 ````
 bash <(curl -Ls https://raw.githubusercontent.com/vaxilu/x-ui/master/install.sh)
 ````
 
-<br>
+- The rest of the panels probably do not support it because it has not been tested, so you can test and use it yourself
 
 
-### When adding a server to the robot, please enter the following address
-
-- If your panel starts with path, please delete it from inside the panel and then restart the panel and give the address without path to the bot
-
-````
-https://youdomain.com:8080
-````
-
-````
-http://192.180.125:8080
-````
-
-
-#### The following address is wrong
-
-````
-https://youdomain.com:8080/xui/inbounds
-````
-
-````
-https://youdomain.com:8080/path
-````
-
-````
-https://youdomain.com:8080/
-````
 
 
 <br>
-
-### Setting the certificate inside the robot
-
-- Instead of keyFile and certificateFile, please enter the address of your certificate and the following is an example:
-
-````
-{"serverName": "","certificates": [{"certificateFile": "","keyFile": ""}]}
-````
-
-Example:
-
-- Important note: do not leave a space between the ssl address and it should be without space, otherwise the entire x-ui panel will fail.
-
-````
-{"serverName": "yourdomain.com","certificates": [{"certificateFile": "/root/cert.crt","keyFile": "/root/private.key"}]}
-````
-
-- serverName: yourdomain.com
-- certificateFile: /root/cert.crt
-- keyFile: /root/private.key
-
-
+<hr>
 <br>
 
 
 
-### Vizviz facilities
+# Donation
 
+- Sepe Bank: `5892101222351344`
+- Tron (TRX): `TY8j7of18gbMtneB8bbL7SZk5gcntQEemG`
+- Bitcoin: `bc1qcnkjnqvs7kyxvlfrns8t4ely7x85dhvz5gqge4`
+- Dogecoin: `DMyGMghEh4W55P3VeVHntCN3vYAFtshvVH`
 
-- Automatic sale of vless - vmess - trojan
-- Setting and creating a configuration with the ability to:
-- (volume - day - network - protocol - single user {depends on the panel})
-- Server creation and management:
-- (name-flag-remark-capacity-header-request-request-tls-sni-ip)
-- Create category and manage it
-- Creating a plan and managing it
-- Create configuration of shared port and dedicated port
-- Create test configuration for users (before purchase)
-- Ability to pay by card (confirmed by the manager)
-- Automatic sending of configuration along with link + configuration name + qrcode to the user
-- View the complete specifications of the purchased configuration
-- Show the sold accounts of each plan
-- Advanced ticketing system section (ticketing)
+<br>
+<hr>
+<br>
+
+# Features
+
+- nowpayments - zarinpal - nextpay - weswap currency exchange portal
+- Support for - xtls - tls - reality - Grpc - ws - tcp
+- Support vless - vmess - trojan
+- The possibility of extending the service
+- Smart subscription
+- Filtering status of servers
+- Automatic location change
+- Increasing volume and service time
+- Ability to pass
+- Ability to order the desired plan by the user
+- Authentication of Iranian and foreign contact numbers
+- Backup x-ui panel
+- Subcategory and commission
+- Create discount and gift codes
+- Ability to track the user
+- Create button and answer for it
+- Config output with different ip or domain
+- Ability to change protocol and network type
+- Setting the config port randomly or automatically
+- Wallet (possibility of charging - balance transfer)
+- Send notification of new member in robot to (admin)
+- Display user information (user-admin)
+- The ability to send private messages from the admin to the user
+- Ability to manage and view servers - categories - plans
+- Ability to block and release
+- Ability to add admin
+- Display the inventory of servers
+- The ability to send income reports to the channel
+- Sending public messages
+- Receive sold configurations
+- Create shared port and dedicated port configuration
+- Test account for users
+- Card to card functionality
+- Display the sold accounts of each plan
 - Display capability (software link)
-- Sending public messages with CronJob
-- Enable or disable (Sales - Configuration specifications or both)
-- Notification of completion of volume and configuration time (only to the user)
-- Inline (config specifications)
+- Send public messages with CronJob
+- Notifying the end of volume and configuration time (to the user)
 - Forced channel lock
-- Senate panel support
-- Alireza panel support
-- Vexilo panel support
-- Niduka panel support
-- The possibility of adding an account by the user
-- The ability to manage and delete the account by the user
-- The possibility of registering the configuration to vless-vmess-uuid (Trojan does not support it well)
-- Get configuration information (for single port and multiple ports)
-- Display account name
-- Show input key
-- Status display
-- Display the total volume
-- Show download consumption
-- Show upload consumption
-- Show total volume usage
-- Display the remaining volume
-- Display the number of remaining days
-- Show subscription expiration date
+- Ability to get link details
+- Off/on capability (all robot features)
+- Notification of purchase information + renewal, etc. in full to the admin robot
+
 
 <br>
+<hr>
+<br>
 
-Be sure to join the group and support us
+Be sure to join the group and channel and support us
 
 ## Contact Developer
 💎 Group: https://t.me/wizwizdev
+💎 Channel: https://t.me/wizwizch
+
+<br>
+<br>
+
+## Stargazers over time
+
+[![Stargazers over time](https://starchart.cc/wizwizdev/wizwizxui-timebot.svg)](https://starchart.cc/wizwizdev/wizwizxui-timebot)
