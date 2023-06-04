@@ -1,0 +1,50 @@
+/**
+* wizwiz v7.5.3
+* https://github.com/wizwizdev/wizwizxui-timebot
+*
+* Copyright (c) @wizwizch
+*/
+.pie_progress {
+  position: relative;
+  text-align: center;
+
+  -webkit-transform-style: preserve-3d;
+
+  transform-style: preserve-3d;
+}
+.pie_progress__svg {
+  position: relative;
+  display: inline-block;
+  width: 80%;
+  padding-bottom: 80%;
+  overflow: hidden;
+  vertical-align: middle;
+}
+.pie_progress__svg svg {
+  position: absolute;
+  top: 0;
+  left: 10%;
+  display: inline-block;
+  width: 80%;
+  height: 80%;
+  margin: 0 auto;
+}
+.pie_progress__content, .pie_progress__number, .pie_progress__label, .pie_progress__icon {
+  position: absolute;
+  top: 34%;
+  left: 0;
+  width: 100%;
+  -webkit-transform: translateY(-32%);
+  -ms-transform: translateY(-32%);
+  transform: translateY(-32%);
+}
+
+.pie_progress__number {
+  font-size: 25px;
+  font-weight: bold;
+}
+
+.pie_progress__label {
+  margin-top: 37px;
+  font-size: 12px;
+}
