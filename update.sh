@@ -258,7 +258,7 @@ do
 			rm /var/www/html/wizwizxui-timebot/wizwiz.sql
 			
 			
-			echo -e "\xE2\x98\x85 \e[94mThe backup settings have been successfully completed.\033[0m\n"
+			echo -e "\e[92m The backup settings have been successfully completed.\033[0m\n"
 			
 			else
 			    echo "ERROR: MySQL password is incorrect"
@@ -273,15 +273,16 @@ do
 			passs=$(cat /root/confwizwiz/dbrootwizwiz.txt | grep '$pass' | cut -d"'" -f2)
    			userrr=$(cat /root/confwizwiz/dbrootwizwiz.txt | grep '$user' | cut -d"'" -f2)
 			pathsss=$(cat /root/confwizwiz/dbrootwizwiz.txt | grep '$path' | cut -d"'" -f2)
+			pathsss=$(cat /root/confwizwiz/dbrootwizwiz.txt | grep '$path' | cut -d"'" -f2)
 			passsword=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbPassword' | cut -d"'" -f2)
    			userrrname=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbUserName' | cut -d"'" -f2)
 			
 			mysql -u $userrr -p$passs -e "DROP DATABASE wizwiz;" -e "DROP USER '$userrrname'@'localhost';" -e "DROP USER '$userrrname'@'%';"
+
+			sudo rm -r /var/www/html/wizpanel${pathsss}
+			sudo rm -r /var/www/html/wizwizxui-timebot
 			
 			clear
-
-			sudo rm -r /var/www/html/wizwizxui-timebot/wizpanel${pathsss}
-			sudo rm -r /var/www/html/wizwizxui-timebot
 			
 			sleep 1
 			
@@ -290,7 +291,7 @@ do
 			(crontab -l | grep -v "warnusers.php") | crontab -
 			(crontab -l | grep -v "backupnutif.php") | crontab -
 			
-			echo -e "\n\xE2\x98\x85 \e[94mRemoved successfully.\033[0m\n"
+			echo -e "\n\e[92m Removed successfully.\033[0m\n"
 			break ;;
 		"Donate")
 			echo " "
