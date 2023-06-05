@@ -232,7 +232,6 @@ sudo apt install python3-certbot-apache -y
 echo -e "\n\033[1;7;36mObtaining SSL certificate using Apache plugin...\033[0m\n"
 sudo certbot --apache --agree-tos --preferred-challenges http -d $DOMAIN_NAME
 
-# SSL certificate using manual DNS mode (wildcard)
 # echo -e "\n\033[1;7;33mObtaining SSL certificate using manual DNS mode (wildcard)...\033[0m\n"
 # sudo certbot certonly --manual --agree-tos --preferred-challenges dns -d $DOMAIN_NAME -d $WILDCARD_DOMAIN
 
