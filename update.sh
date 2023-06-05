@@ -171,7 +171,8 @@ do
 			DOMAIN_NAME="$domainname"
 			
 			PATHS=$(cat /root/updatewizwiz/wizup.txt | grep '$path' | cut -d"'" -f2)
-		
+			PATHS=$(cat /root/confwizwiz/dbrootwizwiz.txt | grep '$path' | cut -d"'" -f2)
+			
 			(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizpanel${PATHS}/backupnutif.php >/dev/null 2>&1") | sort - | uniq - | crontab -
 			fi
 			
