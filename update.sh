@@ -202,11 +202,12 @@ do
 			
 			wait
 
-			BOT_TOKEN=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botToken' | cut -d"'" -d'"' -f2)
+			BOT_TOKEN=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botToken' | cut -d"'" -f2)
 			ROOT_USER=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbUserName' | cut -d"'" -f2)
 			ROOT_PASSWORD=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbPassword' | cut -d"'" -f2)
-			BOT_URL=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botUrl' | cut -d"'" -d'"' -f2)
-			
+			BOT_URL=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botUrl' | cut -d'"' -f2)
+			BOT_URL2=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botUrl' | cut -d"'" -f2)
+
 			filepath="/var/www/html/wizwizxui-timebot/baseInfo.php"
 			ADMIN_ID=$(cat $filepath | grep '$admin =' | sed 's/.*= //' | sed 's/;//')
 			
@@ -230,7 +231,7 @@ do
 			echo "curl_setopt_array(${ASAS}ch, [CURLOPT_URL => ${ASAS}url,CURLOPT_RETURNTRANSFER => true,CURLOPT_POSTFIELDS => ${ASAS}wizwiz]);" >> /var/www/html/wizwizxui-timebot/backup-wizwiz.php
 			echo "${ASAS}result = curl_exec(${ASAS}ch);curl_close(${ASAS}ch);return ${ASAS}result;}" >> /var/www/html/wizwizxui-timebot/backup-wizwiz.php
 			echo "date_default_timezone_set('Asia/Tehran');${ASAS}date = jdate('Y-m-d | H:i:s');" >> /var/www/html/wizwizxui-timebot/backup-wizwiz.php
-			echo "sendDocument('${ADMIN_ID}', '${BOT_URL}wizwiz.sql', '❤️ db '.${ASAS}date);" >> /var/www/html/wizwizxui-timebot/backup-wizwiz.php
+			echo "sendDocument('${ADMIN_ID}', '/var/www/html/wizwizxui-timebot/wizwiz.sql', '❤️ db '.${ASAS}date);" >> /var/www/html/wizwizxui-timebot/backup-wizwiz.php
 			echo "?>" >> /var/www/html/wizwizxui-timebot/backup-wizwiz.php
 			echo " " >> /var/www/html/wizwizxui-timebot/backup-wizwiz.php
 
@@ -244,10 +245,14 @@ do
 			sleep 0.5
 			
 			url="${BOT_URL}backup-wizwiz.php"
-
 			curl $url
 			
-			sleep 2
+			url2="${BOT_URL2}backup-wizwiz.php"
+			curl $url2
+			
+			clear
+			
+			sleep 1
 						
 			rm /var/www/html/wizwizxui-timebot/backup-wizwiz.php
 			rm /var/www/html/wizwizxui-timebot/wizwiz.sql
