@@ -205,7 +205,7 @@ do
 			BOT_TOKEN=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botToken' | cut -d"'" -d'"' -f2)
 			ROOT_USER=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbUserName' | cut -d"'" -f2)
 			ROOT_PASSWORD=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbPassword' | cut -d"'" -f2)
-			BOT_URL=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botUrl' | cut -d"'" -f2)
+			BOT_URL=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botUrl' | cut -d"'" -d'"' -f2)
 			
 			filepath="/var/www/html/wizwizxui-timebot/baseInfo.php"
 			ADMIN_ID=$(cat $filepath | grep '$admin =' | sed 's/.*= //' | sed 's/;//')
