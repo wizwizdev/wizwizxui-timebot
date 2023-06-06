@@ -67,7 +67,11 @@ $arrays = [
     "DROP TABLE `users_wallet`;",
     "ALTER TABLE `users` ADD `phone` varchar(15)  CHARACTER SET utf8 COLLATE utf8_general_ci AFTER `date`, ADD `refered_by` bigint(10) AFTER `phone`, ADD `step` varchar(1000)  CHARACTER SET utf8 COLLATE utf8_general_ci AFTER `refered_by`, ADD `freetrial` varchar(10)  CHARACTER SET utf8 COLLATE utf8_general_ci AFTER `step`, ADD `isAdmin` tinyint(1)  NOT NULL DEFAULT 0 AFTER `freetrial`, ADD `first_start` varchar(10) AFTER `isAdmin`;",
     "ALTER TABLE `needed_sofwares` CHANGE `title` `title` VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;",
-    "ALTER TABLE `server_plans` ADD `dest` VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL AFTER `rahgozar`, ADD `serverNames` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL AFTER `dest`;"
+    "ALTER TABLE `server_plans` ADD `dest` VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL AFTER `rahgozar`, ADD `serverNames` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL AFTER `dest`;",
+    "ALTER TABLE `pays` CHANGE `payid` `payid` VARCHAR(500) NULL DEFAULT NULL;",
+    "ALTER TABLE `setting` CHANGE `type` `type` VARCHAR(5000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;",
+    "ALTER TABLE `server_plans` ADD `spiderX` VARCHAR(500) NULL AFTER `serverNames`;",
+    "ALTER TABLE `server_plans` ADD `flow` VARCHAR(50) NOT NULL DEFAULT 'None' AFTER `spiderX`;"
     ];
 
 
