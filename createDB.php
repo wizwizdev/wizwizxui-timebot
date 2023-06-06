@@ -194,7 +194,7 @@ $connection->query("CREATE TABLE `server_plans` (
 
 $connection->query("CREATE TABLE `setting` (
   `id` int(255) NOT NULL AUTO_INCREMENT,
-  `type` varchar(500) NOT NULL,
+  `type` varchar(500) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `value` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   PRIMARY KEY (`id`)
 )");
