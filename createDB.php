@@ -188,6 +188,8 @@ $connection->query("CREATE TABLE `server_plans` (
   `rahgozar` int(10) DEFAULT 0,
   `dest` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
   `serverNames` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
+  `spiderX` varchar(500) DEFAULT NULL,
+  `flow` varchar(50) NOT NULL DEFAULT 'None'
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci");
 
