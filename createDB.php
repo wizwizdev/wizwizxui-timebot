@@ -111,7 +111,7 @@ $connection->query("CREATE TABLE `orders_list` (
 $connection->query("CREATE TABLE IF NOT EXISTS `pays` (
     `id` int(255) NOT NULL AUTO_INCREMENT,
     `hash_id` varchar(1000) NOT NULL,
-    `payid` bigint(10) NOT NULL DEFAULT 0,
+    `payid` varchar(500) DEFAULT NULL,
     `user_id` bigint(10) NOT NULL,
     `type` varchar(100),
     `plan_id` int(255),
