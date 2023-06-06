@@ -1113,7 +1113,7 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
         if($inbound_id == 0){    
             $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
         }else {
-            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip); 
+            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
         }
         
         if(is_null($response)){
@@ -1383,9 +1383,9 @@ if($inbound_id == 0){
         $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
     } 
 }else {
-    $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip); 
+    $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
     if(! $response->success){
-        $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip);
+        $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
     } 
 }
 
@@ -1551,7 +1551,7 @@ sendMessage("
     $stmt->execute();
     $res = $stmt->get_result()->fetch_assoc();
     $stmt->close();
-    $price = $res['price'];
+    $price = $payInfo['price'];
     $volume = $res['volume'];
 
 
@@ -1609,7 +1609,7 @@ $stmt->bind_param("i", $planid);
 $stmt->execute();
 $res = $stmt->get_result()->fetch_assoc();
 $stmt->close();
-$price = $res['price'];
+$price = $payInfo['price'];
 $volume = $res['volume'];
 
 if($inbound_id > 0)
@@ -1791,7 +1791,7 @@ if(preg_match('/selectCategory(\d+)_(\d+)/',$data,$match) && ($botState['sellSta
             $keyboard[] = ['text' => "$name - $price", 'callback_data' => "selectPlan{$id}_{$call_id}"];
         }
         if($botState['plandelkhahState'] == "on"){
-	    $temp[] = ['text' => '➕ پلن دلخواه تو بخر', 'callback_data' => "selectCustomPlan{$call_id}_{$sid}"];
+	        $keyboard[] = ['text' => '➕ پلن دلخواه تو بخر', 'callback_data' => "selectCustomPlan{$call_id}_{$sid}"];
         }
         $keyboard[] = ['text' => '⤵️ برگرد صفحه قبلی ', 'callback_data' => "selectServer$sid"];
         $keyboard = array_chunk($keyboard,1);
@@ -2333,9 +2333,9 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
             $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
         } 
     }else {
-        $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip); 
+        $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
         if(! $response->success){
-            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip);
+            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
         } 
     }
     
@@ -2538,7 +2538,7 @@ if(preg_match('/payCustomWithCartToCart(.*)/',$userInfo['step'], $match) and $te
 ▫️آیدی کاربر: $from_id
 👨‍💼اسم کاربر: <a href='tg://user?id=$from_id'>$first_name</a>
 ⚡️ نام کاربری: @$username
-💰مبلغ پرداختی: $price تومان
+💰مبلغ پرداختی: $fileprice تومان
 ✏️ نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $day روز
@@ -2592,7 +2592,7 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $cancelText){
     $expire_date = $date + (86400 * $days);
     $type = $file_detail['type'];
     $protocol = $file_detail['protocol'];
-    $price = $file_detail['price'];
+    $price = $payInfo['price'];
     $server_id = $file_detail['server_id'];
     $netType = $file_detail['type'];
     $acount = $file_detail['acount'];
@@ -2664,9 +2664,9 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $cancelText){
             $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
         } 
     }else {
-        $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip); 
+        $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
         if(! $response->success){
-            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip);
+            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
         } 
     }
     
@@ -2776,7 +2776,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
 🧝‍♂️آیدی کاربر: $uid
 🛡اسم کاربر: $uname
 🔖 نام کاربری: $user_name
-💰مبلغ پرداختی:  تومان
+💰مبلغ پرداختی: $price تومان
 🔮 نام سرویس: $remark
 💮 سفارش: $filename
 ⁮⁮ ⁮⁮
@@ -2899,9 +2899,9 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
             $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
         } 
     }else {
-        $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip); 
+        $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
         if(! $response->success){
-            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip);
+            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
         } 
     }
     
@@ -3305,9 +3305,9 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $cancelText){
             $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
         } 
     }else {
-        $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip); 
+        $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
         if(! $response->success){
-            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip);
+            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
         } 
     }
     if(is_null($response)){
@@ -3411,7 +3411,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
 🧝‍♂️آیدی کاربر: $uid
 🛡اسم کاربر: $uname
 🔖 نام کاربری: $user_name
-💰مبلغ پرداختی:  تومان
+💰مبلغ پرداختی: $price تومان
 🔮 نام سرویس: $remark
 💮 سفارش: $filename
 ⁮⁮ ⁮⁮
@@ -3419,12 +3419,20 @@ if($botState['subLinkState'] == "on") $acc_text .= "
     }
 }
 if(preg_match('/decline/',$data) and ($from_id == $admin || $userInfo['isAdmin'] == true)){
-    setUser($data);
+    setUser($data . "_" . $message_id);
     sendMessage('دلیلت از عدم تایید چیه؟ ( بفرس براش ) 😔 ',$cancelKey);
 }
-if(preg_match('/decline(\d+)/',$userInfo['step'],$match) and $text != $cancelText){
+if(preg_match('/decline(\d+)_(\d+)/',$userInfo['step'],$match) and $text != $cancelText){
     setUser();
     $uid = $match[1];
+    bot('editMessageReplyMarkup',[
+		'chat_id' => $from_id,
+		'message_id' => $match[2],
+		'reply_markup' => json_encode(['inline_keyboard'=>[
+		    [['text'=>"لغو شد ❌",'callback_data'=>"wizwizch"]]
+		    ]])
+    ]);
+
     sendMessage('پیامت رو براش ارسال کردم ... 🤝',$removeKeyboard);
     sendMessage('خب برگشتم عقب اگه کاری داری بگو 😉 | اگه خواستی یکی از گزینه هارو انتخاب کن که کارتو انجام بدم
 
@@ -4633,9 +4641,9 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
             $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $id);
         } 
     }else {
-        $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip); 
+        $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $id); 
         if(! $response->success){
-            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip);
+            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $id);
         }
     }
     if(is_null($response)){
@@ -5459,6 +5467,32 @@ if(preg_match('/^editDestName(\d+)/',$userInfo['step'], $match) && $text != $can
         exit;
     }else sendMessage("ویرایش تنظیمات پلن", $keys, "HTML");
 }
+if(preg_match('/^editSpiderX(\d+)/',$data) and ($from_id == $admin || $userInfo['isAdmin'] == true) && $text != $cancelText){
+    setUser($data);
+    delMessage();
+    sendMessage("🎯 spiderX رو برام وارد کن\nبرای حذف کردن متن /empty رو وارد کن",$cancelKey);exit;
+}
+if(preg_match('/^editSpiderX(\d+)/',$userInfo['step'], $match) && $text != $cancelText){
+    if($text == "/empty"){
+        $stmt = $connection->prepare("UPDATE `server_plans` SET `spiderX`=NULL WHERE `id`=?");
+        $stmt->bind_param("s", $match[1]);
+    }else{
+        $stmt = $connection->prepare("UPDATE `server_plans` SET `spiderX`=? WHERE `id`=?");
+        $stmt->bind_param("si", $text, $match[1]);
+    }
+    $stmt->execute();
+    $stmt->close();
+
+
+    sendMessage("با موفقیت برات تغییر دادم ☺️☑️");
+    setUser();
+    
+    $keys = getPlanDetailsKeys($match[1]);
+    if($keys == null){
+        alert("موردی یافت نشد");
+        exit;
+    }else sendMessage("ویرایش تنظیمات پلن", $keys, "HTML");
+}
 if(preg_match('/^editServerNames(\d+)/',$data) and ($from_id == $admin || $userInfo['isAdmin'] == true) && $text != $cancelText){
     setUser($data);
     delMessage();
@@ -5489,6 +5523,27 @@ if(preg_match('/^editServerNames(\d+)/',$userInfo['step'], $match) && $text != $
         alert("موردی یافت نشد");
         exit;
     }else sendMessage("ویرایش تنظیمات پلن", $keys, "HTML");
+}
+if(preg_match('/^editFlow(\d+)/',$data, $match) and ($from_id == $admin || $userInfo['isAdmin'] == true) && $text != $cancelText){
+    setUser($data);
+    delMessage();
+    $keys = json_encode(['inline_keyboard'=>[
+        [['text'=>"None", 'callback_data'=>"editPFlow" . $match[1] . "_None"]],
+        [['text'=>"xtls-rprx-vision", 'callback_data'=>"editPFlow" . $match[1] . "_xtls-rprx-vision"]],
+        ]]);
+    sendMessage("🎯 لطفا یکی از موارد زیر رو انتخاب کن",$keys);exit;
+}
+if(preg_match('/^editPFlow(\d+)_(.*)/',$data, $match) && $text != $cancelText){
+    $stmt = $connection->prepare("UPDATE `server_plans` SET `flow`=? WHERE `id`=?");
+    $stmt->bind_param("si", $match[2], $match[1]);
+    $stmt->execute();
+    $stmt->close();
+
+    alert("با موفقیت برات تغییر دادم ☺️☑️");
+    setUser();
+    
+    $keys = getPlanDetailsKeys($match[1]);
+    editText($message_id, "ویرایش تنظیمات پلن", $keys, "HTML");
 }
 if(preg_match('/^wizwizplanrial(\d+)/',$data) and ($from_id == $admin || $userInfo['isAdmin'] == true) && $text != $cancelText){
     setUser($data);
@@ -6115,7 +6170,7 @@ if(preg_match('/payRenewWithWallet(.*)/', $data,$match)){
 	$stmt->execute();
 	$stmt->close();
 	$stmt = $connection->prepare("INSERT INTO `increase_order` VALUES (NULL, ?, ?, ?, ?, ?, ?);");
-	$stmt->bind_param("iiisii", $uid, $server_id, $inbound_id, $remark, $price, $time);
+	$stmt->bind_param("iiisii", $from_id, $server_id, $inbound_id, $remark, $price, $time);
 	$stmt->execute();
 	$stmt->close();
 	
@@ -6182,8 +6237,17 @@ if(preg_match('/switchServer(.+)_(.+)/',$data,$match)){
     $inbound_id = $order['inbound_id'];
     $server_id = $order['server_id'];
     $remark = $order['remark'];
+    $fid = $order['fileid'];
     $protocol = $order['protocol'];
 	$link = json_decode($order['link'])[0];
+	
+    $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `id`=?");
+    $stmt->bind_param("i", $fid);
+    $stmt->execute();
+    $file_detail = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $flow = $file_detail['flow'] == "None"?"":$file_detail['flow'];
 	
     $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
     $stmt->bind_param("i", $server_id);
@@ -6225,7 +6289,7 @@ if(preg_match('/switchServer(.+)_(.+)/',$data,$match)){
                     $newArr = [
                       "$id_label" => $uniqid,
                       "email" => $remark,
-                      "flow" => "xtls-rprx-vision",
+                      "flow" => $flow,
                       "limitIp" => $remove_response['limitIp'],
                       "totalGB" => $total - $up - $down,
                       "expiryTime" => $remove_response['expiryTime']
@@ -6444,7 +6508,7 @@ if(preg_match('/payIncreaseDayWithCartToCart(.*)/',$userInfo['step'], $match) an
     $stmt->execute();
     $res = $stmt->get_result()->fetch_assoc();
     $stmt->close();
-    $price = $res['price'];
+    $price = $payParam['price'];
     $volume = $res['volume'];
 
     $msg = "
@@ -6576,7 +6640,7 @@ if(preg_match('/payIncraseDayWithWallet(.*)/', $data,$match)){
     $stmt->execute();
     $res = $stmt->get_result()->fetch_assoc();
     $stmt->close();
-    $price = $res['price'];
+    $price = $payParam['price'];
     $volume = $res['volume'];
     
     $userwallet = $userInfo['wallet'];
@@ -6757,7 +6821,7 @@ if(preg_match('/payIncreaseWithCartToCart(.*)/',$userInfo['step'],$match) and $t
     $stmt->execute();
     $res = $stmt->get_result()->fetch_assoc();
     $stmt->close();
-    $price = $res['price'];
+    $price = $payParam['price'];
     $volume = $res['volume'];
     $state = str_replace('payIncreaseWithCartToCart','',$userInfo['step']);
     $msg = "
@@ -6908,7 +6972,7 @@ if(preg_match('/decIncreaseDay(.*)/',$data,$match) && ($from_id == $admin || $us
     $planid = $increaseInfo[4];
 
     $uid = $payParam['user_id'];
-    $stmt = $connection->prepare("SELECT * FROM `increase_plan` WHERE `id` = ?");
+    $stmt = $connection->prepare("SELECT * FROM `increase_day` WHERE `id` = ?");
     $stmt->bind_param("i",$planid);
     $stmt->execute();
     $res = $stmt->get_result()->fetch_assoc();
@@ -6945,12 +7009,12 @@ if(preg_match('/payIncraseWithWallet(.*)/', $data,$match)){
     $remark = $increaseInfo[3];
     $planid = $increaseInfo[4];
 
-    $stmt = $connection->prepare("SELECT * FROM `increase_day` WHERE `id` = ?");
+    $stmt = $connection->prepare("SELECT * FROM `increase_plan` WHERE `id` = ?");
     $stmt->bind_param("i", $planid);
     $stmt->execute();
     $res = $stmt->get_result()->fetch_assoc();
     $stmt->close();
-    $price = $res['price'];
+    $price = $payParam['price'];
     $volume = $res['volume'];
     
     $userwallet = $userInfo['wallet'];
