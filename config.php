@@ -356,7 +356,7 @@ function NOWPayments($method, $endpoint, $datas = [])
     if(curl_error($ch)) var_dump(curl_error($ch));
     else return json_decode($res);
 }
-function getServerConfigKeys($serverId,$offset){
+function getServerConfigKeys($serverId,$offset = 0){
     global $connection;
     $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
     $stmt->bind_param("i", $serverId);
@@ -433,7 +433,7 @@ function getServerConfigKeys($serverId,$offset){
             ],
         [
             ['text'=>$requestHeader,'callback_data'=>"editsServerrequest_header$id"],
-            ['text'=>"response header",'callback_data'=>"wizwizch"],
+            ['text'=>"request header",'callback_data'=>"wizwizch"],
             ],
         [
             ['text'=>$responseHeader,'callback_data'=>"editsServerresponse_header$id"],
@@ -954,7 +954,9 @@ function getPlanDetailsKeys($planId){
         $acount =$pd['acount'];
         $rahgozar = $pd['rahgozar'];
         $dest = $pd['dest']??" ";
+        $spiderX = $pd['spiderX']??" ";
         $serverName = $pd['serverNames']??" ";
+        $flow = $pd['flow'];
 
         $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `status`=1 AND `fileid`=?");
         $stmt->bind_param("i", $id);
@@ -966,8 +968,10 @@ function getPlanDetailsKeys($planId){
         $keyboard = [
             ($rahgozar==true?[['text'=>"* نوع پلن: رهگذر *",'callback_data'=>'wizwizch']]:[]),
             [['text'=>$name,'callback_data'=>"wizwizplanname$id"],['text'=>"🔮 نام پلن",'callback_data'=>"wizwizch"]],
-            ($reality == "true"?[['text'=>$dest,'callback_data'=>"editDestName$id"],['text'=>"🔮 dest",'callback_data'=>"wizwizch"]]:[]),
-            ($reality == "true"?[['text'=>$serverName,'callback_data'=>"editServerNames$id"],['text'=>"🔮 serverNames",'callback_data'=>"wizwizch"]]:[]),
+            ($reality == "true"?[['text'=>$dest,'callback_data'=>"editDestName$id"],['text'=>"dest",'callback_data'=>"wizwizch"]]:[]),
+            ($reality == "true"?[['text'=>$serverName,'callback_data'=>"editServerNames$id"],['text'=>"serverNames",'callback_data'=>"wizwizch"]]:[]),
+            ($reality == "true"?[['text'=>$spiderX,'callback_data'=>"editSpiderX$id"],['text'=>"spiderX",'callback_data'=>"wizwizch"]]:[]),
+            ($reality == "true"?[['text'=>$flow,'callback_data'=>"editFlow$id"],['text'=>"flow",'callback_data'=>"wizwizch"]]:[]),
             [['text'=>$wizwizplanaccnumber,'callback_data'=>"wizwizch"],['text'=>"🎗 تعداد اکانت های فروخته شده",'callback_data'=>"wizwizch"]],
             ($pd['inbound_id'] != 0?[['text'=>"$acount",'callback_data'=>"wizwizplanslimit$id"],['text'=>"🚪 تغییر ظرفیت کانفیگ",'callback_data'=>"wizwizch"]]:[]),
             ($pd['inbound_id'] != 0?[['text'=>$pd['inbound_id'],'callback_data'=>"wizwizplansinobundid$id"],['text'=>"🚪 سطر کانفیگ",'callback_data'=>"wizwizch"]]:[]),
@@ -1931,7 +1935,7 @@ function resetClientTraffic($server_id, $remark, $inboundId = null){
     return $response = json_decode($response);
 
 }
-function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $remark, $volume, $limitip = 1, $newarr = ''){
+function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $remark, $volume, $limitip = 1, $newarr = '', $planId = null){
     global $connection;
     $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
     $stmt->bind_param("i", $server_id);
@@ -1962,11 +1966,19 @@ function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $re
     if($newarr == ''){
 		if($serverType == "sanaei" || $serverType == "alireza"){
 		    if($reality == "true"){
+                $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `id`=?");
+                $stmt->bind_param("i", $planId);
+                $stmt->execute();
+                $file_detail = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
+            
+                $flow = $file_detail['flow'] == "None"?"":$file_detail['flow'];
+                
                 $newClient = [
                     "$id_label" => $client_id,
                     "email" => $remark,
                     "limitIp" => $limitip,
-                    "flow" => "xtls-rprx-vision",
+                    "flow" => "' . $flow .'",
                     "totalGB" => $volume,
                     "expiryTime" => $expiryTime
                 ];
@@ -2177,9 +2189,10 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                     if($tlsStatus == "reality"){
                         $realitySettings = json_decode($row->streamSettings)->realitySettings;
                         $fp = $realitySettings->settings->fingerprint;
+                        $spiderX = $realitySettings->settings->spiderX;
                         $pbk = $realitySettings->settings->publicKey;
                         $sni = $realitySettings->serverNames[0];
-                        $flow = "xtls-rprx-vision";
+                        $flow = $settings['clients'][0]['flow'];
                         $sid = $realitySettings->shortIds[0];
                     }
                 }
@@ -2217,6 +2230,14 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
         }else{
             if($row->id == $inbound_id) {
                 if($serverType == "sanaei" || $serverType == "alireza"){
+                    $settings = json_decode($row->settings);
+                    $clients = $settings->clients;
+                    foreach($clients as $key => $client) {
+                        if($client->email == $remark) {
+                            $flow = $client->flow;
+                            break;
+                        }
+                    }
                     $remark = $row->remark . "-" . $remark;
                 }
                 
@@ -2233,9 +2254,9 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                     if($tlsStatus == "reality"){
                         $realitySettings = json_decode($row->streamSettings)->realitySettings;
                         $fp = $realitySettings->settings->fingerprint;
+                        $spiderX = $realitySettings->settings->spiderX;
                         $pbk = $realitySettings->settings->publicKey;
                         $sni = $realitySettings->serverNames[0];
-                        $flow = "xtls-rprx-vision";
                         $sid = $realitySettings->shortIds[0];
                     }
                 }elseif($netType == 'ws') {
@@ -2280,16 +2301,17 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                     $subDomain = RandomString(4,"domain");
                     if(count($explodeAdd) >= 3) $sni = "{$uniqid}.{$explodeAdd[1]}.{$explodeAdd[2]}";
                     else $sni = "{$uniqid}.$server_ip";
+                    if(empty($host)) $host = $server_ip;
                 }
                 
                 $psting = '';
-                if($header_type == 'http' && $tlsStatus != "reality") $psting .= "&path=/&host=$host"; else $psting .= '';
+                if($header_type == 'http' && $tlsStatus != "reality" && $rahgozar != true) $psting .= "&path=/&host=$host"; else $psting .= '';
                 if($netType == 'tcp' and $header_type == 'http') $psting .= '&headerType=http';
                 if(strlen($sni) > 1 && $tlsStatus != "reality") $psting .= "&sni=$sni";
                 if(strlen($serverName)>1 && $tlsStatus=="xtls") $server_ip = $serverName;
                 if($tlsStatus == "xtls" && $netType == "tcp") $psting .= "&flow=xtls-rprx-direct";
-                if($tlsStatus=="reality") $psting .= "&fp=$fp&pbk=$pbk&sni=$sni&flow=xtls-rprx-vision&sid=$sid";
-                if($rahgozar == true) $psting .= "&path=" . urlencode("$path?ed=2048") . "&encryption=none&host=$server_ip";
+                if($tlsStatus=="reality") $psting .= "&fp=$fp&pbk=$pbk&sni=$sni" . ($flow != ""?"&flow=$flow":"") . "&sid=$sid&spx=$spiderX";
+                if($rahgozar == true) $psting .= "&path=" . urlencode("$path?ed=2048") . "&encryption=none&host=$host";
                 $outputlink = "$protocol://$uniqid@$server_ip:" . ($rahgozar == true?"443":$port) . "?type=$netType&security=" . ($rahgozar==true?"tls":$tlsStatus) . "{$psting}#$remark";
                 if($netType == 'grpc'){
                     if($tlsStatus == 'tls'){
@@ -2318,8 +2340,8 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                     "aid"=> 0,
                     "net"=> $netType,
                     "type"=> $kcpType ? $kcpType : "none",
-                    "host"=> $rahgozar == true? $server_ip:(is_null($host) ? '' : $host),
-                    "path"=> $rahgozar == true?"$path?ed=2048":((is_null($path) and $path != '') ? '/' : (is_null($path) ? '' : $path)),
+                    "host"=> ($rahgozar == true && empty($host))? $server_ip:(is_null($host) ? '' : $host),
+                    "path"=> ($rahgozar == true)?("$path?ed=2048"):((is_null($path) and $path != '') ? '/' : (is_null($path) ? '' : $path)),
                     "tls"=> $rahgozar == true?"tls":((is_null($tlsStatus)) ? 'none' : $tlsStatus)
                 ];
                 
@@ -2333,7 +2355,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
 
                     $vmessArr['alpn'] = 'http/1.1';
                 }
-                if($header_type == 'http'){
+                if($header_type == 'http' && $rahgozar != true){
                     $vmessArr['path'] = "/";
                     $vmessArr['type'] = $header_type;
                     $vmessArr['host'] = $host;
@@ -2351,7 +2373,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                 $urldata = base64_encode(json_encode($vmessArr,JSON_UNESCAPED_SLASHES,JSON_PRETTY_PRINT));
                 $outputlink = "vmess://$urldata";
             }
-        }else {
+        }else { 
             if($protocol == 'vless'){
                 if($rahgozar == true){
                     $parseAdd = parse_url($server_ip);
@@ -2360,13 +2382,15 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                     $subDomain = RandomString(4,"domain");
                     if(count($explodeAdd) >= 3) $sni = "{$uniqid}.{$explodeAdd[1]}.{$explodeAdd[2]}";
                     else $sni = "{$uniqid}.$server_ip";
+                    
+                    if(empty($host)) $host = $server_ip;
                 }
                 
                 if(strlen($sni) > 1 && $tlsStatus != "reality") $psting = "&sni=$sni"; else $psting = '';
                 if($netType == 'tcp'){
                     if($netType == 'tcp' and $header_type == 'http') $psting .= '&headerType=http';
                     if($tlsStatus=="xtls") $psting .= "&flow=xtls-rprx-direct";
-                    if($tlsStatus=="reality") $psting .= "&fp=$fp&pbk=$pbk&sni=$sni&flow=xtls-rprx-vision&sid=$sid";
+                    if($tlsStatus=="reality") $psting .= "&fp=$fp&pbk=$pbk&sni=$sni" . ($flow != ""?"&flow=$flow":"") . "&sid=$sid&spx=$spiderX";
                     else $psting .= "&path=/&host=$host";
                     $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus{$psting}#$remark";
                 }elseif($netType == 'ws'){
@@ -2401,8 +2425,8 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                     "aid"=> 0,
                     "net"=> $netType,
                     "type"=> ($headerType) ? $headerType : ($kcpType ? $kcpType : "none"),
-                    "host"=> $rahgozar == true?$server_ip:(is_null($host) ? '' : $host),
-                    "path"=> $rahgozar == true?"$path?ed=2048" :((is_null($path) and $path != '') ? '/' : (is_null($path) ? '' : $path)),
+                    "host"=> ($rahgozar == true && empty($host))?$server_ip:(is_null($host) ? '' : $host),
+                    "path"=> ($rahgozar == true)?("$path?ed=2048") :((is_null($path) and $path != '') ? '/' : (is_null($path) ? '' : $path)),
                     "tls"=> $rahgozar == true?"tls":((is_null($tlsStatus)) ? 'none' : $tlsStatus)
                 ];
                 if($rahgozar == true){
@@ -3235,8 +3259,14 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
                     $file_detail = $stmt->get_result()->fetch_assoc();
                     $stmt->close();
                 
-                    $dest = $file_detail['dest'];
-                    $serverNames = $file_detail['serverNames'];
+                    $dest = !empty($file_detail['dest'])?$file_detail['dest']:"yahoo.com";
+                    $serverNames = !empty($file_detail['serverNames'])?$file_detail['serverNames']:
+'[
+    "yahoo.com",
+    "www.yahoo.com"
+]';
+                    $spiderX = !empty($file_detail['spiderX'])?$file_detail['spiderX']:"";
+                    $flow = $file_detail['flow'] == "None"?"":$file_detail['flow'];
                     
 
 		            $netType = "tcp";
@@ -3263,7 +3293,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
                                 "settings": {
                                   "publicKey": "' . $publicKey . '",
                                   "fingerprint": "firefox",
-                                  "serverName": "' . $serverName . '"
+                                  "serverName": "' . $serverName . '",
+                                  "spiderX": "' . $spiderX . '"
                                 }
                               },
                               "tcpSettings": {
@@ -3278,7 +3309,7 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
         				{
         				  "id": "'.$client_id.'",
                           "email": "' . $remark. '",
-                          "flow": "xtls-rprx-vision",
+                          "flow": "' . $flow .'",
                           "limitIp": 0,
                           "totalGB": 0,
                           "expiryTime": 0
