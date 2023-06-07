@@ -105,7 +105,6 @@ wait
 git clone https://github.com/wizwizdev/wizwizxui-timebot.git /var/www/html/wizwizxui-timebot
 sudo chown -R www-data:www-data /var/www/html/wizwizxui-timebot/
 sudo chmod -R 755 /var/www/html/wizwizxui-timebot/
-sudo chmod -R 777 /root/
 echo -e "\n\033[33mWizWiz config and script have been installed successfully\033[0m"
 
 wait
@@ -148,7 +147,7 @@ if [ ! -d "/root/confwizwiz" ]; then
     sleep 1
     
     touch /root/confwizwiz/dbrootwizwiz.txt
-    
+    sudo chmod -R 777 /root/confwizwiz/dbrootwizwiz.txt
     sleep 1
     
     randomdbpasstxt=$(openssl rand -base64 10 | tr -dc 'a-zA-Z0-9' | cut -c1-8)
