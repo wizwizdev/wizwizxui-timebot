@@ -183,10 +183,10 @@ do
 
 			
 			
-			if [ -d "/root/updatewizwiz/wizup.txt" ]; then
-			    echo -e "\e[92mPanel: \e[31mhttps://${DOMAIN_NAME}/wizpanel${PATHS}\033[0m\n"
-			else
+			if [ -d "/root/confwizwiz/dbrootwizwiz.txt" ]; then
 			    echo -e "\e[92mPanel: \e[31mhttps://${DOMAIN_NAME}/wizpanel${PATHS2}\033[0m\n"
+			else
+			    echo -e "\e[92mPanel: \e[31mhttps://${DOMAIN_NAME}/wizpanel${PATHS}\033[0m\n"
 			fi
 			
 			
