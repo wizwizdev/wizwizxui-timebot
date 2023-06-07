@@ -26,7 +26,7 @@ if($robotState == "off" && $from_id != $admin){
     exit();
 }
 if(strpos($text, "/start ") !== false){
-    $inviter = str_replace("/start ", null, $text);
+    $inviter = str_replace("/start ", "", $text);
     
     if($uinfo->num_rows == 0 && $inviter != $from_id){
         
@@ -5171,7 +5171,7 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan)/',$userInfo['step']) and $text!=
         sendMessage($msg);
     }
     if($step==55 and $text!=$cancelText){
-        if($text != "tcp" && $text != "ws" && $text != grpc){
+        if($text != "tcp" && $text != "ws" && $text != "grpc"){
             sendMessage("لطفا فقط نوع (ws | tcp | grpc) را وارد کنید");
             exit();
         }
