@@ -84,125 +84,6 @@ bash <(curl -s https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/mai
 
 <br>
 
-<h2 align="center">
-<a href="https://t.me/wizwizch/193">Installation tutorial on Ubuntu server</a>
-</h2>
-
-<br>
-
-<h2 align="center">
-<a href="https://t.me/wizwizch/192">Installation tutorial on cPanel host</a>
-</h2>
-
-
-
-<br>
-<hr>
-<br>
-
-
-
-## The instructions for installing on the host, download the project through the link below
-
-````
-https://github.com/wizwizdev/wizwizxui-timebot/archive/refs/heads/main.zip
-````
-
-<br>
-
-
-# Important items in the host
-
-## 1- Error 500 in cPanel host
-
-> In the cpanel host, click on the Select PHPVersion option and activate the following options in the extension section:
-- pdo_mysql
-- mysqlnd
-- nd_mysqli
-> Disable the following options:
-- mysqli
-- nd_pdo_mysql
-### If the following option is blue, please activate it:
-
-<br>
-     <a align="center">
-         <img src="https://user-images.githubusercontent.com/27927279/230842783-16f6d1a5-e726-4533-a57b-98cb04fa8dfc.PNG" />
-     </a>
-<br>
-<br>
-
-## 2- Activation of the following extensions
-
-- soap (for the payment gateway)
-- ssh2 (to back up from the panel) for some hosts, this does not exist and you cannot use the backup function
-- fileinfo ( Token not found error )
-
-
-<br>
-
-
-## 3- Notes after installation
-
-- After installation, be sure to completely delete the install folder and the create DB.php file inside the wizwizxui-timebot-main folder
-
-
-<br>
-
-## 4- Kronjob for the following files
-
-- messagewizwiz.php
-- rewardReport.php
-- warnusers.php
-- backupnutif.php
-
-````
-/usr/bin/php -q /home/wizwizro/public_html/wizwizxui-timebot-main/settings/messagewizwiz.php >/dev/null 2>&1
-````
-
-
-- instead of wizwizro, you should take the desired address from the host according to the image below and enter it
-
-
-<p align="center">
-     <img src="https://user-images.githubusercontent.com/27927279/229339959-3da695e6-eee8-49b0-a520-37552d50090f.PNG" />
-</p>
-
-
-
-- You must create a separate cron job for each of the files warnusers.php - rewardReport.php - messagewizwiz.php, but it is different for the backupnutif.php file that you must do as follows
-
-
-````
-/usr/bin/php -q /home/wizwizro/public_html/panel_folder_name/backupnutif.php >/dev/null 2>&1
-````
-
-
-<br>
-<hr>
-<br>
-
-# Important Points
-
-- To force lock the channel, make sure the bot is the admin of the channel and give it full admin access (tick them all)
-- If you install the Vizuise panel on the host, be sure to activate the ssh2 extension to perform the backup work.
-- To use the NowPayment portal, the charge amount must be above 3.5 dollars because it cannot be paid below 3.5 dollars.
-- Lokishhost or Linux should not be hosted in Iran (because Telegram is restricted and censored in Iran)
-- If you use trojan protocol, your x-ui panel must support trojan, otherwise your panel will have problems.
-- If the remaining traffic of the service reaches one gigabyte and the remaining time reaches one day, a notification is sent to the user.
-- If the user does not renew the service within 48 hours, the service deletion notification will be sent to the user and the service will be deleted.
-- To create a test account, set the price to 0, each user can have a test account only once
-- To use HTTP and Header in the robot, you must set the value of Header Type to http and enter the value of Host:domain.ir for the request header.
-- If we use reality, after registering the plan, please edit the plan and enter the desired dest and servername value.
-- If you use the tunnel, be sure to read the <a href="https://t.me/wizwizch/177">text</a> inside the channel carefully.
-- If you encounter an error (your connection to the server is not established) while shopping, be sure to listen to <a href="https://t.me/wizwizch/186">Voice</a> inside the channel.
-
-
-
-<br>
-<hr>
-<br>
-
-
 
 # Supported Panels
 
@@ -223,8 +104,6 @@ bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.s
 ````
 bash <(curl -Ls https://raw.githubusercontent.com/vaxilu/x-ui/master/install.sh)
 ````
-
-- The rest of the panels probably do not support it because it has not been tested, so you can test and use it yourself
 
 
 
