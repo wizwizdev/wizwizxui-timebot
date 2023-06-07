@@ -170,10 +170,9 @@ do
 			
 			DOMAIN_NAME="$domainname"
 			
-			PATHS=$(cat /root/updatewizwiz/wizup.txt | grep '$path' | cut -d"'" -f2)
+			PATHS3=$(cat /root/updatewizwiz/wizup.txt | grep '$path' | cut -d"'" -f2)
 			PATHS=$(cat /root/confwizwiz/dbrootwizwiz.txt | grep '$path' | cut -d"'" -f2)
 			
-			(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizpanel${PATHS}/backupnutif.php >/dev/null 2>&1") | sort - | uniq - | crontab -
 			fi
 			
 			clear
@@ -183,11 +182,13 @@ do
 			
 # 			PATHS2=$(cat /root/confwizwiz/dbrootwizwiz.txt | grep '$path' | cut -d"'" -f2)
 # 			PATHS3=$(cat /root/updatewizwiz/wizup.txt | grep '$path' | cut -d"'" -f2)
-# 			if [ -d "/root/confwizwiz/dbrootwizwiz.txt" ]; then
-			echo -e "\e[92mPanel: \e[31mhttps://${DOMAIN_NAME}/wizpanel${PATHS}\033[0m\n"
-# 			else
-# 			    echo -e "\e[92mPanel: \e[31mhttps://${DOMAIN_NAME}/wizpanel${PATHS3}\033[0m\n"
-# 			fi
+			if [ -d "/root/confwizwiz/dbrootwizwiz.txt" ]; then
+                            echo -e "\e[92mPanel: \e[31mhttps://${DOMAIN_NAME}/wizpanel${PATHS}\033[0m\n"
+			    (crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizpanel${PATHS}/backupnutif.php >/dev/null 2>&1") | sort - | uniq - | crontab -
+			else
+			    echo -e "\e[92mPanel: \e[31mhttps://${DOMAIN_NAME}/wizpanel${PATHS3}\033[0m\n"
+			    (crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizpanel${PATHS3}/backupnutif.php >/dev/null 2>&1") | sort - | uniq - | crontab -
+			fi
 			
 			
 			
