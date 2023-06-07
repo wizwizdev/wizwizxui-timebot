@@ -171,7 +171,7 @@ do
 			DOMAIN_NAME="$domainname"
 			
 			PATHS=$(cat /root/updatewizwiz/wizup.txt | grep '$path' | cut -d"'" -f2)
-			PATHS=$(cat /root/confwizwiz/dbrootwizwiz.txt | grep '$path' | cut -d"'" -f2)
+			PATHS2=$(cat /root/confwizwiz/dbrootwizwiz.txt | grep '$path' | cut -d"'" -f2)
 			
 			(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizpanel${PATHS}/backupnutif.php >/dev/null 2>&1") | sort - | uniq - | crontab -
 			fi
@@ -181,8 +181,14 @@ do
 			echo -e ' '
 			echo -e ' '
 
-
-			echo -e "\e[92mPanel: \e[31mhttps://${DOMAIN_NAME}/wizpanel${PATHS}\033[0m\n"
+			
+			
+			if [ -d "/root/updatewizwiz/wizup.txt" ]; then
+			    echo -e "\e[92mPanel: \e[31mhttps://${DOMAIN_NAME}/wizpanel${PATHS}\033[0m\n"
+			else
+			    echo -e "\e[92mPanel: \e[31mhttps://${DOMAIN_NAME}/wizpanel${PATHS2}\033[0m\n"
+			fi
+			
 			
 		
 			echo -e "\e[92mThe script was successfully updated!\033[0m\n"
