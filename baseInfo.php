@@ -4,6 +4,6 @@
   $dbUserName = '[DBUSERNAME]';
   $dbPassword = '[DBPASSWORD]';
   $dbName = '[DBNAME]';
-  $admin = '[ADMIN]';
+  $admin = [ADMIN];
   $botUrl = '[BOTURL]';
 ?>
