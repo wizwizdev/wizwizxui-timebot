@@ -131,7 +131,7 @@ bash <(curl -s https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/mai
 
 
 ### رکوئست هدر:
-- برای استفاده از HTTP و Header در ربات باید مقدار Header Type را روی http قرار دهید و مقدار Host:domain.ir را برای هدر درخواست وارد کنید.
+- برای استفاده از HTTP و Header در ربات باید مقدار Header Type را روی http قرار دهید و مقدار Host:domain.ir را برای هدر درخواست وارد کنید و در صورتی که چندتا هدر میخواید فعال کنید از مقدار Host:domain1.ir,domain2.ir استفاده کنید
 
 
 ### ثبت نشدن سرور در ربات:
