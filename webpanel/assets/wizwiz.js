@@ -54,13 +54,28 @@ $(document).ready(function () {
     });
 });
 $(document).ready(function () {
-    $("#insert_plans").submit(function (event) {
+    $("#insert_plans1").submit(function (event) {
         event.preventDefault();
         var formData = $(this).serialize();
         $.ajax({
-            url: "plans.php",
+            url: "singleplans.php",
             type: "POST",
-            data: $(this).serialize() + "&action=insert_plans",
+            data: $(this).serialize() + "&action=insert_plans1",
+            success: function (response) {
+                $("#result").html(response);
+            }
+        });
+    });
+});
+
+$(document).ready(function () {
+    $("#insert_plans2").submit(function (event) {
+        event.preventDefault();
+        var formData = $(this).serialize();
+        $.ajax({
+            url: "multipleplans.php",
+            type: "POST",
+            data: $(this).serialize() + "&action=insert_plans2",
             success: function (response) {
                 $("#result").html(response);
             }

@@ -1,10 +1,14 @@
-<!--
-* WizWiz v7.5.3
-* https://github.com/wizwizdev/wizwizxui-timebot
-* Copyright (c) @wizwizch
--->
 <?php
 include 'includ/header.php';
+?>
+<?php
+$sql_admins = "SELECT * FROM admins";
+$result_admins = $conn->query($sql_admins);
+$row_admins = $result_admins->fetch_assoc();
+$lang_file = 'langs/lang_' . $row_admins['lang'] . '.php';
+if (file_exists($lang_file)) {
+    include($lang_file);
+}
 ?>
 <ul class="mt-4">
     <li class="relative px-6 py-3">
@@ -26,7 +30,7 @@ include 'includ/header.php';
                         d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
                 ></path>
             </svg>
-            <span class="ml-4">Dashboard</span>
+            <span class="ml-4"><?php echo $_LANG['Dashboard'] ?></span>
         </a>
     </li>
 </ul>
@@ -54,7 +58,7 @@ include 'includ/header.php';
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                 ></path>
             </svg>
-            <span class="ml-4">Orders</span>
+            <span class="ml-4"><?php echo $_LANG['Orders'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -76,7 +80,7 @@ include 'includ/header.php';
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                 ></path>
             </svg>
-            <span class="ml-4">Servers</span>
+            <span class="ml-4"><?php echo $_LANG['Servers'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -92,20 +96,33 @@ include 'includ/header.php';
                 <path d="M14,7h3v3a1,1,0,0,0,2,0V7h3a1,1,0,0,0,0-2H19V2a1,1,0,0,0-2,0V5H14a1,1,0,0,0,0,2Z"/>
             </svg>
 
-            <span class="ml-4">category</span>
+            <span class="ml-4"><?php echo $_LANG['category'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
         <a
                 class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
-                href="plans.php"
+                href="singleplans.php"
         >
             <svg stroke-linejoin="round" fill="gray" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                  id="Outline" viewBox="0 0 24 24" width="20" height="20">
                 <path d="M19,3H12.472a1.019,1.019,0,0,1-.447-.1L8.869,1.316A3.014,3.014,0,0,0,7.528,1H5A5.006,5.006,0,0,0,0,6V18a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V8A5.006,5.006,0,0,0,19,3ZM5,3H7.528a1.019,1.019,0,0,1,.447.1l3.156,1.579A3.014,3.014,0,0,0,12.472,5H19a3,3,0,0,1,2.779,1.882L2,6.994V6A3,3,0,0,1,5,3ZM19,21H5a3,3,0,0,1-3-3V8.994l20-.113V18A3,3,0,0,1,19,21Z"/>
             </svg>
 
-            <span class="ml-4">Plans</span>
+            <span class="ml-4"><?php echo $_LANG['SinglePlans'] ?></span>
+        </a>
+    </li>
+    <li class="relative px-6 py-3">
+        <a
+                class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
+                href="multipleplans.php"
+        >
+            <svg stroke-linejoin="round" fill="gray" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                 id="Outline" viewBox="0 0 24 24" width="20" height="20">
+                <path d="M19,3H12.472a1.019,1.019,0,0,1-.447-.1L8.869,1.316A3.014,3.014,0,0,0,7.528,1H5A5.006,5.006,0,0,0,0,6V18a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V8A5.006,5.006,0,0,0,19,3ZM5,3H7.528a1.019,1.019,0,0,1,.447.1l3.156,1.579A3.014,3.014,0,0,0,12.472,5H19a3,3,0,0,1,2.779,1.882L2,6.994V6A3,3,0,0,1,5,3ZM19,21H5a3,3,0,0,1-3-3V8.994l20-.113V18A3,3,0,0,1,19,21Z"/>
+            </svg>
+
+            <span class="ml-4"><?php echo $_LANG['MultiplePlans'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -117,7 +134,7 @@ include 'includ/header.php';
                 <path d="M12,9C17.934,8.844,17.933,.155,12,0c-5.934,.156-5.933,8.845,0,9Zm0-7c3.286,.059,3.285,4.942,0,5-3.285-.059-3.285-4.942,0-5Zm10.204,9.162c-1.143-.953-2.64-1.347-4.099-1.081l-3.821,.695c-.913,.166-1.707,.634-2.284,1.289-.578-.655-1.371-1.123-2.285-1.289l-3.821-.695c-1.461-.264-2.956,.128-4.098,1.081-1.142,.953-1.796,2.352-1.796,3.839v2.793c0,2.417,1.727,4.486,4.106,4.919l6.284,1.143c1.068,.194,2.151,.194,3.219,0l6.285-1.143c2.379-.433,4.105-2.502,4.105-4.919v-2.793c0-1.487-.654-2.886-1.796-3.838Zm-11.204,10.767c-.084-.012-.168-.026-.252-.041l-6.284-1.143c-1.428-.26-2.464-1.501-2.464-2.952v-2.793c0-.892,.393-1.731,1.078-2.303,.685-.573,1.59-.808,2.459-.648l3.821,.695c.952,.173,1.642,1,1.642,1.968v7.217Zm11-4.135c0,1.451-1.036,2.692-2.463,2.952l-6.285,1.143c-.084,.015-.168,.029-.252,.041v-7.217c0-.967,.69-1.795,1.642-1.968l3.821-.695c.875-.16,1.774,.077,2.46,.648,.685,.572,1.077,1.411,1.077,2.303v2.793Z"/>
             </svg>
 
-            <span class="ml-4">Pays</span>
+            <span class="ml-4"><?php echo $_LANG['Pays'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -131,7 +148,7 @@ include 'includ/header.php';
                 </g></svg>
 
 
-            <span class="ml-4">Add Volume</span>
+            <span class="ml-4"><?php echo $_LANG['AddVolume'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -145,7 +162,7 @@ include 'includ/header.php';
             </svg>
 
 
-            <span class="ml-4">Volume orders</span>
+            <span class="ml-4"><?php echo $_LANG['Volumeorders'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -157,7 +174,7 @@ include 'includ/header.php';
                 <path d="m24 12a1 1 0 0 1 -2 0 10.011 10.011 0 0 0 -10-10 1 1 0 0 1 0-2 12.013 12.013 0 0 1 12 12zm-8 1a1 1 0 0 0 0-2h-2.277a2 2 0 0 0 -.723-.723v-3.277a1 1 0 0 0 -2 0v3.277a1.994 1.994 0 1 0 2.723 2.723zm-14.173-6.216a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm.173 5.216a1 1 0 1 0 -1 1 1 1 0 0 0 1-1zm10 10a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-7.779-18.793a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm3.558-2.366a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-5.952 14.375a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm2.394 3.577a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm3.558 2.366a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm14.394-5.943a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-2.394 3.577a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-3.558 2.366a1 1 0 1 0 1 1 1 1 0 0 0 -1-1z"/>
             </svg>
 
-            <span class="ml-4">Discount code</span>
+            <span class="ml-4"><?php echo $_LANG['Discountcode'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -170,7 +187,7 @@ include 'includ/header.php';
             </svg>
 
 
-            <span class="ml-4">Rahgozar</span>
+            <span class="ml-4"><?php echo $_LANG['Rahgozar'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -183,7 +200,7 @@ include 'includ/header.php';
             </svg>
 
 
-            <span class="ml-4">Gift</span>
+            <span class="ml-4"><?php echo $_LANG['Gift'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -194,7 +211,7 @@ include 'includ/header.php';
                  width="21" height="21">
                 <path d="M11.24,24a2.262,2.262,0,0,1-.948-.212,2.18,2.18,0,0,1-1.2-2.622L10.653,16H6.975A3,3,0,0,1,4.1,12.131l3.024-10A2.983,2.983,0,0,1,10,0h3.693a2.6,2.6,0,0,1,2.433,3.511L14.443,8H17a3,3,0,0,1,2.483,4.684l-6.4,10.3A2.2,2.2,0,0,1,11.24,24ZM10,2a1,1,0,0,0-.958.71l-3.024,10A1,1,0,0,0,6.975,14H12a1,1,0,0,1,.957,1.29L11.01,21.732a.183.183,0,0,0,.121.241A.188.188,0,0,0,11.4,21.9l6.4-10.3a1,1,0,0,0,.078-1.063A.979.979,0,0,0,17,10H13a1,1,0,0,1-.937-1.351l2.19-5.84A.6.6,0,0,0,13.693,2Z"/>
             </svg>
-            <span class="ml-4">Software</span>
+            <span class="ml-4"><?php echo $_LANG['Software'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -202,7 +219,7 @@ include 'includ/header.php';
             class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
             href="wizwizbackup.php">
             <svg xmlns="http://www.w3.org/2000/svg" fill="gray" id="Outline" viewBox="0 0 24 24" width="21" height="21"><path d="M18.4,7.379a1.128,1.128,0,0,1-.769-.754h0a8,8,0,1,0-15.1,5.237A1.046,1.046,0,0,1,2.223,13.1,5.5,5.5,0,0,0,.057,18.3,5.622,5.622,0,0,0,5.683,23H11a1,1,0,0,0,1-1h0a1,1,0,0,0-1-1H5.683a3.614,3.614,0,0,1-3.646-2.981,3.456,3.456,0,0,1,1.376-3.313A3.021,3.021,0,0,0,4.4,11.141a6.113,6.113,0,0,1-.073-4.126A5.956,5.956,0,0,1,9.215,3.05,6.109,6.109,0,0,1,9.987,3a5.984,5.984,0,0,1,5.756,4.28,2.977,2.977,0,0,0,2.01,1.99,5.934,5.934,0,0,1,.778,11.09.976.976,0,0,0-.531.888h0a.988.988,0,0,0,1.388.915c4.134-1.987,6.38-7.214,2.88-12.264A6.935,6.935,0,0,0,18.4,7.379Z"/><path d="M18.707,16.707a1,1,0,0,0,0-1.414l-1.586-1.586a3,3,0,0,0-4.242,0l-1.586,1.586a1,1,0,0,0,1.414,1.414L14,15.414V23a1,1,0,0,0,2,0V15.414l1.293,1.293a1,1,0,0,0,1.414,0Z"/></svg>
-            <span class="ml-4">Backup</span>
+            <span class="ml-4"><?php echo $_LANG['Backup'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -215,7 +232,7 @@ include 'includ/header.php';
                 <path d="M21.294,13.9l-.444-.256a9.1,9.1,0,0,0,0-3.29l.444-.256a3,3,0,1,0-3-5.2l-.445.257A8.977,8.977,0,0,0,15,3.513V3A3,3,0,0,0,9,3v.513A8.977,8.977,0,0,0,6.152,5.159L5.705,4.9a3,3,0,0,0-3,5.2l.444.256a9.1,9.1,0,0,0,0,3.29l-.444.256a3,3,0,1,0,3,5.2l.445-.257A8.977,8.977,0,0,0,9,20.487V21a3,3,0,0,0,6,0v-.513a8.977,8.977,0,0,0,2.848-1.646l.447.258a3,3,0,0,0,3-5.2Zm-2.548-3.776a7.048,7.048,0,0,1,0,3.75,1,1,0,0,0,.464,1.133l1.084.626a1,1,0,0,1-1,1.733l-1.086-.628a1,1,0,0,0-1.215.165,6.984,6.984,0,0,1-3.243,1.875,1,1,0,0,0-.751.969V21a1,1,0,0,1-2,0V19.748a1,1,0,0,0-.751-.969A6.984,6.984,0,0,1,7.006,16.9a1,1,0,0,0-1.215-.165l-1.084.627a1,1,0,1,1-1-1.732l1.084-.626a1,1,0,0,0,.464-1.133,7.048,7.048,0,0,1,0-3.75A1,1,0,0,0,4.79,8.992L3.706,8.366a1,1,0,0,1,1-1.733l1.086.628A1,1,0,0,0,7.006,7.1a6.984,6.984,0,0,1,3.243-1.875A1,1,0,0,0,11,4.252V3a1,1,0,0,1,2,0V4.252a1,1,0,0,0,.751.969A6.984,6.984,0,0,1,16.994,7.1a1,1,0,0,0,1.215.165l1.084-.627a1,1,0,1,1,1,1.732l-1.084.626A1,1,0,0,0,18.746,10.125Z"/>
             </svg>
 
-            <span class="ml-4">Settings</span>
+            <span class="ml-4"><?php echo $_LANG['Settings'] ?></span>
         </a>
     </li>
 </ul>
@@ -315,7 +332,7 @@ include 'includ/header.php';
                                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
                         ></path>
                     </svg>
-                    <span class="ml-4">Dashboard</span>
+                    <span class="ml-4"><?php echo $_LANG['Dashboard'] ?></span>
                 </a>
             </li>
         </ul>
@@ -343,7 +360,7 @@ include 'includ/header.php';
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                         ></path>
                     </svg>
-                    <span class="ml-4">Orders</span>
+                    <span class="ml-4"><?php echo $_LANG['Orders'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -365,7 +382,7 @@ include 'includ/header.php';
                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                         ></path>
                     </svg>
-                    <span class="ml-4">Servers</span>
+                    <span class="ml-4"><?php echo $_LANG['Servers'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -381,22 +398,35 @@ include 'includ/header.php';
                         <path d="M14,7h3v3a1,1,0,0,0,2,0V7h3a1,1,0,0,0,0-2H19V2a1,1,0,0,0-2,0V5H14a1,1,0,0,0,0,2Z"/>
                     </svg>
 
-                    <span class="ml-4">category</span>
+                    <span class="ml-4"><?php echo $_LANG['category'] ?></span>
                 </a>
             </li>
-            <li class="relative px-6 py-3">
-                <a
-                        class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
-                        href="plans.php"
-                >
-                    <svg stroke-linejoin="round" fill="gray" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
-                         id="Outline" viewBox="0 0 24 24" width="20" height="20">
-                        <path d="M19,3H12.472a1.019,1.019,0,0,1-.447-.1L8.869,1.316A3.014,3.014,0,0,0,7.528,1H5A5.006,5.006,0,0,0,0,6V18a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V8A5.006,5.006,0,0,0,19,3ZM5,3H7.528a1.019,1.019,0,0,1,.447.1l3.156,1.579A3.014,3.014,0,0,0,12.472,5H19a3,3,0,0,1,2.779,1.882L2,6.994V6A3,3,0,0,1,5,3ZM19,21H5a3,3,0,0,1-3-3V8.994l20-.113V18A3,3,0,0,1,19,21Z"/>
-                    </svg>
+    <li class="relative px-6 py-3">
+        <a
+                class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
+                href="singleplans.php"
+        >
+            <svg stroke-linejoin="round" fill="gray" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                 id="Outline" viewBox="0 0 24 24" width="20" height="20">
+                <path d="M19,3H12.472a1.019,1.019,0,0,1-.447-.1L8.869,1.316A3.014,3.014,0,0,0,7.528,1H5A5.006,5.006,0,0,0,0,6V18a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V8A5.006,5.006,0,0,0,19,3ZM5,3H7.528a1.019,1.019,0,0,1,.447.1l3.156,1.579A3.014,3.014,0,0,0,12.472,5H19a3,3,0,0,1,2.779,1.882L2,6.994V6A3,3,0,0,1,5,3ZM19,21H5a3,3,0,0,1-3-3V8.994l20-.113V18A3,3,0,0,1,19,21Z"/>
+            </svg>
 
-                    <span class="ml-4">Plans</span>
-                </a>
-            </li>
+            <span class="ml-4"><?php echo $_LANG['SinglePlans'] ?></span>
+        </a>
+    </li>
+    <li class="relative px-6 py-3">
+        <a
+                class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
+                href="multipleplans.php"
+        >
+            <svg stroke-linejoin="round" fill="gray" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                 id="Outline" viewBox="0 0 24 24" width="20" height="20">
+                <path d="M19,3H12.472a1.019,1.019,0,0,1-.447-.1L8.869,1.316A3.014,3.014,0,0,0,7.528,1H5A5.006,5.006,0,0,0,0,6V18a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V8A5.006,5.006,0,0,0,19,3ZM5,3H7.528a1.019,1.019,0,0,1,.447.1l3.156,1.579A3.014,3.014,0,0,0,12.472,5H19a3,3,0,0,1,2.779,1.882L2,6.994V6A3,3,0,0,1,5,3ZM19,21H5a3,3,0,0,1-3-3V8.994l20-.113V18A3,3,0,0,1,19,21Z"/>
+            </svg>
+
+            <span class="ml-4"><?php echo $_LANG['MultiplePlans'] ?></span>
+        </a>
+    </li>
             <li class="relative px-6 py-3">
                 <a
                         class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
@@ -406,7 +436,7 @@ include 'includ/header.php';
                         <path d="M12,9C17.934,8.844,17.933,.155,12,0c-5.934,.156-5.933,8.845,0,9Zm0-7c3.286,.059,3.285,4.942,0,5-3.285-.059-3.285-4.942,0-5Zm10.204,9.162c-1.143-.953-2.64-1.347-4.099-1.081l-3.821,.695c-.913,.166-1.707,.634-2.284,1.289-.578-.655-1.371-1.123-2.285-1.289l-3.821-.695c-1.461-.264-2.956,.128-4.098,1.081-1.142,.953-1.796,2.352-1.796,3.839v2.793c0,2.417,1.727,4.486,4.106,4.919l6.284,1.143c1.068,.194,2.151,.194,3.219,0l6.285-1.143c2.379-.433,4.105-2.502,4.105-4.919v-2.793c0-1.487-.654-2.886-1.796-3.838Zm-11.204,10.767c-.084-.012-.168-.026-.252-.041l-6.284-1.143c-1.428-.26-2.464-1.501-2.464-2.952v-2.793c0-.892,.393-1.731,1.078-2.303,.685-.573,1.59-.808,2.459-.648l3.821,.695c.952,.173,1.642,1,1.642,1.968v7.217Zm11-4.135c0,1.451-1.036,2.692-2.463,2.952l-6.285,1.143c-.084,.015-.168,.029-.252,.041v-7.217c0-.967,.69-1.795,1.642-1.968l3.821-.695c.875-.16,1.774,.077,2.46,.648,.685,.572,1.077,1.411,1.077,2.303v2.793Z"/>
                     </svg>
 
-                    <span class="ml-4">Pays</span>
+                    <span class="ml-4"><?php echo $_LANG['Pays'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -420,7 +450,7 @@ include 'includ/header.php';
                         </g></svg>
 
 
-                    <span class="ml-4">Add Volume</span>
+                    <span class="ml-4"><?php echo $_LANG['AddVolume'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -435,7 +465,7 @@ include 'includ/header.php';
                     </svg>
 
 
-                    <span class="ml-4">Volume orders</span>
+                    <span class="ml-4"><?php echo $_LANG['Volumeorders'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -447,7 +477,7 @@ include 'includ/header.php';
                         <path d="m24 12a1 1 0 0 1 -2 0 10.011 10.011 0 0 0 -10-10 1 1 0 0 1 0-2 12.013 12.013 0 0 1 12 12zm-8 1a1 1 0 0 0 0-2h-2.277a2 2 0 0 0 -.723-.723v-3.277a1 1 0 0 0 -2 0v3.277a1.994 1.994 0 1 0 2.723 2.723zm-14.173-6.216a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm.173 5.216a1 1 0 1 0 -1 1 1 1 0 0 0 1-1zm10 10a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-7.779-18.793a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm3.558-2.366a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-5.952 14.375a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm2.394 3.577a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm3.558 2.366a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm14.394-5.943a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-2.394 3.577a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-3.558 2.366a1 1 0 1 0 1 1 1 1 0 0 0 -1-1z"/>
                     </svg>
 
-                    <span class="ml-4">Discount code</span>
+                    <span class="ml-4"><?php echo $_LANG['Discountcode'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -460,7 +490,7 @@ include 'includ/header.php';
                     </svg>
 
 
-                    <span class="ml-4">Rahgozar</span>
+                    <span class="ml-4"><?php echo $_LANG['Rahgozar'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -473,7 +503,7 @@ include 'includ/header.php';
                     </svg>
 
 
-                    <span class="ml-4">Gift</span>
+                    <span class="ml-4"><?php echo $_LANG['Gift'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -484,7 +514,7 @@ include 'includ/header.php';
                          viewBox="0 0 24 24" width="21" height="21">
                         <path d="M11.24,24a2.262,2.262,0,0,1-.948-.212,2.18,2.18,0,0,1-1.2-2.622L10.653,16H6.975A3,3,0,0,1,4.1,12.131l3.024-10A2.983,2.983,0,0,1,10,0h3.693a2.6,2.6,0,0,1,2.433,3.511L14.443,8H17a3,3,0,0,1,2.483,4.684l-6.4,10.3A2.2,2.2,0,0,1,11.24,24ZM10,2a1,1,0,0,0-.958.71l-3.024,10A1,1,0,0,0,6.975,14H12a1,1,0,0,1,.957,1.29L11.01,21.732a.183.183,0,0,0,.121.241A.188.188,0,0,0,11.4,21.9l6.4-10.3a1,1,0,0,0,.078-1.063A.979.979,0,0,0,17,10H13a1,1,0,0,1-.937-1.351l2.19-5.84A.6.6,0,0,0,13.693,2Z"/>
                     </svg>
-                    <span class="ml-4">Software</span>
+                    <span class="ml-4"><?php echo $_LANG['Software'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -492,7 +522,7 @@ include 'includ/header.php';
                         class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
                         href="wizwizbackup.php">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="gray" id="Outline" viewBox="0 0 24 24" width="21" height="21"><path d="M18.4,7.379a1.128,1.128,0,0,1-.769-.754h0a8,8,0,1,0-15.1,5.237A1.046,1.046,0,0,1,2.223,13.1,5.5,5.5,0,0,0,.057,18.3,5.622,5.622,0,0,0,5.683,23H11a1,1,0,0,0,1-1h0a1,1,0,0,0-1-1H5.683a3.614,3.614,0,0,1-3.646-2.981,3.456,3.456,0,0,1,1.376-3.313A3.021,3.021,0,0,0,4.4,11.141a6.113,6.113,0,0,1-.073-4.126A5.956,5.956,0,0,1,9.215,3.05,6.109,6.109,0,0,1,9.987,3a5.984,5.984,0,0,1,5.756,4.28,2.977,2.977,0,0,0,2.01,1.99,5.934,5.934,0,0,1,.778,11.09.976.976,0,0,0-.531.888h0a.988.988,0,0,0,1.388.915c4.134-1.987,6.38-7.214,2.88-12.264A6.935,6.935,0,0,0,18.4,7.379Z"/><path d="M18.707,16.707a1,1,0,0,0,0-1.414l-1.586-1.586a3,3,0,0,0-4.242,0l-1.586,1.586a1,1,0,0,0,1.414,1.414L14,15.414V23a1,1,0,0,0,2,0V15.414l1.293,1.293a1,1,0,0,0,1.414,0Z"/></svg>
-                    <span class="ml-4">Backup</span>
+                    <span class="ml-4"><?php echo $_LANG['Backup'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -506,7 +536,7 @@ include 'includ/header.php';
                         <path d="M21.294,13.9l-.444-.256a9.1,9.1,0,0,0,0-3.29l.444-.256a3,3,0,1,0-3-5.2l-.445.257A8.977,8.977,0,0,0,15,3.513V3A3,3,0,0,0,9,3v.513A8.977,8.977,0,0,0,6.152,5.159L5.705,4.9a3,3,0,0,0-3,5.2l.444.256a9.1,9.1,0,0,0,0,3.29l-.444.256a3,3,0,1,0,3,5.2l.445-.257A8.977,8.977,0,0,0,9,20.487V21a3,3,0,0,0,6,0v-.513a8.977,8.977,0,0,0,2.848-1.646l.447.258a3,3,0,0,0,3-5.2Zm-2.548-3.776a7.048,7.048,0,0,1,0,3.75,1,1,0,0,0,.464,1.133l1.084.626a1,1,0,0,1-1,1.733l-1.086-.628a1,1,0,0,0-1.215.165,6.984,6.984,0,0,1-3.243,1.875,1,1,0,0,0-.751.969V21a1,1,0,0,1-2,0V19.748a1,1,0,0,0-.751-.969A6.984,6.984,0,0,1,7.006,16.9a1,1,0,0,0-1.215-.165l-1.084.627a1,1,0,1,1-1-1.732l1.084-.626a1,1,0,0,0,.464-1.133,7.048,7.048,0,0,1,0-3.75A1,1,0,0,0,4.79,8.992L3.706,8.366a1,1,0,0,1,1-1.733l1.086.628A1,1,0,0,0,7.006,7.1a6.984,6.984,0,0,1,3.243-1.875A1,1,0,0,0,11,4.252V3a1,1,0,0,1,2,0V4.252a1,1,0,0,0,.751.969A6.984,6.984,0,0,1,16.994,7.1a1,1,0,0,0,1.215.165l1.084-.627a1,1,0,1,1,1,1.732l-1.084.626A1,1,0,0,0,18.746,10.125Z"/>
                     </svg>
 
-                    <span class="ml-4">Settings</span>
+                    <span class="ml-4"><?php echo $_LANG['Settings'] ?></span>
                 </a>
             </li>
         </ul>
@@ -577,8 +607,8 @@ include 'includ/header.php';
                             d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                     ></path>
                 </svg>
-                <span class="ml-4">Orders</span>
-                <?php session_notif_wizwiz() ?>
+                <span class="ml-4"><?php echo $_LANG['Orders']?></span>
+                <?php session_notif_wizwiz(); ?>
             </a>
 
 
@@ -587,26 +617,6 @@ include 'includ/header.php';
                 order_on($conn);
                 order_off($conn);
                 order_delete($conn);
-//                $server_info_select = server_info_select($conn);
-//                if (is_array($server_info_select) || is_object($server_info_select)) {
-//                    foreach ($server_info_select
-//                             as $value):
-//                        echo '<div class="shadow-xl min-w-0 p-4 bg-white rounded-lg shadow-xs dark:bg-gray-800 text-xs font-semibold tracking-wide text-left text-gray-500 border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800 ">';
-//                        echo '<div class="w-full h-full text-center">';
-//                        echo '<div class="flex flex-col justify-between h-full">';
-//                        echo '<img class="object-cover mx-auto rounded-full" src="icons/server.png" width="150px" alt="" loading="lazy">';
-//                        echo '<p class="mt-3" style="font-size: 14px;font-weight: bold"> <span class="font-bold text-gray-800 dark:text-white"> ' . $value['title'] . ' </span></p>';
-//                        echo '<div class="flex items-center justify-between w-full gap-4 mt-8">';
-//                        echo '<a id="ts-error" class="py-2 px-4 bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500 focus:ring-offset-indigo-200 text-white w-full transition ease-in duration-200 text-center text-base font-semibold shadow-md focus:outline-none focus:ring-2 focus:ring-offset-2  rounded-lg " href="orders.php?id=' . $value['id'] . '">View server</a>';
-//                        echo '</div>';
-//                        echo '</div>';
-//                        echo '</div>';
-//                        echo '</div>';
-//
-//                    endforeach;
-//                }
-
-//                if (isset($_GET['id'])) {
                 ?>
 
             </div>
@@ -615,14 +625,14 @@ include 'includ/header.php';
                     <table class="w-full whitespace-no-wrap  text-center">
                         <thead class="">
                         <tr class="text-xs text-center font-semibold tracking-wide text-left text-gray-500 dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-700">
-                            <th class="px-4 py-3">id</th>
-                            <th class="px-4 py-3">user</th>
-                            <th class="px-4 py-3">remark</th>
-                            <th class="px-4 py-3">protocol</th>
-                            <th class="px-4 py-3">Date</th>
-                            <th class="px-4 py-3">price</th>
-                            <th class="px-4 py-3">status</th>
-                            <th class="px-4 py-3">delete</th>
+                            <th class="px-4 py-3"><?php echo $_LANG['id']?></th>
+                            <th class="px-4 py-3"><?php echo $_LANG['user']?></th>
+                            <th class="px-4 py-3"><?php echo $_LANG['remark']?></th>
+                            <th class="px-4 py-3"><?php echo $_LANG['protocol']?></th>
+                            <th class="px-4 py-3"><?php echo $_LANG['Date']?></th>
+                            <th class="px-4 py-3"><?php echo $_LANG['price']?></th>
+                            <th class="px-4 py-3"><?php echo $_LANG['status']?></th>
+                            <th class="px-4 py-3"><?php echo $_LANG['delete']?></th>
                         </tr>
                         </thead>
                         <tbody class='bg-white divide-y dark:divide-gray-700 dark:bg-gray-800 text-center'>
@@ -693,8 +703,3 @@ include 'includ/header.php';
 <?php
 include 'includ/footer.php';
 ?>
-<!--
-* WizWiz v7.5.3
-* https://github.com/wizwizdev/wizwizxui-timebot
-* Copyright (c) @wizwizch
--->

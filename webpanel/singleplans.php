@@ -1,10 +1,14 @@
-<!--
-* WizWiz v7.5.3
-* https://github.com/wizwizdev/wizwizxui-timebot
-* Copyright (c) @wizwizch
--->
 <?php
 include 'includ/header.php';
+?>
+<?php
+$sql_admins = "SELECT * FROM admins";
+$result_admins = $conn->query($sql_admins);
+$row_admins = $result_admins->fetch_assoc();
+$lang_file = 'langs/lang_' . $row_admins['lang'] . '.php';
+if (file_exists($lang_file)) {
+    include($lang_file);
+}
 ?>
 <ul class="mt-4">
     <li class="relative px-6 py-3">
@@ -26,7 +30,7 @@ include 'includ/header.php';
                         d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
                 ></path>
             </svg>
-            <span class="ml-4">Dashboard</span>
+            <span class="ml-4"><?php echo $_LANG['Dashboard'] ?></span>
         </a>
     </li>
 </ul>
@@ -52,7 +56,7 @@ include 'includ/header.php';
                         d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                 ></path>
             </svg>
-            <span class="ml-4">Orders</span>
+            <span class="ml-4"><?php echo $_LANG['Orders'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -74,7 +78,7 @@ include 'includ/header.php';
                         d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                 ></path>
             </svg>
-            <span class="ml-4">Servers</span>
+            <span class="ml-4"><?php echo $_LANG['Servers'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -90,7 +94,7 @@ include 'includ/header.php';
                 <path d="M14,7h3v3a1,1,0,0,0,2,0V7h3a1,1,0,0,0,0-2H19V2a1,1,0,0,0-2,0V5H14a1,1,0,0,0,0,2Z"/>
             </svg>
 
-            <span class="ml-4">category</span>
+            <span class="ml-4"><?php echo $_LANG['category'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -100,14 +104,27 @@ include 'includ/header.php';
                   ></span>
         <a
                 class="inline-flex items-center w-full text-sm font-semibold text-gray-800 transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 dark:text-gray-100"
-                href="plans.php"
+                href="singleplans.php"
         >
-            <svg stroke-linejoin="round" fill="" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+            <svg stroke-linejoin="round" fill="gray" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                  id="Outline" viewBox="0 0 24 24" width="20" height="20">
                 <path d="M19,3H12.472a1.019,1.019,0,0,1-.447-.1L8.869,1.316A3.014,3.014,0,0,0,7.528,1H5A5.006,5.006,0,0,0,0,6V18a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V8A5.006,5.006,0,0,0,19,3ZM5,3H7.528a1.019,1.019,0,0,1,.447.1l3.156,1.579A3.014,3.014,0,0,0,12.472,5H19a3,3,0,0,1,2.779,1.882L2,6.994V6A3,3,0,0,1,5,3ZM19,21H5a3,3,0,0,1-3-3V8.994l20-.113V18A3,3,0,0,1,19,21Z"/>
             </svg>
 
-            <span class="ml-4">Plans</span>
+            <span class="ml-4"><?php echo $_LANG['SinglePlans'] ?></span>
+        </a>
+    </li>
+    <li class="relative px-6 py-3">
+        <a
+                class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
+                href="multipleplans.php"
+        >
+            <svg stroke-linejoin="round" fill="gray" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                 id="Outline" viewBox="0 0 24 24" width="20" height="20">
+                <path d="M19,3H12.472a1.019,1.019,0,0,1-.447-.1L8.869,1.316A3.014,3.014,0,0,0,7.528,1H5A5.006,5.006,0,0,0,0,6V18a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V8A5.006,5.006,0,0,0,19,3ZM5,3H7.528a1.019,1.019,0,0,1,.447.1l3.156,1.579A3.014,3.014,0,0,0,12.472,5H19a3,3,0,0,1,2.779,1.882L2,6.994V6A3,3,0,0,1,5,3ZM19,21H5a3,3,0,0,1-3-3V8.994l20-.113V18A3,3,0,0,1,19,21Z"/>
+            </svg>
+
+            <span class="ml-4"><?php echo $_LANG['MultiplePlans'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -119,7 +136,7 @@ include 'includ/header.php';
                 <path d="M12,9C17.934,8.844,17.933,.155,12,0c-5.934,.156-5.933,8.845,0,9Zm0-7c3.286,.059,3.285,4.942,0,5-3.285-.059-3.285-4.942,0-5Zm10.204,9.162c-1.143-.953-2.64-1.347-4.099-1.081l-3.821,.695c-.913,.166-1.707,.634-2.284,1.289-.578-.655-1.371-1.123-2.285-1.289l-3.821-.695c-1.461-.264-2.956,.128-4.098,1.081-1.142,.953-1.796,2.352-1.796,3.839v2.793c0,2.417,1.727,4.486,4.106,4.919l6.284,1.143c1.068,.194,2.151,.194,3.219,0l6.285-1.143c2.379-.433,4.105-2.502,4.105-4.919v-2.793c0-1.487-.654-2.886-1.796-3.838Zm-11.204,10.767c-.084-.012-.168-.026-.252-.041l-6.284-1.143c-1.428-.26-2.464-1.501-2.464-2.952v-2.793c0-.892,.393-1.731,1.078-2.303,.685-.573,1.59-.808,2.459-.648l3.821,.695c.952,.173,1.642,1,1.642,1.968v7.217Zm11-4.135c0,1.451-1.036,2.692-2.463,2.952l-6.285,1.143c-.084,.015-.168,.029-.252,.041v-7.217c0-.967,.69-1.795,1.642-1.968l3.821-.695c.875-.16,1.774,.077,2.46,.648,.685,.572,1.077,1.411,1.077,2.303v2.793Z"/>
             </svg>
 
-            <span class="ml-4">Pays</span>
+            <span class="ml-4"><?php echo $_LANG['Pays'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -133,7 +150,7 @@ include 'includ/header.php';
                 </g></svg>
 
 
-            <span class="ml-4">Add Volume</span>
+            <span class="ml-4"><?php echo $_LANG['AddVolume'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -147,7 +164,7 @@ include 'includ/header.php';
             </svg>
 
 
-            <span class="ml-4">Volume orders</span>
+            <span class="ml-4"><?php echo $_LANG['Volumeorders'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -159,7 +176,7 @@ include 'includ/header.php';
                 <path d="m24 12a1 1 0 0 1 -2 0 10.011 10.011 0 0 0 -10-10 1 1 0 0 1 0-2 12.013 12.013 0 0 1 12 12zm-8 1a1 1 0 0 0 0-2h-2.277a2 2 0 0 0 -.723-.723v-3.277a1 1 0 0 0 -2 0v3.277a1.994 1.994 0 1 0 2.723 2.723zm-14.173-6.216a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm.173 5.216a1 1 0 1 0 -1 1 1 1 0 0 0 1-1zm10 10a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-7.779-18.793a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm3.558-2.366a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-5.952 14.375a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm2.394 3.577a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm3.558 2.366a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm14.394-5.943a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-2.394 3.577a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-3.558 2.366a1 1 0 1 0 1 1 1 1 0 0 0 -1-1z"/>
             </svg>
 
-            <span class="ml-4">Discount code</span>
+            <span class="ml-4"><?php echo $_LANG['Discountcode'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -172,7 +189,7 @@ include 'includ/header.php';
             </svg>
 
 
-            <span class="ml-4">Rahgozar</span>
+            <span class="ml-4"><?php echo $_LANG['Rahgozar'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -185,7 +202,7 @@ include 'includ/header.php';
             </svg>
 
 
-            <span class="ml-4">Gift</span>
+            <span class="ml-4"><?php echo $_LANG['Gift'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -196,7 +213,7 @@ include 'includ/header.php';
                  width="21" height="21">
                 <path d="M11.24,24a2.262,2.262,0,0,1-.948-.212,2.18,2.18,0,0,1-1.2-2.622L10.653,16H6.975A3,3,0,0,1,4.1,12.131l3.024-10A2.983,2.983,0,0,1,10,0h3.693a2.6,2.6,0,0,1,2.433,3.511L14.443,8H17a3,3,0,0,1,2.483,4.684l-6.4,10.3A2.2,2.2,0,0,1,11.24,24ZM10,2a1,1,0,0,0-.958.71l-3.024,10A1,1,0,0,0,6.975,14H12a1,1,0,0,1,.957,1.29L11.01,21.732a.183.183,0,0,0,.121.241A.188.188,0,0,0,11.4,21.9l6.4-10.3a1,1,0,0,0,.078-1.063A.979.979,0,0,0,17,10H13a1,1,0,0,1-.937-1.351l2.19-5.84A.6.6,0,0,0,13.693,2Z"/>
             </svg>
-            <span class="ml-4">Software</span>
+            <span class="ml-4"><?php echo $_LANG['Software'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -204,7 +221,7 @@ include 'includ/header.php';
             class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
             href="wizwizbackup.php">
             <svg xmlns="http://www.w3.org/2000/svg" fill="gray" id="Outline" viewBox="0 0 24 24" width="21" height="21"><path d="M18.4,7.379a1.128,1.128,0,0,1-.769-.754h0a8,8,0,1,0-15.1,5.237A1.046,1.046,0,0,1,2.223,13.1,5.5,5.5,0,0,0,.057,18.3,5.622,5.622,0,0,0,5.683,23H11a1,1,0,0,0,1-1h0a1,1,0,0,0-1-1H5.683a3.614,3.614,0,0,1-3.646-2.981,3.456,3.456,0,0,1,1.376-3.313A3.021,3.021,0,0,0,4.4,11.141a6.113,6.113,0,0,1-.073-4.126A5.956,5.956,0,0,1,9.215,3.05,6.109,6.109,0,0,1,9.987,3a5.984,5.984,0,0,1,5.756,4.28,2.977,2.977,0,0,0,2.01,1.99,5.934,5.934,0,0,1,.778,11.09.976.976,0,0,0-.531.888h0a.988.988,0,0,0,1.388.915c4.134-1.987,6.38-7.214,2.88-12.264A6.935,6.935,0,0,0,18.4,7.379Z"/><path d="M18.707,16.707a1,1,0,0,0,0-1.414l-1.586-1.586a3,3,0,0,0-4.242,0l-1.586,1.586a1,1,0,0,0,1.414,1.414L14,15.414V23a1,1,0,0,0,2,0V15.414l1.293,1.293a1,1,0,0,0,1.414,0Z"/></svg>
-            <span class="ml-4">Backup</span>
+            <span class="ml-4"><?php echo $_LANG['Backup'] ?></span>
         </a>
     </li>
     <li class="relative px-6 py-3">
@@ -217,7 +234,7 @@ include 'includ/header.php';
                 <path d="M21.294,13.9l-.444-.256a9.1,9.1,0,0,0,0-3.29l.444-.256a3,3,0,1,0-3-5.2l-.445.257A8.977,8.977,0,0,0,15,3.513V3A3,3,0,0,0,9,3v.513A8.977,8.977,0,0,0,6.152,5.159L5.705,4.9a3,3,0,0,0-3,5.2l.444.256a9.1,9.1,0,0,0,0,3.29l-.444.256a3,3,0,1,0,3,5.2l.445-.257A8.977,8.977,0,0,0,9,20.487V21a3,3,0,0,0,6,0v-.513a8.977,8.977,0,0,0,2.848-1.646l.447.258a3,3,0,0,0,3-5.2Zm-2.548-3.776a7.048,7.048,0,0,1,0,3.75,1,1,0,0,0,.464,1.133l1.084.626a1,1,0,0,1-1,1.733l-1.086-.628a1,1,0,0,0-1.215.165,6.984,6.984,0,0,1-3.243,1.875,1,1,0,0,0-.751.969V21a1,1,0,0,1-2,0V19.748a1,1,0,0,0-.751-.969A6.984,6.984,0,0,1,7.006,16.9a1,1,0,0,0-1.215-.165l-1.084.627a1,1,0,1,1-1-1.732l1.084-.626a1,1,0,0,0,.464-1.133,7.048,7.048,0,0,1,0-3.75A1,1,0,0,0,4.79,8.992L3.706,8.366a1,1,0,0,1,1-1.733l1.086.628A1,1,0,0,0,7.006,7.1a6.984,6.984,0,0,1,3.243-1.875A1,1,0,0,0,11,4.252V3a1,1,0,0,1,2,0V4.252a1,1,0,0,0,.751.969A6.984,6.984,0,0,1,16.994,7.1a1,1,0,0,0,1.215.165l1.084-.627a1,1,0,1,1,1,1.732l-1.084.626A1,1,0,0,0,18.746,10.125Z"/>
             </svg>
 
-            <span class="ml-4">Settings</span>
+            <span class="ml-4"><?php echo $_LANG['Settings'] ?></span>
         </a>
     </li>
 </ul>
@@ -318,7 +335,7 @@ include 'includ/header.php';
                                 d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"
                         ></path>
                     </svg>
-                    <span class="ml-4">Dashboard</span>
+                    <span class="ml-4"><?php echo $_LANG['Dashboard'] ?></span>
                 </a>
             </li>
         </ul>
@@ -342,7 +359,7 @@ include 'includ/header.php';
                                 d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01"
                         ></path>
                     </svg>
-                    <span class="ml-4">Orders</span>
+                    <span class="ml-4"><?php echo $_LANG['Orders'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -364,7 +381,7 @@ include 'includ/header.php';
                                 d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"
                         ></path>
                     </svg>
-                    <span class="ml-4">Servers</span>
+                    <span class="ml-4"><?php echo $_LANG['Servers'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -380,24 +397,37 @@ include 'includ/header.php';
                         <path d="M14,7h3v3a1,1,0,0,0,2,0V7h3a1,1,0,0,0,0-2H19V2a1,1,0,0,0-2,0V5H14a1,1,0,0,0,0,2Z"/>
                     </svg>
 
-                    <span class="ml-4">category</span>
+                    <span class="ml-4"><?php echo $_LANG['category'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
-                                  <span
-                                          class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"
-                                          aria-hidden="true"
-                                  ></span>
+                  <span
+                          class="absolute inset-y-0 left-0 w-1 bg-purple-600 rounded-tr-lg rounded-br-lg"
+                          aria-hidden="true"
+                  ></span>
                 <a
-                        class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
-                        href="plans.php"
+                        class="inline-flex items-center w-full text-sm font-semibold text-gray-800 transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200 dark:text-gray-100"
+                        href="singleplans.php"
                 >
                     <svg stroke-linejoin="round" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
                          id="Outline" viewBox="0 0 24 24" width="20" height="20">
                         <path d="M19,3H12.472a1.019,1.019,0,0,1-.447-.1L8.869,1.316A3.014,3.014,0,0,0,7.528,1H5A5.006,5.006,0,0,0,0,6V18a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V8A5.006,5.006,0,0,0,19,3ZM5,3H7.528a1.019,1.019,0,0,1,.447.1l3.156,1.579A3.014,3.014,0,0,0,12.472,5H19a3,3,0,0,1,2.779,1.882L2,6.994V6A3,3,0,0,1,5,3ZM19,21H5a3,3,0,0,1-3-3V8.994l20-.113V18A3,3,0,0,1,19,21Z"/>
                     </svg>
 
-                    <span class="ml-4">Plans</span>
+                    <span class="ml-4"><?php echo $_LANG['SinglePlans'] ?></span>
+                </a>
+            </li>
+            <li class="relative px-6 py-3">
+                <a
+                        class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
+                        href="multipleplans.php"
+                >
+                    <svg stroke-linejoin="round" fill="gray" aria-hidden="true" xmlns="http://www.w3.org/2000/svg"
+                         id="Outline" viewBox="0 0 24 24" width="20" height="20">
+                        <path d="M19,3H12.472a1.019,1.019,0,0,1-.447-.1L8.869,1.316A3.014,3.014,0,0,0,7.528,1H5A5.006,5.006,0,0,0,0,6V18a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V8A5.006,5.006,0,0,0,19,3ZM5,3H7.528a1.019,1.019,0,0,1,.447.1l3.156,1.579A3.014,3.014,0,0,0,12.472,5H19a3,3,0,0,1,2.779,1.882L2,6.994V6A3,3,0,0,1,5,3ZM19,21H5a3,3,0,0,1-3-3V8.994l20-.113V18A3,3,0,0,1,19,21Z"/>
+                    </svg>
+
+                    <span class="ml-4"><?php echo $_LANG['MultiplePlans'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -409,7 +439,7 @@ include 'includ/header.php';
                         <path d="M12,9C17.934,8.844,17.933,.155,12,0c-5.934,.156-5.933,8.845,0,9Zm0-7c3.286,.059,3.285,4.942,0,5-3.285-.059-3.285-4.942,0-5Zm10.204,9.162c-1.143-.953-2.64-1.347-4.099-1.081l-3.821,.695c-.913,.166-1.707,.634-2.284,1.289-.578-.655-1.371-1.123-2.285-1.289l-3.821-.695c-1.461-.264-2.956,.128-4.098,1.081-1.142,.953-1.796,2.352-1.796,3.839v2.793c0,2.417,1.727,4.486,4.106,4.919l6.284,1.143c1.068,.194,2.151,.194,3.219,0l6.285-1.143c2.379-.433,4.105-2.502,4.105-4.919v-2.793c0-1.487-.654-2.886-1.796-3.838Zm-11.204,10.767c-.084-.012-.168-.026-.252-.041l-6.284-1.143c-1.428-.26-2.464-1.501-2.464-2.952v-2.793c0-.892,.393-1.731,1.078-2.303,.685-.573,1.59-.808,2.459-.648l3.821,.695c.952,.173,1.642,1,1.642,1.968v7.217Zm11-4.135c0,1.451-1.036,2.692-2.463,2.952l-6.285,1.143c-.084,.015-.168,.029-.252,.041v-7.217c0-.967,.69-1.795,1.642-1.968l3.821-.695c.875-.16,1.774,.077,2.46,.648,.685,.572,1.077,1.411,1.077,2.303v2.793Z"/>
                     </svg>
 
-                    <span class="ml-4">Pays</span>
+                    <span class="ml-4"><?php echo $_LANG['Pays'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -423,7 +453,7 @@ include 'includ/header.php';
                         </g></svg>
 
 
-                    <span class="ml-4">Add Volume</span>
+                    <span class="ml-4"><?php echo $_LANG['AddVolume'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -438,7 +468,7 @@ include 'includ/header.php';
                     </svg>
 
 
-                    <span class="ml-4">Volume orders</span>
+                    <span class="ml-4"><?php echo $_LANG['Volumeorders'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -450,7 +480,7 @@ include 'includ/header.php';
                         <path d="m24 12a1 1 0 0 1 -2 0 10.011 10.011 0 0 0 -10-10 1 1 0 0 1 0-2 12.013 12.013 0 0 1 12 12zm-8 1a1 1 0 0 0 0-2h-2.277a2 2 0 0 0 -.723-.723v-3.277a1 1 0 0 0 -2 0v3.277a1.994 1.994 0 1 0 2.723 2.723zm-14.173-6.216a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm.173 5.216a1 1 0 1 0 -1 1 1 1 0 0 0 1-1zm10 10a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-7.779-18.793a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm3.558-2.366a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-5.952 14.375a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm2.394 3.577a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm3.558 2.366a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm14.394-5.943a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-2.394 3.577a1 1 0 1 0 1 1 1 1 0 0 0 -1-1zm-3.558 2.366a1 1 0 1 0 1 1 1 1 0 0 0 -1-1z"/>
                     </svg>
 
-                    <span class="ml-4">Discount code</span>
+                    <span class="ml-4"><?php echo $_LANG['Discountcode'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -463,7 +493,7 @@ include 'includ/header.php';
                     </svg>
 
 
-                    <span class="ml-4">Rahgozar</span>
+                    <span class="ml-4"><?php echo $_LANG['Rahgozar'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -476,7 +506,7 @@ include 'includ/header.php';
                     </svg>
 
 
-                    <span class="ml-4">Gift</span>
+                    <span class="ml-4"><?php echo $_LANG['Gift'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -487,7 +517,7 @@ include 'includ/header.php';
                          viewBox="0 0 24 24" width="21" height="21">
                         <path d="M11.24,24a2.262,2.262,0,0,1-.948-.212,2.18,2.18,0,0,1-1.2-2.622L10.653,16H6.975A3,3,0,0,1,4.1,12.131l3.024-10A2.983,2.983,0,0,1,10,0h3.693a2.6,2.6,0,0,1,2.433,3.511L14.443,8H17a3,3,0,0,1,2.483,4.684l-6.4,10.3A2.2,2.2,0,0,1,11.24,24ZM10,2a1,1,0,0,0-.958.71l-3.024,10A1,1,0,0,0,6.975,14H12a1,1,0,0,1,.957,1.29L11.01,21.732a.183.183,0,0,0,.121.241A.188.188,0,0,0,11.4,21.9l6.4-10.3a1,1,0,0,0,.078-1.063A.979.979,0,0,0,17,10H13a1,1,0,0,1-.937-1.351l2.19-5.84A.6.6,0,0,0,13.693,2Z"/>
                     </svg>
-                    <span class="ml-4">Software</span>
+                    <span class="ml-4"><?php echo $_LANG['Software'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -495,7 +525,7 @@ include 'includ/header.php';
                         class="inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
                         href="wizwizbackup.php">
                     <svg xmlns="http://www.w3.org/2000/svg" fill="gray" id="Outline" viewBox="0 0 24 24" width="21" height="21"><path d="M18.4,7.379a1.128,1.128,0,0,1-.769-.754h0a8,8,0,1,0-15.1,5.237A1.046,1.046,0,0,1,2.223,13.1,5.5,5.5,0,0,0,.057,18.3,5.622,5.622,0,0,0,5.683,23H11a1,1,0,0,0,1-1h0a1,1,0,0,0-1-1H5.683a3.614,3.614,0,0,1-3.646-2.981,3.456,3.456,0,0,1,1.376-3.313A3.021,3.021,0,0,0,4.4,11.141a6.113,6.113,0,0,1-.073-4.126A5.956,5.956,0,0,1,9.215,3.05,6.109,6.109,0,0,1,9.987,3a5.984,5.984,0,0,1,5.756,4.28,2.977,2.977,0,0,0,2.01,1.99,5.934,5.934,0,0,1,.778,11.09.976.976,0,0,0-.531.888h0a.988.988,0,0,0,1.388.915c4.134-1.987,6.38-7.214,2.88-12.264A6.935,6.935,0,0,0,18.4,7.379Z"/><path d="M18.707,16.707a1,1,0,0,0,0-1.414l-1.586-1.586a3,3,0,0,0-4.242,0l-1.586,1.586a1,1,0,0,0,1.414,1.414L14,15.414V23a1,1,0,0,0,2,0V15.414l1.293,1.293a1,1,0,0,0,1.414,0Z"/></svg>
-                    <span class="ml-4">Backup</span>
+                    <span class="ml-4"><?php echo $_LANG['Backup'] ?></span>
                 </a>
             </li>
             <li class="relative px-6 py-3">
@@ -508,7 +538,7 @@ include 'includ/header.php';
                         <path d="M21.294,13.9l-.444-.256a9.1,9.1,0,0,0,0-3.29l.444-.256a3,3,0,1,0-3-5.2l-.445.257A8.977,8.977,0,0,0,15,3.513V3A3,3,0,0,0,9,3v.513A8.977,8.977,0,0,0,6.152,5.159L5.705,4.9a3,3,0,0,0-3,5.2l.444.256a9.1,9.1,0,0,0,0,3.29l-.444.256a3,3,0,1,0,3,5.2l.445-.257A8.977,8.977,0,0,0,9,20.487V21a3,3,0,0,0,6,0v-.513a8.977,8.977,0,0,0,2.848-1.646l.447.258a3,3,0,0,0,3-5.2Zm-2.548-3.776a7.048,7.048,0,0,1,0,3.75,1,1,0,0,0,.464,1.133l1.084.626a1,1,0,0,1-1,1.733l-1.086-.628a1,1,0,0,0-1.215.165,6.984,6.984,0,0,1-3.243,1.875,1,1,0,0,0-.751.969V21a1,1,0,0,1-2,0V19.748a1,1,0,0,0-.751-.969A6.984,6.984,0,0,1,7.006,16.9a1,1,0,0,0-1.215-.165l-1.084.627a1,1,0,1,1-1-1.732l1.084-.626a1,1,0,0,0,.464-1.133,7.048,7.048,0,0,1,0-3.75A1,1,0,0,0,4.79,8.992L3.706,8.366a1,1,0,0,1,1-1.733l1.086.628A1,1,0,0,0,7.006,7.1a6.984,6.984,0,0,1,3.243-1.875A1,1,0,0,0,11,4.252V3a1,1,0,0,1,2,0V4.252a1,1,0,0,0,.751.969A6.984,6.984,0,0,1,16.994,7.1a1,1,0,0,0,1.215.165l1.084-.627a1,1,0,1,1,1,1.732l-1.084.626A1,1,0,0,0,18.746,10.125Z"/>
                     </svg>
 
-                    <span class="ml-4">Settings</span>
+                    <span class="ml-4"><?php echo $_LANG['Settings'] ?></span>
                 </a>
             </li>
         </ul>
@@ -569,8 +599,7 @@ include 'includ/header.php';
                      id="Outline" viewBox="0 0 24 24" width="20" height="20">
                     <path d="M19,3H12.472a1.019,1.019,0,0,1-.447-.1L8.869,1.316A3.014,3.014,0,0,0,7.528,1H5A5.006,5.006,0,0,0,0,6V18a5.006,5.006,0,0,0,5,5H19a5.006,5.006,0,0,0,5-5V8A5.006,5.006,0,0,0,19,3ZM5,3H7.528a1.019,1.019,0,0,1,.447.1l3.156,1.579A3.014,3.014,0,0,0,12.472,5H19a3,3,0,0,1,2.779,1.882L2,6.994V6A3,3,0,0,1,5,3ZM19,21H5a3,3,0,0,1-3-3V8.994l20-.113V18A3,3,0,0,1,19,21Z"/>
                 </svg>
-
-                <span class="ml-4">Plans</span>
+                <span class="ml-4"><?php echo $_LANG['singleplans']?></span>
                 <span class="ml-4 justify-end inline-flex">
                     <button @click="openModal"
                             class=" text-sm font-medium leading-5 text-white transition-colors duration-150 border border-transparent rounded-lg focus:outline-none ">
@@ -580,13 +609,13 @@ include 'includ/header.php';
                 <?php session_notif_wizwiz() ?>
             </a>
 
-            <div style='margin-top:40px' class=" w-full flex justify-center items-center grid gap-6 mb-8 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-2">
+            <div style='margin-top:40px' class=" w-full flex justify-center items-center grid gap-6 mb-8 xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-2 grid-cols-1">
                 <?php
-                plans($conn);
+                plans1($conn);
                 ?>
                 <?php
 
-                $sql_plans = "SELECT * FROM server_plans where rahgozar = 0 ORDER BY id DESC";
+                $sql_plans = "SELECT * FROM server_plans where rahgozar = 0 and inbound_id = 0 ORDER BY id DESC";
                 $result_plans = $conn->query($sql_plans);
                 while ($row_plans = $result_plans->fetch_assoc()) {
                     $id_plans = $row_plans["id"];
@@ -609,7 +638,7 @@ include 'includ/header.php';
                 ' . $row_plans['title'] . '
             </p>
             <p class="px-6 py-2 text-xs text-gray-600 dark:text-gray-400">
-               ' . $row_plans['days'] . ' Days - ' . $row_plans['volume'] . ' GB - ' . $row_plans['protocol'] . ' ' . $row_plans['type'] . '
+               ' . $_LANG['Days'] . ' ' . $row_plans['days'] . ' - ' . $_LANG['GB'] . ' ' . $row_plans['volume'] . ' - ' . $row_plans['protocol'] . ' ' . $row_plans['type'] . '
             </p>';
 
 
@@ -622,18 +651,21 @@ include 'includ/header.php';
                     }
 
                     echo '<div class="flex items-center justify-center w-full gap-4 mt-3">
-                    <a href="plans.php?edit=' . $row_plans['id'] . '">
+                    <a href="singleplans.php?edit=' . $row_plans['id'] . '">
                     <svg class="m-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" fill="#9dbebb"><g id="_01_align_center" data-name="01 align center"><path d="M10.931,2.75a3.728,3.728,0,0,0-7.195,0H0v2H3.736a3.728,3.728,0,0,0,7.195,0H24v-2ZM7.333,5.5a1.75,1.75,0,1,1,1.75-1.75A1.753,1.753,0,0,1,7.333,5.5Z"/><path d="M16.667,8.25A3.745,3.745,0,0,0,13.07,11H0v2H13.07a3.727,3.727,0,0,0,7.194,0H24V11H20.264A3.745,3.745,0,0,0,16.667,8.25Zm0,5.5A1.75,1.75,0,1,1,18.417,12,1.752,1.752,0,0,1,16.667,13.75Z"/><path d="M7.333,16.5a3.745,3.745,0,0,0-3.6,2.75H0v2H3.736a3.728,3.728,0,0,0,7.195,0H24v-2H10.931A3.745,3.745,0,0,0,7.333,16.5Zm0,5.5a1.75,1.75,0,1,1,1.75-1.75A1.753,1.753,0,0,1,7.333,22Z"/></g></svg>
                     </a>
-                    <a href="plans.php?delete=' . $row_plans['id'] . '">
+                    <a href="singleplans.php?delete=' . $row_plans['id'] . '">
                     <svg class="m-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="26" fill="#ff758f"><g id="_01_align_center" data-name="01 align center"><path d="M18.965,8.464l5.029-5.029L22.565,2.006,17.519,7.051,15.313,4.895a2.011,2.011,0,0,0-2.724-.073A19.71,19.71,0,0,1,6.226,8.687L-.006,10.514v.756A12.892,12.892,0,0,0,13.006,24.006h1.241l.261-.182a14.98,14.98,0,0,0,6.886-12.081,2.013,2.013,0,0,0-.611-1.5ZM13.9,6.34l5.477,5.341a12.652,12.652,0,0,1-.456,3.015L11.941,7.9A24.691,24.691,0,0,0,13.9,6.34Zm-.294,15.645h-.6a11.153,11.153,0,0,1-4.293-.859,11.55,11.55,0,0,0,4.348-3.8l.518-.76L11.91,15.43l-.518.761A9.539,9.539,0,0,1,7.8,19.324l-1.229.618a10.9,10.9,0,0,1-2.585-2.563,11.632,11.632,0,0,0,4.357-2.657L6.932,13.277a9.611,9.611,0,0,1-3.974,2.317,10.4,10.4,0,0,1-.921-3.575l4.755-1.394a15.234,15.234,0,0,0,3.423-1.59l7.911,7.7A14.1,14.1,0,0,1,13.608,21.985Z"/></g></svg>
+                    </a>
+                    <a href="singleplans.php?copy=' . $row_plans['id'] . '">
+                    <svg class="m-2" id="Layer_1" height="26" viewBox="0 0 24 24" width="26" xmlns="http://www.w3.org/2000/svg" fill="#778da9" data-name="Layer 1"><path d="m15 20h-10a5.006 5.006 0 0 1 -5-5v-10a5.006 5.006 0 0 1 5-5h10a5.006 5.006 0 0 1 5 5v10a5.006 5.006 0 0 1 -5 5zm-10-18a3 3 0 0 0 -3 3v10a3 3 0 0 0 3 3h10a3 3 0 0 0 3-3v-10a3 3 0 0 0 -3-3zm19 17v-13a1 1 0 0 0 -2 0v13a3 3 0 0 1 -3 3h-13a1 1 0 0 0 0 2h13a5.006 5.006 0 0 0 5-5z"/></svg>                    
                     </a>';
                     if ($row_plans['active'] == '1') {
-                        echo '<a href="plans.php?off=' . $row_plans['id'] . '">
+                        echo '<a href="singleplans.php?off=' . $row_plans['id'] . '">
                     <svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" class="m-2" width="27" fill="#219ebc"><path d="M23.821,11.181v0C22.943,9.261,19.5,3,12,3S1.057,9.261.179,11.181a1.969,1.969,0,0,0,0,1.64C1.057,14.739,4.5,21,12,21s10.943-6.261,11.821-8.181A1.968,1.968,0,0,0,23.821,11.181ZM12,18a6,6,0,1,1,6-6A6.006,6.006,0,0,1,12,18Z"/><circle cx="12" cy="12" r="4"/></svg>
                     </a>';
                     } else {
-                        echo '<a href="plans.php?on=' . $row_plans['id'] . '">
+                        echo '<a href="singleplans.php?on=' . $row_plans['id'] . '">
                     <svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" class="m-2" width="27" fill="#bde0fe"><path d="M23.821,11.181v0C22.943,9.261,19.5,3,12,3S1.057,9.261.179,11.181a1.969,1.969,0,0,0,0,1.64C1.057,14.739,4.5,21,12,21s10.943-6.261,11.821-8.181A1.968,1.968,0,0,0,23.821,11.181ZM12,18a6,6,0,1,1,6-6A6.006,6.006,0,0,1,12,18Z"/><circle cx="12" cy="12" r="4"/></svg>
                     </a>';
                     }
@@ -648,20 +680,20 @@ include 'includ/header.php';
 
 
             <?php
-            $plan_edit = plan_edit($conn);
+            $plan_edit = plan_edit1($conn);
             if (is_array($plan_edit) || is_object($plan_edit)) {
                 foreach ($plan_edit
                          as $value):
                     echo '
 <br>
-                <div style="width: 80%" class=" mx-auto shadow-xl min-w-0 p-4 bg-white rounded-lg dark:bg-gray-800 text-xs font-semibold tracking-wide text-left text-gray-500 border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
+                <div style="width: 100%" class=" mx-auto shadow-xl min-w-0 p-4 bg-white rounded-lg dark:bg-gray-800 text-xs font-semibold tracking-wide text-left text-gray-500 border-b dark:border-gray-700 bg-gray-50 dark:text-gray-400 dark:bg-gray-800">
         
         
                             <a style="font-size: 20px"
                             class="m-5 text-xs font-semibold tracking-wide text-left text-gray-500 0 dark:text-gray-400 inline-flex items-center w-full text-sm font-semibold transition-colors duration-150 hover:text-gray-800 dark:hover:text-gray-200"
                     >
 <svg xmlns="http://www.w3.org/2000/svg"  viewBox="0 0 32 32" width="32px" height="32px" fill="gray"><path d="M 23.90625 3.96875 C 22.859375 3.96875 21.8125 4.375 21 5.1875 L 5.1875 21 L 5.125 21.3125 L 4.03125 26.8125 L 3.71875 28.28125 L 5.1875 27.96875 L 10.6875 26.875 L 11 26.8125 L 26.8125 11 C 28.4375 9.375 28.4375 6.8125 26.8125 5.1875 C 26 4.375 24.953125 3.96875 23.90625 3.96875 Z M 23.90625 5.875 C 24.410156 5.875 24.917969 6.105469 25.40625 6.59375 C 26.378906 7.566406 26.378906 8.621094 25.40625 9.59375 L 24.6875 10.28125 L 21.71875 7.3125 L 22.40625 6.59375 C 22.894531 6.105469 23.402344 5.875 23.90625 5.875 Z M 20.3125 8.71875 L 23.28125 11.6875 L 11.1875 23.78125 C 10.53125 22.5 9.5 21.46875 8.21875 20.8125 Z M 6.9375 22.4375 C 8.136719 22.921875 9.078125 23.863281 9.5625 25.0625 L 6.28125 25.71875 Z"/></svg>
-                        <span class="ml-4"> Editing plan [ ' . $value["title"] . ' ]</span>
+                        <span class="ml-4"> ' . $_LANG["editplan"] . ' [ ' . $value["title"] . ' ]</span>
                     </a>
         <div>
            
@@ -675,7 +707,7 @@ include 'includ/header.php';
 <form method="post">
 <div class="flex relative m-2">
     <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-        Plan name
+        ' . $_LANG["title"] . '
     </span>
     <input required name="title_plan" style="font-size: 14px;" value="' . $value["title"] . '" type="text" id="with-email" class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-blue-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent" name="url" placeholder=""/>
     </div>
@@ -683,7 +715,7 @@ include 'includ/header.php';
 
     <div class="flex relative m-2">
     <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-        protocol [ vless - vmess - trojan ]
+        ' . $_LANG["protocol2"] . '
     </span>
     <input required name="protocol_plan" style="font-size: 14px;" value="' . $value["protocol"] . '" type="text" id="with-email" class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-blue-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent" name="url" placeholder=""/>
     </div>
@@ -691,7 +723,7 @@ include 'includ/header.php';
     
     <div class="flex relative m-2">
     <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-        type [ ws - tcp - grpc ]
+        ' . $_LANG["type2"] . '
     </span>
     <input required name="type_plan" style="font-size: 14px;" value="' . $value["type"] . '" type="text" id="with-email" class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-blue-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent" name="url" placeholder=""/>
     </div>
@@ -706,7 +738,7 @@ include 'includ/header.php';
 
 <div class="flex relative m-2">
     <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-        Price
+        ' . $_LANG["Price3"] . '
     </span>
     <input required name="price_plan" style="font-size: 14px;" value="' . $value["price"] . '" type="number" id="with-email" class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-blue-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent" name="url" placeholder=""/>
     </div>
@@ -714,7 +746,7 @@ include 'includ/header.php';
 
 <div class="flex relative m-2">
     <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-        Days
+        ' . $_LANG["days"] . '
     </span>
     <input required name="days_plan" style="font-size: 14px;" value="' . $value["days"] . '" type="number" id="with-email" class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-blue-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent" name="url" placeholder=""/>
     </div>
@@ -722,7 +754,7 @@ include 'includ/header.php';
     
     <div class="flex relative m-2">
     <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-        Volume
+        ' . $_LANG["volume"] . '
     </span>
     <input required name="volume_plan" style="font-size: 14px;" value="' . $value["volume"] . '" type="number" id="with-email" class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-blue-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent" name="url" placeholder=""/>
     </div>
@@ -784,62 +816,48 @@ include 'includ/header.php';
                     <?php
                     echo '<div class="flex relative m-2">
     <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-       Limitip
+       ' . $_LANG["limitip"] . '
     </span>
     <input required name="limitip_plan" style="font-size: 14px;" value="' . $value["limitip"] . '" type="number" id="with-email" class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-blue-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent" name="url" placeholder=""/>
-    </div>
-
-
-<div class="flex relative m-2">
-    <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-        Inbound id
-    </span>
-    <input name="inbound_id_plan" style="font-size: 14px;" value="' . $value["inbound_id"] . '" type="number" id="with-email" class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-blue-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent" name="url" placeholder=""/>
     </div>
     <br>';
     ?>
                 <?php
-            if($value["acount"] == 0){
-
-            }else{
-                echo '
-                <div class="flex relative m-2">
-                    <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-                        count
-                    </span>
-                    <input name="acount_plan" style="font-size: 14px;" value="' . $value["acount"] . '" type="number" id="with-email"
-                           class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
-                           placeholder=""/>
-                </div>
-                    <br>
-                    <br>
-                    ';
-            }
 
                 $sql_server_info3 = "SELECT * FROM server_config where id='" . $value['server_id'] . "'";
                 $res_server_info3 = mysqli_query($conn, $sql_server_info3);
                 $row_server_info3 = mysqli_fetch_assoc($res_server_info3);
-                if ($row_server_info3["reality"] == 'true') {
-                    echo '
+                    if ($row_server_info3["reality"] == 'true') {
+                        echo '
+
             <div class="flex relative m-2">
                 <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-                    dest
+                    ' . $_LANG["dest"] . '
                 </span>
                 <input name="dest_reality" style="font-size: 14px;" value="' . $value["dest"] . '" type="text" id="with-email"
                        class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
-                       placeholder="yahoo.com" required/>
+                       placeholder="yahoo.com:443" required/>
+            </div>       
+            <div class="flex relative m-2">
+                <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
+                    ' . $_LANG["spiderX"] . '
+                </span>
+                <input name="spiderX_reality" style="font-size: 14px;" value="' . $value["spiderX"] . '" type="text" id="with-email"
+                       class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
+                       placeholder="/tc/value" required/>
+            </div>
+            <div class="flex relative m-2">
+                <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
+                    ' . $_LANG["flow"] . '
+                </span>
+                <input name="flow_reality" style="font-size: 14px;" value="' . $value["flow"] . '" type="text" id="with-email"
+                       class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
+                       placeholder="" required/>
             </div>
                 <br>
-                ';
-                } else {
-
-                }
-
-
-                    if ($row_server_info3["reality"] == 'true') {
-                        echo '
+                    
                 <div class="m-1">
-                    <label class="text-gray-600 dark:text-gray-400" for="name" style="font-size: 14px">serverNames:
+                    <label class="text-gray-600 dark:text-gray-400" for="name" style="font-size: 14px">' . $_LANG["serverNames"] . ':
                     <br>
 <pre>
 [
@@ -859,7 +877,7 @@ include 'includ/header.php';
    echo '<br>
 
     <div class="m-1">
-        <label class="text-gray-600 dark:text-gray-400" for="name" style="font-size: 14px">Description
+        <label class="text-gray-600 dark:text-gray-400" for="name" style="font-size: 14px">' . $_LANG["Description"] . '
             <textarea required name="description_plan" style="font-size: 14px" class="mt-2 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray flex-1 w-full px-4 py-2 text-base text-blue-400 placeholder-gray-400 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent" id="comment" name="comment" rows="2" cols="30">' . $value["descr"] . '</textarea>
         </label>
     </div>
@@ -869,7 +887,7 @@ include 'includ/header.php';
                   <button name="btn_edit" type="submit" style="background-color: #ccf1db;color:#006e2c !important;"
                   class="justify-end flex px-4 py-2 text-sm font-medium leading-5 text-white transition-colors duration-150 bg-purple-600 border border-transparent rounded-lg active:bg-purple-600 hover:bg-purple-700 focus:outline-none focus:shadow-outline-purple"
                 >
-                  <span>Save</span>
+                  <span>' . $_LANG["Save2"] . '</span>
                 </button>
                 </form>
 
@@ -895,6 +913,8 @@ include 'includ/header.php';
                 $name_category_wizwiz_plans = $_POST["name_category_wizwiz"];
                 $name_server_wizwiz_plans = $_POST["name_server_wizwiz"];
                 $dest_reality_plans = $_POST["dest_reality"];
+                $spiderX_reality_plans = $_POST["spiderX_reality"];
+                $flow_reality_plans = $_POST["flow_reality"];
 
                 if ($_POST['serverNames_reality']) {
                     $serverNames_reality_plans = $_POST["serverNames_reality"];
@@ -907,6 +927,19 @@ include 'includ/header.php';
                     $dest_reality_plans = $_POST["dest_reality"];
                 } else {
                     $dest_reality_plans = NULL;
+                }
+
+                if ($_POST['spiderX_reality']) {
+                    $spiderX_reality_plans = $_POST["spiderX_reality"];
+                } else {
+                    $spiderX_reality_plans = NULL;
+                }
+
+
+                if ($_POST['flow_reality']) {
+                    $flow_reality_plans = $_POST["flow_reality"];
+                } else {
+                    $flow_reality_plans = NULL;
                 }
 
 
@@ -930,7 +963,7 @@ include 'includ/header.php';
                          volume='$volume_plans',limitip='$limitip_plans',inbound_id='$inbound_id_plans',
                          descr='$description_plans',catid='$name_category_wizwiz_plans',
                         server_id='$name_server_wizwiz_plans',acount='$acount_plans',dest='$dest_reality_plans',
-                        serverNames='$serverNames_reality_plans' WHERE id = '" . $value['id'] . "'";
+                        serverNames='$serverNames_reality_plans',spiderX='$spiderX_reality_plans',flow='$flow_reality_plans' WHERE id = '" . $value['id'] . "'";
                 $result_plan = mysqli_query($conn, $sql_server_plans);
 
                 if (!$result_plan) {
@@ -938,7 +971,7 @@ include 'includ/header.php';
 
                 } else {
                     editwizwiz();
-                    header("location: plans.php");
+                    header("location: singleplans.php");
                 }
 
             }
@@ -980,18 +1013,17 @@ include 'includ/header.php';
         <!-- Remove header if you don't want a close icon. Use modal body to place modal tile. -->
 
         <?php
-        plan_insert($conn);
+        plan_insert1($conn);
         ?>
-        <form id="insert_plans">
-            <!-- Modal body -->
-            <div class="">
+
+        <form id="insert_plans1">
+            <div style="height: 300px;overflow-y: scroll;">
                 <p class="m-4 dark:text-gray-200 text-gray-700">
-                    Notice: To create a private connection, you do not need to enter the <b style="color: #2ba84a">inbound
-                        id</b> value, but to create a shared connection, you must enter the <b style="color: #2ba84a">inbound
-                        id</b> to connect the connection. </p>
+                    <b style="color: #2ba84a">tip:</b> Create a custom plan
+                </p>
                 <div class="flex relative m-2">
                     <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-                        title
+                        <?php echo $_LANG['title']?>
                     </span>
                     <input name="title_plan" style="font-size: 14px;" value="" type="text" id="with-email"
                            class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
@@ -999,7 +1031,7 @@ include 'includ/header.php';
                 </div>
                 <div class="flex relative m-2">
                     <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-                        protocol [ vless - vmess - trojan ]
+                        <?php echo $_LANG['protocol2']?>
                     </span>
                     <input name="protocol_plan" style="font-size: 14px;" value="" type="text" id="with-email"
                            class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
@@ -1007,23 +1039,7 @@ include 'includ/header.php';
                 </div>
                 <div class="flex relative m-2">
                     <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-                        days
-                    </span>
-                    <input name="days_plan" style="font-size: 14px;" value="" type="number" id="with-email"
-                           class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
-                           placeholder="" required/>
-                </div>
-                <div class="flex relative m-2">
-                    <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-                        volume
-                    </span>
-                    <input name="volume_plan" style="font-size: 14px;" value="" type="number" id="with-email"
-                           class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
-                           placeholder="" required/>
-                </div>
-                <div class="flex relative m-2">
-                    <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-                        type [ ws - tcp - grpc ]
+                        <?php echo $_LANG['type2']?>
                     </span>
                     <input name="type_plan" style="font-size: 14px;" value="" type="text" id="with-email"
                            class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
@@ -1031,7 +1047,23 @@ include 'includ/header.php';
                 </div>
                 <div class="flex relative m-2">
                     <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-                        price
+                        <?php echo $_LANG['days']?>
+                    </span>
+                    <input name="days_plan" style="font-size: 14px;" value="" type="number" id="with-email"
+                           class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
+                           placeholder="" required/>
+                </div>
+                <div class="flex relative m-2">
+                    <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
+                        <?php echo $_LANG['volume']?>
+                    </span>
+                    <input name="volume_plan" style="font-size: 14px;" value="" type="number" id="with-email"
+                           class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
+                           placeholder="" required/>
+                </div>
+                <div class="flex relative m-2">
+                    <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
+                        <?php echo $_LANG['Price3']?>
                     </span>
                     <input name="price_plan" style="font-size: 14px;" value="" type="number" id="with-email"
                            class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
@@ -1039,28 +1071,13 @@ include 'includ/header.php';
                 </div>
                 <div class="flex relative m-2">
                     <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-                        limitip
+                        <?php echo $_LANG['limitip']?>
                     </span>
                     <input  name="limitip_plan" style="font-size: 14px;" value="" type="number" id="with-email"
                            class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
                            placeholder="" required/>
                 </div>
-                <div class="flex relative m-2">
-                    <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-                        inbound id
-                    </span>
-                    <input name="inbound_plan" style="font-size: 14px;" value="" type="number" id="with-email"
-                           class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
-                           placeholder=""/>
-                </div>
-                <div class="flex relative m-2">
-                    <span class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-l-md inline-flex  items-center px-3 border-t bg-white border-l border-b  border-gray-300 text-gray-500 shadow-sm text-sm">
-                         count <span style="font-size: 11px;margin-left: 8px"> ( It is specific to the subscription plan ) </span>
-                    </span>
-                    <input name="count_plan" style="font-size: 14px;" value="" type="number" id="with-email"
-                           class="dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray rounded-r-lg flex-1 appearance-none border border-gray-300 w-full py-2 px-4 bg-white text-red-400 placeholder-gray-400 shadow-sm text-base focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
-                           placeholder=""/>
-                </div>
+
                 <label class="block mt-2 text-sm mx-auto" style="width: 98%">
                     <select required name="name_category_wizwiz"
                             class="block w-full mt-1 text-sm dark:text-gray-300 dark:border-gray-600 dark:bg-gray-700 form-select focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:focus:shadow-outline-gray">
@@ -1097,7 +1114,7 @@ include 'includ/header.php';
                 </label>
                 <div class="m-1">
                     <label class="text-gray-600" for="name" style="font-size: 14px">
-                        <textarea required placeholder="description..." name="description" style="font-size: 14px"
+                        <textarea required placeholder="<?php echo $_LANG['Descriptiontitle']?>" name="description" style="font-size: 14px"
                                   class="mt-2 dark:border-gray-600 dark:bg-gray-700 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-300 dark:focus:shadow-outline-gray flex-1 w-full px-4 py-2 text-base text-blue-400 placeholder-gray-400 bg-white border border-gray-300 rounded-lg appearance-none focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-transparent"
                                   id="comment" name="comment" rows="2" cols="30"></textarea>
                     </label>
@@ -1126,8 +1143,3 @@ include 'includ/header.php';
 <?php
 include 'includ/footer.php';
 ?>
-<!--
-* WizWiz v7.5.3
-* https://github.com/wizwizdev/wizwizxui-timebot
-* Copyright (c) @wizwizch
--->

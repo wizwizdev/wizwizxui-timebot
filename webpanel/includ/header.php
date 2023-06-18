@@ -1,8 +1,3 @@
-<!--
-* WizWiz v7.5.3
-* https://github.com/wizwizdev/wizwizxui-timebot
-* Copyright (c) @wizwizch
--->
 <?php
 ob_start();
 session_start();
@@ -11,6 +6,8 @@ include 'includ/jdf.php';
 include 'includ/notif.php';
 include 'includ/session.php';
 include 'includ/fun.php';
+//include 'langs/lang_en.php';
+//include 'langs/lang_fa.php';
 session_login_wizwiz();
 ?>
 <!DOCTYPE html>
@@ -30,8 +27,9 @@ session_login_wizwiz();
     <script src="./assets/wizwiz.js"></script>
     <style>
         @font-face {
-            font-family: 'iransans';
-            src: url('../assets/fonts/IRANSans.ttf');
+            font-family: IRANSans;
+            src: url('../assets/fonts/IRANSans.ttf'); format('truetype');
+            font-weight: normal;
         }
         ::-webkit-scrollbar {
             width: 7px;
@@ -44,7 +42,7 @@ session_login_wizwiz();
         }
     </style>
 </head>
-<body style="font-family: iransans !important;" id="result">
+<body style="font-family: IRANSans !important;" id="result">
 
 <div
     class="flex h-screen bg-gray-50 dark:bg-gray-900"

@@ -1,8 +1,3 @@
-<!--
-* WizWiz v7.5.3
-* https://github.com/wizwizdev/wizwizxui-timebot
-* Copyright (c) @wizwizch
--->
 <?php
 
 class VolumeInsertionHandler {
@@ -513,7 +508,7 @@ function orders_list($conn){
 //        }
 //    return @$result;
 //}
-function plan_edit($conn){
+function plan_edit1($conn){
     if (isset($_GET['edit'])) {
         $id_edit_select = $_GET['edit'];
         $sql12123 = "SELECT * FROM server_plans WHERE id = '$id_edit_select'";
@@ -524,8 +519,141 @@ function plan_edit($conn){
         return @$result;
     }
 }
-function plan_insert($conn){
-    if(isset($_POST['action']) && $_POST['action'] == 'insert_plans') {
+function plan_insert1($conn){
+    if(isset($_POST['action']) && $_POST['action'] == 'insert_plans1') {
+        foreach($_POST as &$post_var) {
+            if(is_string($post_var)) {
+                $post_var = preg_replace("/[!@#\$%\^&\*\(\)_\+><\{\|\}\"':;]/", "", $post_var);
+            }
+        }
+        $title_plans5 = $_POST['title_plan'];
+        $protocol_plans5 = $_POST['protocol_plan'];
+        $days_plans5 = $_POST['days_plan'];
+        $volume_plans5 = $_POST['volume_plan'];
+        $type_plans5 = $_POST['type_plan'];
+        $price_plans5 = $_POST['price_plan'];
+        $limitip_plans5 = $_POST['limitip_plan'];
+        $name_category_plans5 = $_POST['name_category_wizwiz'];
+        $name_servers_plans5 = $_POST['name_servers_wizwiz'];
+        $descriptions5 = $_POST['description'];
+        $fileid5 = '0';
+        $pic5 = '0';
+        $active5 = 1;
+        $step5 = 10;
+        $dates5 = time();
+        $rahgozars5 = 0;
+//        if ($_POST['inbound_plan']) {
+//            $inbound_plans = $_POST['inbound_plan'];
+//        } else {
+        $inbound_plans5 = 0;
+//        }
+//        if ($_POST['count_plan']) {
+//            $count_plans = $_POST['count_plan'];
+//        } else {
+        $count_plans5 = 0;
+//        }
+        $insert_plans_sql5 = "INSERT INTO server_plans (fileid,catid,server_id,inbound_id,acount,
+                          limitip,title,protocol,days,volume,type,price,descr,pic,active,step,date,rahgozar)
+                          VALUES ('$fileid5','$name_category_plans5','$name_servers_plans5','$inbound_plans5','$count_plans5',
+'$limitip_plans5','$title_plans5','$protocol_plans5','$days_plans5','$volume_plans5','$type_plans5','$price_plans5','$descriptions5','$pic5','$active5',
+'$step5','$dates5','$rahgozars5')";
+        $result_plans_sql5 = mysqli_query($conn, $insert_plans_sql5);
+        if (!$result_plans_sql5) {
+            echo "خطا" . die(mysqli_error($conn));
+        } else {
+            creatwizwiz();
+            header('Location: singleplans.php');
+
+        }
+    }
+}
+function plans1($conn) {
+    if (isset($_GET['delete'])) {
+        $id_delete_server_plans = $_GET['delete'];
+        $sql_delete_server_plans = "DELETE FROM server_plans WHERE id='$id_delete_server_plans'";
+        $result_delete_server_plans = mysqli_query($conn, $sql_delete_server_plans);
+
+        if (!$result_delete_server_plans) {
+            die("خطای پایگاه داده" . mysqli_error($conn));
+        } else {
+            deletewizwiz();
+            header("location: singleplans.php");
+        }
+    }
+
+    if (isset($_GET['on'])) {
+        $id_on_select = $_GET['on'];
+        $sql_on_select = "UPDATE server_plans SET active='1' WHERE id='$id_on_select'";
+        $res_on_select = mysqli_query($conn, $sql_on_select);
+        if (!$res_on_select) {
+            echo "خطا" . die(mysqli_error($conn));
+        } else {
+            statusonwizwiz();
+            header("location: singleplans.php");
+        }
+    }
+
+    if (isset($_GET['off'])) {
+        $id_off_select = $_GET['off'];
+        $sql_off_select = "UPDATE server_plans SET active='0' WHERE id='$id_off_select'";
+        $res_off_select = mysqli_query($conn, $sql_off_select);
+        if (!$res_off_select) {
+            echo "خطا" . die(mysqli_error($conn));
+        } else {
+            statusoffwizwiz();
+            header("location: singleplans.php");
+        }
+    }
+
+
+    if (isset($_GET['copy'])) {
+        $id_copy_server_plans = $_GET['copy'];
+        $sql_copy_server_plans = "SELECT * FROM server_plans WHERE id='$id_copy_server_plans'";
+        $result_copy_server_plans = mysqli_query($conn, $sql_copy_server_plans);
+
+        if (!$result_copy_server_plans) {
+            die("database error" . mysqli_error($conn));
+        } else {
+            // Perform copy operation here
+            $row_data = mysqli_fetch_assoc($result_copy_server_plans);
+            header("location: singleplans.php");
+            $dates = time();
+            $insert_plans_sql = "INSERT INTO server_plans (fileid,catid,server_id,inbound_id,acount,
+                          limitip,title,protocol,days,volume,type,price,descr,pic,active,step,date,rahgozar,dest,serverNames,spiderX,flow)
+                          VALUES ('{$row_data['fileid']}','{$row_data['catid']}','{$row_data['server_id']}','{$row_data['inbound_id']}',
+                                  '{$row_data['acount']}','{$row_data['limitip']}','{$row_data['title']}','{$row_data['protocol']}',
+                                  '{$row_data['days']}','{$row_data['volume']}','{$row_data['type']}','{$row_data['price']}',
+                                  '{$row_data['descr']}','{$row_data['pic']}','{$row_data['active']}','{$row_data['step']}',
+                                  '$dates','{$row_data['rahgozar']}','{$row_data['dest']}','{$row_data['serverNames']}'
+                                  ,'{$row_data['spiderX']}','{$row_data['flow']}')";
+            $result_plans_sql = mysqli_query($conn, $insert_plans_sql);
+            if (!$result_plans_sql) {
+                echo "خطا" . die(mysqli_error($conn));
+            } else {
+                creatwizwiz();
+                header('Location: singleplans.php');
+            }
+
+        }
+    }
+
+
+}
+
+
+function plan_edit2($conn){
+    if (isset($_GET['edit'])) {
+        $id_edit_select = $_GET['edit'];
+        $sql12123 = "SELECT * FROM server_plans WHERE id = '$id_edit_select'";
+        $result5454 = $conn->query($sql12123);
+        while ($row656 = $result5454->fetch_assoc()) {
+            $result[] = $row656;
+        }
+        return @$result;
+    }
+}
+function plan_insert2($conn){
+    if(isset($_POST['action']) && $_POST['action'] == 'insert_plans2') {
         foreach($_POST as &$post_var) {
             if(is_string($post_var)) {
                 $post_var = preg_replace("/[!@#\$%\^&\*\(\)_\+><\{\|\}\"':;]/", "", $post_var);
@@ -541,22 +669,14 @@ function plan_insert($conn){
         $name_category_plans = $_POST['name_category_wizwiz'];
         $name_servers_plans = $_POST['name_servers_wizwiz'];
         $descriptions = $_POST['description'];
+        $count_plans = $_POST['count_plan'];
         $fileid = '0';
         $pic = '0';
         $active = 1;
         $step = 10;
         $dates = time();
         $rahgozars = 0;
-        if ($_POST['inbound_plan']) {
-            $inbound_plans = $_POST['inbound_plan'];
-        } else {
-            $inbound_plans = '0';
-        }
-        if ($_POST['count_plan']) {
-            $count_plans = $_POST['count_plan'];
-        } else {
-            $count_plans = '0';
-        }
+        $inbound_plans = $_POST['inbound_plan'];
         $insert_plans_sql = "INSERT INTO server_plans (fileid,catid,server_id,inbound_id,acount,
                           limitip,title,protocol,days,volume,type,price,descr,pic,active,step,date,rahgozar) 
                           VALUES ('$fileid','$name_category_plans','$name_servers_plans','$inbound_plans','$count_plans',
@@ -567,12 +687,12 @@ function plan_insert($conn){
             echo "خطا" . die(mysqli_error($conn));
         } else {
             creatwizwiz();
-            header('Location: plans.php');
+            header('Location: multipleplans.php');
 
         }
     }
 }
-function plans($conn) {
+function plans2($conn) {
     if (isset($_GET['delete'])) {
         $id_delete_server_plans = $_GET['delete'];
         $sql_delete_server_plans = "DELETE FROM server_plans WHERE id='$id_delete_server_plans'";
@@ -582,7 +702,7 @@ function plans($conn) {
             die("خطای پایگاه داده" . mysqli_error($conn));
         } else {
             deletewizwiz();
-            header("location: plans.php");
+            header("location: multipleplans.php");
         }
     }
 
@@ -594,7 +714,7 @@ function plans($conn) {
             echo "خطا" . die(mysqli_error($conn));
         } else {
             statusonwizwiz();
-            header("location: plans.php");
+            header("location: multipleplans.php");
         }
     }
 
@@ -606,9 +726,41 @@ function plans($conn) {
             echo "خطا" . die(mysqli_error($conn));
         } else {
             statusoffwizwiz();
-            header("location: plans.php");
+            header("location: multipleplans.php");
         }
     }
+
+
+    if (isset($_GET['copy'])) {
+        $id_copy_server_plans = $_GET['copy'];
+        $sql_copy_server_plans = "SELECT * FROM server_plans WHERE id='$id_copy_server_plans'";
+        $result_copy_server_plans = mysqli_query($conn, $sql_copy_server_plans);
+
+        if (!$result_copy_server_plans) {
+            die("database error" . mysqli_error($conn));
+        } else {
+            // Perform copy operation here
+            $row_data = mysqli_fetch_assoc($result_copy_server_plans);
+            header("location: multipleplans.php");
+            $dates = time();
+            $insert_plans_sql = "INSERT INTO server_plans (fileid,catid,server_id,inbound_id,acount,
+                          limitip,title,protocol,days,volume,type,price,descr,pic,active,step,date,rahgozar,dest,serverNames,spiderX,flow) 
+                          VALUES ('{$row_data['fileid']}','{$row_data['catid']}','{$row_data['server_id']}','{$row_data['inbound_id']}',
+                                  '{$row_data['acount']}','{$row_data['limitip']}','{$row_data['title']}','{$row_data['protocol']}',
+                                  '{$row_data['days']}','{$row_data['volume']}','{$row_data['type']}','{$row_data['price']}',
+                                  '{$row_data['descr']}','{$row_data['pic']}','{$row_data['active']}','{$row_data['step']}',
+                                  '$dates','{$row_data['rahgozar']}','{$row_data['dest']}','{$row_data['serverNames']}'
+                                  ,'{$row_data['spiderX']}','{$row_data['flow']}')";
+            $result_plans_sql = mysqli_query($conn, $insert_plans_sql);
+            if (!$result_plans_sql) {
+                echo "خطا" . die(mysqli_error($conn));
+            } else {
+                creatwizwiz();
+                header('Location: multipleplans.php');
+            }
+        }
+    }
+
 
 }
 function rahgozar($conn) {
@@ -649,7 +801,17 @@ function rahgozar($conn) {
         }
     }
 }
-
+function plan_edit_rahgozar($conn){
+    if (isset($_GET['edit'])) {
+        $id_edit_select = $_GET['edit'];
+        $sql12123 = "SELECT * FROM server_plans WHERE id = '$id_edit_select'";
+        $result5454 = $conn->query($sql12123);
+        while ($row656 = $result5454->fetch_assoc()) {
+            $result[] = $row656;
+        }
+        return @$result;
+    }
+}
 class rahgozar_insert {
     private $conn;
 
@@ -1033,3 +1195,4 @@ function volumes_delete($conn){
         $delete_category->delete($id_delete_categories);
     }
 }
+

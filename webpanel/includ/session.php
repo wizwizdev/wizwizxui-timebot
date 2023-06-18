@@ -1,8 +1,3 @@
-<!--
-* WizWiz v7.5.3
-* https://github.com/wizwizdev/wizwizxui-timebot
-* Copyright (c) @wizwizch
--->
 <?php
 function session_notif_wizwiz(){
     if (isset($_SESSION['flash_message'])) {

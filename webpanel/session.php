@@ -2,7 +2,7 @@
 session_start();
 function sessions(){
     if(!isset($_SESSION['username'])){
-        header("location: test.php");
+        header("location: langs.php");
         exit();
     }else{}
 }

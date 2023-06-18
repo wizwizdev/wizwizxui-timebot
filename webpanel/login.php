@@ -1,8 +1,3 @@
-<!--
-* WizWiz v7.5.3
-* https://github.com/wizwizdev/wizwizxui-timebot
-* Copyright (c) @wizwizch
--->
 <?php
 session_start();
 ob_start();
@@ -160,7 +155,7 @@ function input($data)
                         <label class="block mt-4 text-sm">
                             <span class="text-gray-700 dark:text-gray-600">Password</span>
                             <input class="block w-full mt-1 text-sm dark:border-gray-500 dark:bg-gray-600 focus:border-purple-400 focus:outline-none focus:shadow-outline-purple dark:text-gray-600 dark:focus:shadow-outline-gray form-input"
-                                   type="text" name="password" id="password" required/>
+                                   type="password" name="password" id="password" required/>
                         </label>
                         <input hidden checked type="checkbox" class="form-check-input btn-outline-success"
                                id="inputcheckbox" value="1"

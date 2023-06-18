@@ -534,7 +534,7 @@
                 style: "eslint .",
                 pretest: "npm run generate",
                 test: "jest",
-                "test:integrations": "npm run test --prefix ./integrations",
+                "test:integrations": "npm run langs --prefix ./integrations",
                 "install:integrations": "node scripts/install-integrations.js",
                 "generate:plugin-list": "node -r @swc/register scripts/create-plugin-list.js",
                 "generate:types": "node -r @swc/register scripts/generate-types.js",
@@ -596,7 +596,7 @@
             jest: {
                 testTimeout: 3e4,
                 setupFilesAfterEnv: ["<rootDir>/jest/customMatchers.js"],
-                testPathIgnorePatterns: ["/node_modules/", "/integrations/", "/standalone-cli/", "\\.test\\.skip\\.js$"],
+                testPathIgnorePatterns: ["/node_modules/", "/integrations/", "/standalone-cli/", "\\.langs\\.skip\\.js$"],
                 transformIgnorePatterns: ["node_modules/(?!lightningcss)"],
                 transform: {"\\.js$": "@swc/jest", "\\.ts$": "@swc/jest"}
             },
