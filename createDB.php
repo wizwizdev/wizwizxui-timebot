@@ -234,11 +234,12 @@ $connection->query("CREATE TABLE `admins` (
   `username` varchar(200) NOT NULL,
   `password` varchar(200) NOT NULL,
   `backupchannel` varchar(200) CHARACTER SET utf8 NOT NULL,
+  `lang` varchar(10) CHARACTER SET utf8 NOT NULL,
   PRIMARY KEY (`id`)
 )");
 
-$connection->query("INSERT INTO `admins` (`id`, `username`, `password`, `backupchannel`) VALUES
-(1, 'admin', 'admin', '-1002545458541');
+$connection->query("INSERT INTO `admins` (`id`, `username`, `password`, `backupchannel`, `lang`) VALUES
+(1, 'admin', 'admin', '-1002545458541', 'en');
 ");
 
 
