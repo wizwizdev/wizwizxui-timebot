@@ -18,15 +18,15 @@ $arrays = [
         PRIMARY KEY (`id`)
         );",
     "CREATE TABLE `admins` (
-      `id` int(10) NOT NULL AUTO_INCREMENT,
-      `username` varchar(200) NOT NULL,
-      `password` varchar(200) NOT NULL,
-      `backupchannel` varchar(200) CHARACTER SET utf8 NOT NULL,
+	  `id` int(10) NOT NULL AUTO_INCREMENT,
+	  `username` varchar(200) NOT NULL,
+	  `password` varchar(200) NOT NULL,
+	  `backupchannel` varchar(200) CHARACTER SET utf8 NOT NULL,
+	  `lang` varchar(10) CHARACTER SET utf8 NOT NULL,
       PRIMARY KEY (`id`)
     );",
-    "INSERT INTO `admins` (`id`, `username`, `password`, `backupchannel`) VALUES
-    (1, 'admin', 'admin', '-1002545458541');
-    ",   
+    "INSERT INTO `admins` (`id`, `username`, `password`, `backupchannel`, `lang`) VALUES
+    (1, 'admin', 'admin', '-1002545458541', 'en');",
     "CREATE TABLE `servers` (
       `id` int(11) NOT NULL AUTO_INCREMENT,
       `ip` varchar(200) NOT NULL,
@@ -71,7 +71,8 @@ $arrays = [
     "ALTER TABLE `pays` CHANGE `payid` `payid` VARCHAR(500) NULL DEFAULT NULL;",
     "ALTER TABLE `setting` CHANGE `type` `type` VARCHAR(5000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;",
     "ALTER TABLE `server_plans` ADD `spiderX` VARCHAR(500) NULL AFTER `serverNames`;",
-    "ALTER TABLE `server_plans` ADD `flow` VARCHAR(50) NOT NULL DEFAULT 'None' AFTER `spiderX`;"
+    "ALTER TABLE `server_plans` ADD `flow` VARCHAR(50) NOT NULL DEFAULT 'None' AFTER `spiderX`;",
+    "ALTER TABLE admins ADD lang varchar(10) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'en' AFTER `backupchannel`;"
     ];
 
 
