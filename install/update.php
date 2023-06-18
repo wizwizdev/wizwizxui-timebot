@@ -72,7 +72,7 @@ $arrays = [
     "ALTER TABLE `setting` CHANGE `type` `type` VARCHAR(5000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;",
     "ALTER TABLE `server_plans` ADD `spiderX` VARCHAR(500) NULL AFTER `serverNames`;",
     "ALTER TABLE `server_plans` ADD `flow` VARCHAR(50) NOT NULL DEFAULT 'None' AFTER `spiderX`;",
-    "ALTER TABLE admins ADD lang varchar(10) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'en' AFTER `backupchannel`;"
+    "ALTER TABLE `admins` ADD `lang` varchar(10) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'en' AFTER `backupchannel`;"
     ];
 
 
