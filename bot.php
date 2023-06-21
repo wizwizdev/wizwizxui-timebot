@@ -1887,7 +1887,7 @@ if(preg_match('/selectCustomPlanGB(\d+)_(\d+)/',$userInfo['step'], $match) && ($
     }
     $id = $match[1];
     
-	sendMessage(str_replace("DAY-PRICE", $botState['dayPrice'], $mainValues['customer_custome_plan_day']));
+	sendMessage("⏰|لطفا  تعداد روز اشتراکت رو وارد کن\n💰|هزینه هر روز: " . $botState['dayPrice']);
 	setUser("selectCustomPlanDay" . $match[1] . "_" . $match[2] . "_" . $text);
 }
 if((preg_match('/^discountCustomPlanDay(\d+)_(\d+)_(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) || preg_match('/selectCustomPlanDay(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match)) && ($botState['sellState']=="on" ||$from_id ==$admin) && $text != $cancelText){
