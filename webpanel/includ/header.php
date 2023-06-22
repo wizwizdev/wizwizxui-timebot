@@ -28,7 +28,7 @@ session_login_wizwiz();
     <style>
         @font-face {
             font-family: IRANSans;
-            src: url('../assets/fonts/IRANSans.ttf'); format('truetype');
+            src: url('./assets/fonts/IRANSans.ttf'); format('truetype');
             font-weight: normal;
         }
         ::-webkit-scrollbar {
