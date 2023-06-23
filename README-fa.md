@@ -137,7 +137,7 @@ bash <(curl -s https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/mai
 
 
 ### رکوئست هدر:
-- برای استفاده از رکوئست هدر در ربات باید مقدار Header Type را روی http قرار دهید و مقدار request headerهم باید  Host:domain.ir را  وارد کنید و در صورتی که چندتا هدر میخواید فعال کنید از مقدار Host:domain1.ir,domain2.ir استفاده کنید
+- برای استفاده از رکوئست هدر در ربات به قسمت مدیریت سرور برید و یه سرور رو انتخاب کنید سپس باید مقدار Header Type را روی http قرار دهید و مقدار request headerهم باید  Host:domain.ir را  وارد کنید و در صورتی که چندتا هدر میخواید فعال کنید از مقدار Host:domain1.ir,domain2.ir استفاده کنید
 
 
 ### ثبت نشدن سرور در ربات:
