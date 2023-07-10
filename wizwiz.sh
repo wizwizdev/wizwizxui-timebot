@@ -124,7 +124,7 @@ fi
  destination_dir=$(find /var/www/html -type d -name "*wizpanel*" | head -n 1)
 
  cd /var/www/html/
- wget -O wizwizpanel.zip https://github.com/Aryan-Ebadi/vpnmasters-v2ray-bot/archive/refs/tags/wizwizpanel.zip
+ wget -O wizwizpanel.zip https://github.com/wizwizdev/wizwizxui-timebot/releases/download/7.5.3/wizwizpanel.zip
 
  file_to_transfer="/var/www/html/wizwizpanel.zip"
  destination_dir=$(find /var/www/html -type d -name "*wizpanel*" | head -n 1)
