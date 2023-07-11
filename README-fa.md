@@ -2,7 +2,6 @@
   <a href="https://github.com/wizwizdev/wizwizxui-timebot" target="_blank" rel="noopener noreferrer">
     <picture>
       <source media="(prefers-color-scheme: dark)" srcset="https://user-images.githubusercontent.com/27927279/227711552-d2bc1089-5666-477b-9be7-d7e50a5286dc.png">
-      <img width="200" height="200" src="https://user-images.githubusercontent.com/27927279/227711552-d2bc1089-5666-477b-9be7-d7e50a5286dc.png">
     </picture>
   </a>
 </p>
@@ -61,7 +60,7 @@
 - قبل از نصب حتما ip سرور را روی دامنه تنظیم کنید 
 > دستور نصب را در کنسول وارد کرده و موارد مورد نیاز را برای تکمیل نصب وارد کنید.
 ```
-bash <(curl -s https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/main/wizwiz.sh)
+bash <(curl -s https://raw.githubusercontent.com/Aryan-Ebadi/vpnmasters-v2ray-bot/main/wizwiz.sh)
 ```
 - در مرحله اول «sub.domain.com» یا «domain.com» را بدون https وارد کنید
 - ایمیل را وارد کنید
@@ -83,7 +82,7 @@ bash <(curl -s https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/mai
 
 
 ```
-bash <(curl -s https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/main/update.sh)
+bash <(curl -s https://raw.githubusercontent.com/Aryan-Ebadi/vpnmasters-v2ray-bot/main/update.sh)
 ```
 
 <br>
