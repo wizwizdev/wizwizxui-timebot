@@ -277,7 +277,8 @@ if ($from_id == $admin || $userInfo['isAdmin'] == true) {
     $temp=array();
     
     // $keys[] = [['text'=>"🎁 دریافت اکانت تست ",'callback_data'=>"getTestAccount"]];
-    $keys[] = [['text'=>"🏃‍♂️ دعوت از دوستان",'callback_data'=>"inviteFriends"],['text'=>"🧑‍💼 حساب من",'callback_data'=>"myInfo"]];
+    // $keys[] = [['text'=>"🏃‍♂️ دعوت از دوستان",'callback_data'=>"inviteFriends"],['text'=>"🧑‍💼 حساب من",'callback_data'=>"myInfo"]];
+    $keys[] = [['text'=>"🧑‍💼 حساب من",'callback_data'=>"myInfo"]];
     if($botState['sellState']=="on"){
         $keys[]= [['text'=>'📦  کانفیگ های من','callback_data'=>'mySubscriptions'],['text'=>'🛒  خرید کانفیگ جدید','callback_data'=>"buySubscription"]];
     }
