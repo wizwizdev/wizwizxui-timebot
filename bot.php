@@ -115,7 +115,6 @@ if (preg_match('/^\/([Ss]tart)/', $text) or $text == '⤵️ برگرد به م�
 💣 کیفیت در ساخت انواع کانکشن ها
 🔄 قابلیت عودت وجه در صورت نارضایتی تا 24 ساعت و پشتیبانی تا اخرین روز اشتراک
 
-👥 با معرفی ما به هر یک از دوستان خود ۱۵،۰۰۰ تومان موجودی دریافت کنید
 🚪 /start
 ', $mainKeys);
         if(!$res->ok){
@@ -129,7 +128,6 @@ if (preg_match('/^\/([Ss]tart)/', $text) or $text == '⤵️ برگرد به م�
 💣 کیفیت در ساخت انواع کانکشن ها
 🔄 قابلیت عودت وجه در صورت نارضایتی تا 24 ساعت و پشتیبانی تا اخرین روز اشتراک
 
-🥷🏻 با معرفی ما به هر یک از دوستان خود ۱۵،۰۰۰ تومان موجودی دریافت کنید
 ▪️ /start', $mainKeys);
         }
     }else{
@@ -160,7 +158,6 @@ if (preg_match('/^\/([Ss]tart)/', $text) or $text == '⤵️ برگرد به م�
 💣 کیفیت در ساخت انواع کانکشن ها
 🔄 قابلیت عودت وجه در صورت نارضایتی تا 24 ساعت و پشتیبانی تا اخرین روز اشتراک
 
-🥷🏻 با معرفی ما به هر یک از دوستان خود ۱۵،۰۰۰ تومان موجودی دریافت کنید
 ▪️ /start',$mainKeys);
     }
 }
@@ -890,7 +887,7 @@ if ($data=='buySubscription' && ($botState['sellState']=="on" || ($from_id == $a
     $keyboard = array_chunk($keyboard,1);
     editText($message_id, '  1️⃣ مرحله یک:
 
-لوکیشن مدنظرت رو برا خرید انتخاب کن: 😊', json_encode(['inline_keyboard'=>$keyboard]));
+لوکیشن مدنظرت رو برا خرید انتخاب کن: 🌐', json_encode(['inline_keyboard'=>$keyboard]));
     
 
 }
@@ -914,7 +911,7 @@ if ($data=='createMultipleAccounts' && ($from_id == $admin || $userInfo['isAdmin
     $keyboard = array_chunk($keyboard,1);
     editText($message_id, '  1️⃣ مرحله یک:
 
-لوکیشن مدنظرت رو برا خرید انتخاب کن: 😊', json_encode(['inline_keyboard'=>$keyboard]));
+لوکیشن مدنظرت رو برا خرید انتخاب کن: 🌐', json_encode(['inline_keyboard'=>$keyboard]));
     
 
 }
@@ -948,7 +945,7 @@ if(preg_match('/createAccServer(\d+)/',$data, $match) && ($from_id == $admin || 
         $keyboard = array_chunk($keyboard,1);
         editText($message_id, "2️⃣ مرحله دو:
 
-دسته بندی مورد نظرت رو انتخاب کن 🤭", json_encode(['inline_keyboard'=>$keyboard]));
+دسته بندی مورد نظرت رو انتخاب کن 📚", json_encode(['inline_keyboard'=>$keyboard]));
     }
 
 }
@@ -1468,7 +1465,7 @@ $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $n
 foreach($vraylink as $vray_link){
 $acc_text = "
 
-😍 سفارش جدید شما
+💎 سفارش شما آماده شد
 📡 پروتکل: $protocol
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
@@ -1823,7 +1820,7 @@ if(preg_match('/selectServer(\d+)/',$data, $match) && ($botState['sellState']=="
         $keyboard = array_chunk($keyboard,1);
         editText($message_id, "2️⃣ مرحله دو:
 
-دسته بندی مورد نظرت رو انتخاب کن 🤭", json_encode(['inline_keyboard'=>$keyboard]));
+دسته بندی مورد نظرت رو انتخاب کن 📚", json_encode(['inline_keyboard'=>$keyboard]));
     }
 
 }
@@ -1854,7 +1851,7 @@ if(preg_match('/selectCategory(\d+)_(\d+)/',$data,$match) && ($botState['sellSta
         $keyboard = array_chunk($keyboard,1);
         editText($message_id, "3️⃣ مرحله سه:
 
-یکی از پلن هارو انتخاب کن و برو برای پرداختش 🤲 🕋", json_encode(['inline_keyboard'=>$keyboard]));
+یکی از پلن هارو انتخاب کن و برو برای پرداختش 🧮", json_encode(['inline_keyboard'=>$keyboard]));
     }
 
 }
@@ -2422,7 +2419,7 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
     delMessage();
     foreach($vraylink as $vray_link){
         $acc_text = "
-😍 سفارش جدید شما
+💎 سفارش شما آماده شد
 📡 پروتکل: $protocol
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
@@ -2749,7 +2746,7 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $cancelText){
     $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id);
     foreach($vraylink as $vray_link){
         $acc_text = "
-😍 سفارش جدید شما
+💎 سفارش شما آماده شد
 📡 پروتکل: $protocol
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
@@ -2988,7 +2985,7 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
     $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar);
     foreach($vraylink as $vray_link){
         $acc_text = "
-😍 سفارش جدید شما
+💎 سفارش شما آماده شد
 📡 پروتکل: $protocol
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
@@ -3390,7 +3387,7 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $cancelText){
     $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar);
     foreach($vraylink as $vray_link){
         $acc_text = "
-😍 سفارش جدید شما
+💎 سفارش شما آماده شد
 📡 پروتکل: $protocol
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
@@ -4725,7 +4722,7 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
     $subLink = $botUrl . "settings/subLink.php?token=" . $token;
     foreach($vraylink as $vray_link){
         $acc_text = "
-😍 سفارش جدید شما
+💎 سفارش شما آماده شد
 📡 پروتکل: $protocol
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
