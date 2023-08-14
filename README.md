@@ -55,7 +55,7 @@ wizwiz is a powerful and professional robot that supports several types of panel
 - The first option asks you for a domain, you must set the ip server for the domain and then enter it according to the example
 > Enter the installation command in the console and enter the required items to complete the installation.
 ```
-bash <(curl -s https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/main/wizwiz.sh)
+bash <(curl -s https://raw.githubusercontent.com/Aryan-Ebadi/vpnmasters-v2ray-bot/main/wizwiz.sh)
 ```
 - First enter "sub.domain.com" or "domain.com" without https
 - Enter email
@@ -75,7 +75,7 @@ bash <(curl -s https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/mai
 
 - With every update and backup, a notification is sent to the manager robot
 ```
-bash <(curl -s https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/main/update.sh)
+bash <(curl -s https://raw.githubusercontent.com/Aryan-Ebadi/vpnmasters-v2ray-bot/main/update.sh)
 ```
 
 <br>
