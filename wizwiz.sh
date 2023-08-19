@@ -347,7 +347,7 @@ wait
         
         echo " "
         
-        echo -e "\e[100mDatabase information:\033[0m"
+        echo -e "\e[100mDatabase information: https://${YOUR_DOMAIN}/phpmyadmin\033[0m"
         echo -e "\e[33mDatabase name: \e[36m${dbname}\033[0m"
         echo -e "\e[33mDatabase username: \e[36m${dbuser}\033[0m"
         echo -e "\e[33mDatabase password: \e[36m${dbpass}\033[0m"
