@@ -94,11 +94,11 @@ bash <(curl -Ls https://raw.githubusercontent.com/NidukaAkalanka/x-ui-english/ma
 ````
 - (Sanaei)
 ````
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.6.1
+bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.7.6
 ````
 - (Alireza)
 ````
-bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 1.4.1
+bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 1.5.3
 ````
 - (Vaxilu)
 ````
