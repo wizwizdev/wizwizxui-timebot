@@ -72,7 +72,27 @@ $arrays = [
     "ALTER TABLE `setting` CHANGE `type` `type` VARCHAR(5000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;",
     "ALTER TABLE `server_plans` ADD `spiderX` VARCHAR(500) NULL AFTER `serverNames`;",
     "ALTER TABLE `server_plans` ADD `flow` VARCHAR(50) NOT NULL DEFAULT 'None' AFTER `spiderX`;",
-    "ALTER TABLE `admins` ADD `lang` varchar(10) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'en' AFTER `backupchannel`;"
+	"ALTER TABLE `admins` ADD `lang` varchar(10) CHARACTER SET utf8mb4 NOT NULL DEFAULT 'en' AFTER `backupchannel`;",
+	"ALTER TABLE `pays` ADD `description` VARCHAR(5000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL AFTER `hash_id`;",
+	"ALTER TABLE `server_plans` ADD `custom_path` INT(10) NULL DEFAULT '1' AFTER `flow`;",
+	"ALTER TABLE `discounts` ADD `can_use` INT(255) NOT NULL DEFAULT '1' AFTER `used_by`;",
+	"ALTER TABLE `server_plans` ADD `custom_port` INT(255) NOT NULL DEFAULT '0' AFTER `custom_path`;",
+	"ALTER TABLE `server_plans` ADD `custom_sni` VARCHAR(500) NULL AFTER `custom_port`;",
+    "CREATE TABLE `gift_list` (
+        `id` int(255) NOT NULL AUTO_INCREMENT,
+        `server_id` int(255) NOT NULL,
+        `volume` int(255) NOT NULL,
+        `day` int(255) NOT NULL,
+        `offset` int(255) DEFAULT 0,
+        `server_offset` int(255) DEFAULT 0,
+        PRIMARY KEY (`id`)
+        );",
+    "ALTER TABLE `users` ADD `temp` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL AFTER `first_start`;",
+    "ALTER TABLE `users` ADD `is_agent` INT(1) NOT NULL DEFAULT '0' AFTER `temp`, ADD `discount_percent` INT(255) NOT NULL DEFAULT '0' AFTER `is_agent`;",
+    "ALTER TABLE `users` ADD `agent_date` INT(255) NOT NULL DEFAULT '0' AFTER `discount_percent`;",
+    "ALTER TABLE `pays` ADD `agent_bought` INT(1) NOT NULL DEFAULT '0' AFTER `state`;",
+    "ALTER TABLE `orders_list` ADD `agent_bought` INT(1) NOT NULL DEFAULT '0' AFTER `rahgozar`;",
+    "ALTER TABLE `pays` ADD `agent_count` INT(255) NOT NULL DEFAULT '0' AFTER `agent_bought`;"
     ];
 
 
