@@ -220,11 +220,11 @@ bash <(curl -Ls https://raw.githubusercontent.com/NidukaAkalanka/x-ui-english/ma
 ````
 - (Sanaei)
 ````
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.6.1
+bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.7.6
 ````
 - (Alireza)
 ````
-bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 1.4.1
+bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 1.5.3
 ````
 - (Vaxilu)
 ````
@@ -254,10 +254,23 @@ bash <(curl -Ls https://raw.githubusercontent.com/vaxilu/x-ui/master/install.sh)
 
 # امکانات
 
-- درگاه nowpayments - zarinpal - nextpay - weswap
+- درگاه nowpayments - zarinpal - nextpay و ارزی ریالی
 - پشتیبانی از - xtls - tls - reality - Grpc - ws - tcp
 - پشتیبانی vless - vmess - trojan
 - امکان تمدید سرویس
+- نمایش مشخصات کانفیگ به صورت ساب ( داخل نرم افزار v2ray )
+- نمایندگی ( خرید تکی و انبوه - مدیریت کانفیگ - آمار فروش و ... )
+- قابلیت جست و جو کانفیگ های خریداری شده برای دسترسی راحت ( نماینده )
+- نمایش مشخصات  کانفیگ به صورت وب
+- دکمه ثبت لینک برای تمدید و به روزرسانی کانفیگ ( از بات خرید نشده )
+- دکمه دریافت QRcode کانفیگ 
+- حذف کانفیگ توسط کاربر ( حذف از پنل x-ui و دیتابیس + اعلان حذف )
+- قابلیت اضافه کردن حجم و زمان روی سرور دلخواه + اعلان
+- قابلیت کسر موجودی از اعتبار کاربر
+- قابلیت قطع و دریافت لینک جدید توسط کاربر ( تغییر uuid )
+- قابلیت به روزرسانی کانکشن ( با توجه به تغییرات شما در پنل )
+- قابلیت تغییر نام کانفیگ ( رندم و عادی )
+- تعیین نام کانفیگ هنگام خرید توسط کاربر ( پلن دلخواه )
 - اشتراک هوشمند
 - وضعیت فیلتر شدن سرورها
 - تغییر مکان خودکار
