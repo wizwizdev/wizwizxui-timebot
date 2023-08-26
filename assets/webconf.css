@@ -1,0 +1,149 @@
+@font-face {
+    font-family: 'iransans';
+    src: url('IRANSans.ttf');
+}
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+    font-family: 'iransans' !important;
+    line-height: 30px;
+    background: #172b4d;
+    direction: rtl;
+}
+
+.container {
+    width: 80%;
+    margin: 20px auto;
+    position: relative;
+}
+
+#contact input[type="text"],
+#contact button[type="submit"] {
+    font: 500 16px/25px 'iransans';
+}
+
+.contactw {
+    background: #f7f0f5;
+    /*padding: 25px;*/
+    /*box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.2), 0 5px 5px 0 rgba(0, 0, 0, 0.24);*/
+    /*border-radius: 15px !important;*/
+}
+
+fieldset {
+    border: medium none !important;
+    margin: 0 0 10px;
+    min-width: 100%;
+    padding: 0;
+    width: 100%;
+}
+
+#contact input[type="text"]
+{
+    width: 100%;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background: #FFF;
+    margin: 0 0 2px;
+    padding: 6px;
+    font-size: 14px;
+}
+
+#contact button[type="submit"] {
+    cursor: pointer;
+    width: 100%;
+    border: none;
+    background: #345987;
+    color: #FFF;
+    margin: 0 0 5px;
+    padding: 10px;
+    font-size: 15px;
+}
+body{
+    direction: rtl;
+    padding-top: 15px;
+    text-align: center;
+}
+p {
+    line-height: 40px;
+    color: black;
+}
+span {
+    margin-right: 5px;
+    color: green;
+}
+.tarikh{
+    direction: ltr !important;
+}
+.container div {
+    display: flex;
+    justify-content: center
+}
+.container div div{
+    display: block;
+}
+#__next section {
+    min-height:100vh;
+    display: flex;
+    justify-content: center!important;
+    background-color: #172b4d;
+    direction: rtl;
+}
+#__next main {
+    display: flex;
+    flex-direction: column!important;
+    align-items: center!important;
+    justify-content: center!important;
+}
+.div1 {
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 20px;
+    position: relative;
+    display: block;
+    flex: 0 0 50.83333333%;
+    max-width: 50.83333333%;
+    right: auto;
+    left: auto;
+    align-items: center;
+    display: flex;
+    justify-content: center!important;
+}
+.div2 {
+    padding-bottom: 2rem!important;
+    padding-top: 2rem!important;
+    align-items: center!important;
+    display: flex;
+    color: #e31b23;
+    flex-direction: column!important;
+}
+.ant-layout1 {
+    background: #f0f2f5;
+    display: flex;
+    flex: auto;
+    flex-direction: column;
+    min-height: 0;
+}
+.PayPing-layout1 {
+    background-color: #fff;
+}
+.w-100 {
+    width: 100%
+}
+.align-center {
+    align-items: center!important;display: flex;
+}
+.justify-center {
+    display: flex;justify-content: center!important;
+}
+.progress-bar {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  width: 150px;
+  height: 150px;
+  border-radius: 50%;
+}
