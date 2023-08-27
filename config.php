@@ -334,7 +334,7 @@ function getAdminKeys(){
         [['text'=>$buttonValues['tickets_list'],'callback_data'=>"ticketsList"],['text'=>$buttonValues['message_to_all'],'callback_data'=>"message2All"]],
         [
             ['text'=>$buttonValues['agent_list'],'callback_data'=>"agentsList"],
-            ['text'=>$buttonValues['rejected_agent_list'],'callback_data'=>"rejectedAgentList"]
+            ['text'=>'درخواست رد شده نماینده','callback_data'=>"rejectedAgentList"]
             ],
         [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]],
     ]]);
