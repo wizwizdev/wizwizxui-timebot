@@ -140,7 +140,7 @@ bash <(curl -s https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/mai
 - برای استفاده از رکوئست هدر در ربات به قسمت مدیریت سرور برید و یه سرور رو انتخاب کنید سپس باید مقدار Header Type را روی http قرار دهید و مقدار request headerهم باید  Host:domain.ir را  وارد کنید و در صورتی که چندتا هدر میخواید فعال کنید از مقدار Host:domain1.ir,domain2.ir استفاده کنید
 
 
-### ثبت نشدن سرور در ربات:
+### خطا هنگام خرید:
 
 - اگر هنگام خرید با خطای ( ارتباط شما با سرور برقرار نیست ) برخوردید حتما این <a href="https://t.me/wizwizch/186">ویس</a> رو گوش بدید
 
@@ -148,10 +148,10 @@ bash <(curl -s https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/mai
 
 ### ادیت سورس:
 
-  - نرم افزار winscip یا termius نصب کن که دسترسی به فایل داشته باشی یا از طریق سایت shellngn برو وقتی رفتی وارد این مسیر شو و هر فایلی خواستی ادیت بزن
+  - نرم افزار winscip یا termius نصب کنید تا به فایل values.php دسترسی داشته باشید و وارد این مسیر بشید هر متنی خواستین تغییر بدید
 
 ```
-/var/www/html/wizwizxui-timebot
+/var/www/html/wizwizxui-timebot/settings/values.php
 ```
 
 
@@ -220,11 +220,11 @@ bash <(curl -Ls https://raw.githubusercontent.com/NidukaAkalanka/x-ui-english/ma
 ````
 - (Sanaei)
 ````
-bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.7.6
+bash <(curl -Ls https://raw.githubusercontent.com/mhsanaei/3x-ui/master/install.sh) v1.7.7
 ````
 - (Alireza)
 ````
-bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 1.5.3
+bash <(curl -Ls https://raw.githubusercontent.com/alireza0/x-ui/master/install.sh) 1.5.4
 ````
 - (Vaxilu)
 ````
