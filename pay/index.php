@@ -65,8 +65,8 @@ if(mysqli_num_rows($payInfo)==0){
     elseif($payType == "RENEW_ACCOUNT") $type = "تمدید اکانت";
     elseif($payType == "RENEW_SCONFIG") $type = "تمدید اکانت";
     elseif($payType == "INCREASE_WALLET") $type ="شارژ کیف پول";
-    elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)_(.+)_(\d+)/',$payType)) $type = "افزایش زمان اکانت";
-    elseif(preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)_(.+)_(\d+)/',$payType)) $type = "افزایش حجم اکانت";
+    elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType)) $type = "افزایش زمان اکانت";
+    elseif(preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)/',$payType)) $type = "افزایش حجم اکانت";
     
     
     
