@@ -292,7 +292,6 @@ $buttonValues = [
     'agent_joined_date'=>"تاریخ عضویت",
     'agent_agency_date'=>"تاریخ نمایندگی",
     "agent_list"=>" 📍 مدیریت نمایندگان 📍",
-    "rejected_agent_list"=>"درخواست های رد شده",
     'search_agent_config'=>"جستجوی کانفیگ",
     'search_admin_config'=>"جستجوی کانفیگ کاربر"
     ];
