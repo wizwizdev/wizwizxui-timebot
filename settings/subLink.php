@@ -1,7 +1,6 @@
 <?php
 include "../baseInfo.php";
 include "../config.php";
-
 $connection = new mysqli('localhost',$dbUserName,$dbPassword,$dbName);
 if($connection->connect_error){
     exit("error " . $connection->connect_error);  
@@ -84,7 +83,7 @@ $token = $_GET['token'];
 
 
         
-        $newRemark = preg_replace("/\(📊.+\/.+\|📆.+\)/","", $remark) . "(📊" . $totalUsed . " / " . $total . "|📆" .  $daysLeft . ")";
+        $newRemark = preg_replace("/\(ðŸ“Š.+-.+\|ðŸ“†.+\)/","", $remark) . "(ðŸ“Š" . $totalUsed . " - " . $total . "|ðŸ“†" .  $daysLeft . ")";
         if($inbound_id == 0) $res = editInboundRemark($server_id, $remark, $newRemark);
         else $res = editClientRemark($server_id, $inbound_id, $remark, $newRemark);
 
