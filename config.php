@@ -332,10 +332,36 @@ function getAdminKeys(){
         [['text'=>$buttonValues['discount_settings'],'callback_data'=>"discount_codes"],['text'=>$buttonValues['main_button_settings'],'callback_data'=>"mainMenuButtons"]],
         [['text'=>$buttonValues['gateways_settings'],'callback_data'=>"gateWays_Channels"],['text'=>$buttonValues['bot_settings'],'callback_data'=>'botSettings']],
         [['text'=>$buttonValues['tickets_list'],'callback_data'=>"ticketsList"],['text'=>$buttonValues['message_to_all'],'callback_data'=>"message2All"]],
-        [['text'=>$buttonValues['agent_list'],'callback_data'=>"agentsList"]],
+        [
+            ['text'=>$buttonValues['agent_list'],'callback_data'=>"agentsList"],
+            ['text'=>$buttonValues['rejected_agent_list'],'callback_data'=>"rejectedAgentList"]
+            ],
         [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]],
     ]]);
     
+}
+function getRejectedAgentList(){
+    global $connection, $mainValues, $buttonValues;
+    
+    $stmt = $connection->prepare("SELECT * FROM `users` WHERE `is_agent` = -1");
+    $stmt->execute();
+    $list = $stmt->get_result();
+    $stmt->close();
+    
+    if($list->num_rows>0){
+        $keys = array();
+        $keys[] = [['text'=>"آزاد ساختن",'callback_data'=>"wizwizch"],['text'=>"اسم کاربر",'callback_data'=>'wizwizch'],['text'=>"آیدی عددی",'callback_data'=>"wizwizch"]];
+        while($row = $list->fetch_assoc()){
+            $userId = $row['userid'];
+            
+            $userDetail = bot('getChat',['chat_id'=>$userId])->result;
+            $fullName = $userDetail->first_name . " " . $userDetail->last_name;
+            
+            $keys[] = [['text'=>"✅",'callback_data'=>"releaseRejectedAgent" . $userId],['text'=>$fullName,'callback_data'=>"wizwizch"],['text'=>$userId,'callback_data'=>"wizwizch"]];
+        }
+        $keys[] = [['text'=>$buttonValues['back_button'],'callback_data'=>"managePanel"]];
+        return json_encode(['inline_keyboard'=>$keys]);
+    }else return null;
 }
 function getAgentDetails($userId){
     global $connection, $mainVAlues, $buttonValues;
@@ -1489,7 +1515,7 @@ function getUserOrderDetailKeys($id){
         $server_info = $stmt->get_result()->fetch_assoc();
         $stmt->close();
         
-        $subLink = $botUrl . "settings/subLink.php?token=" . $token;
+        $subLink = $botState['subLinkState']=="on"?"<code>" . $botUrl . "settings/subLink.php?token=" . $token . "</code>":"";
 
         $msg = str_replace(['NAME','CONNECT-LINK', 'SUB-LINK'], [$remark, $configLinks, $subLink], $mainValues['config_details_message']);
     
@@ -1812,14 +1838,15 @@ function getOrderDetailKeys($from_id, $id){
         $server_info = $stmt->get_result()->fetch_assoc();
         $stmt->close();
         
-        $subLink = $botUrl . "settings/subLink.php?token=" . $token;
+        $subLink = $botState['subLinkState']=="on"?"<code>" . $botUrl . "settings/subLink.php?token=" . $token . "</code>":"";
 
         $msg = str_replace(['NAME','CONNECT-LINK', 'SUB-LINK'], [$remark, $configLinks, $subLink], $mainValues['config_details_message']);
     
         $extrakey = [];
-        if($botState['increaseVolumeState']=="on" && $price != 0) $extrakey[] = ['text' => $buttonValues['increase_config_volume'], 'callback_data' => "increaseAVolume{$server_id}_{$inbound_id}_{$remark}"];
-        if($botState['increaseTimeState']=="on" && $price != 0) $extrakey[] = ['text' => $buttonValues['increase_config_days'], 'callback_data' => "increaseADay{$server_id}_{$inbound_id}_{$remark}"];
+        if($botState['increaseVolumeState']=="on" && $price != 0) $extrakey[] = ['text' => $buttonValues['increase_config_volume'], 'callback_data' => "increaseAVolume{$id}"];
+        if($botState['increaseTimeState']=="on" && $price != 0) $extrakey[] = ['text' => $buttonValues['increase_config_days'], 'callback_data' => "increaseADay{$id}"];
         $keyboard[] = $extrakey;
+        
          
         if($botState['renewConfigLinkState'] == "on" && $botState['updateConfigLinkState'] == "on") $keyboard[] = [['text'=>$buttonValues['renew_connection_link'],'callback_data'=>'changAccountConnectionLink' . $id],['text'=>$buttonValues['update_config_connection'],'callback_data'=>'updateConfigConnectionLink' . $id]];
         elseif($botState['renewConfigLinkState'] == "on") $keyboard[] = [['text'=>$buttonValues['renew_connection_link'],'callback_data'=>'changAccountConnectionLink' . $id]];
@@ -1919,26 +1946,16 @@ function addBorderImage($add){
     imageCopyResized($newimage, $im, $border, $border, 0, 0, $width, $height, $width, $height);
     ImagePNG($newimage, $add, 5);
 }
-// function sumerize($amount){
-//     $gb = $amount / (1024 * 1024 * 1024);
-//     if($gb > 1){
-//       return round($gb,2) . " گیگابایت"; 
-//     }
-//     else{
-//         $gb *= 1024;
-//         return round($gb,2) . " مگابایت";
-//     }
-
-// }
 function sumerize($amount){
     $gb = $amount / (1024 * 1024 * 1024);
-    // if($gb > 1){
-      return round($gb,2);
-    // }
-    // else{
-    //     $gb *= 1024;
-    //     return round($gb,2) . " مگابایت";
-    // }
+    if($gb > 1){
+      return round($gb,2) . " گیگابایت"; 
+    }
+    else{
+        $gb *= 1024;
+        return round($gb,2) . " مگابایت";
+    }
+
 }
 function deleteClient($server_id, $inbound_id, $remark, $delete = 0){
     global $connection;
@@ -2854,11 +2871,9 @@ function resetClientTraffic($server_id, $remark, $inboundId = null){
         return $loginResponse;
     }
     $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
-
     if($serverType == "sanaei") $url = "$panel_url/panel/inbound/$inboundId/resetClientTraffic/" . urlencode($remark);
     elseif($inboundId == null) $url = "$panel_url/xui/inbound/resetClientTraffic/" . urlencode($remark);
     else $url = "$panel_url/xui/inbound/$inboundId/resetClientTraffic/" . urlencode($remark);
-    
     curl_setopt_array($curl, array(
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
@@ -2925,7 +2940,8 @@ function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $re
                     "limitIp" => $limitip,
                     "flow" => $flow,
                     "totalGB" => $volume,
-                    "expiryTime" => $expiryTime
+                    "expiryTime" => $expiryTime,
+                    "subId" => RandomString(16)
                 ];
 		    }else{
                 $newClient = [
@@ -2934,7 +2950,8 @@ function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $re
                     "email" => $remark,
                     "limitIp" => $limitip,
                     "totalGB" => $volume,
-                    "expiryTime" => $expiryTime
+                    "expiryTime" => $expiryTime,
+                    "subId" => RandomString(16)
                 ];
 		    }
     	}else{
@@ -3538,7 +3555,8 @@ function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', 
         		  "email": "' . $remark. '",
                   "limitIp": 0,
                   "totalGB": 0,
-                  "expiryTime": 0
+                  "expiryTime": 0,
+                  "subId": "' . RandomString(16) . '"
         		}
         	  ],
         	  "decryption": "none",
@@ -3614,7 +3632,8 @@ function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', 
 			  "email": "' . $remark. '",
               "limitIp": 0,
               "totalGB": 0,
-              "expiryTime": 0
+              "expiryTime": 0,
+              "subId": "' . RandomString(16) . '"
 			}
 		  ],
 		  "fallbacks": []
@@ -3695,6 +3714,7 @@ function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', 
                       "limitIp": 0,
                       "totalGB": 0,
                       "expiryTime": 0
+                      "subId": "' . RandomString(16) . '"
             		}
             	  ],
             	  "decryption": "none",
@@ -3741,7 +3761,8 @@ function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', 
                       "email": "' . $remark. '",
                       "limitIp": 0,
                       "totalGB": 0,
-                      "expiryTime": 0
+                      "expiryTime": 0,
+                      "subId": "' . RandomString(16) . '"
                     }
                   ],
                   "decryption": "none",
@@ -3787,7 +3808,8 @@ function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', 
                       "email": "' . $remark. '",
                       "limitIp": 0,
                       "totalGB": 0,
-                      "expiryTime": 0
+                      "expiryTime": 0,
+                      "subId": "' . RandomString(16) . '"
                     }
                   ],
                   "decryption": "none",
@@ -3831,7 +3853,8 @@ function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', 
             		  "email": "' . $remark. '",
                       "limitIp": 0,
                       "totalGB": 0,
-                      "expiryTime": 0
+                      "expiryTime": 0,
+                      "subId": "' . RandomString(16) . '"
             		}
             	  ],
             	  "decryption": "none",
@@ -4099,7 +4122,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
                   "email": "' . $remark. '",
                   "limitIp": 0,
                   "totalGB": 0,
-                  "expiryTime": 0
+                  "expiryTime": 0,
+                  "subId": "' . RandomString(16) . '"
         		}
         	  ],
         	  "decryption": "none",
@@ -4175,7 +4199,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
               "email": "' . $remark. '",
               "limitIp": 0,
               "totalGB": 0,
-              "expiryTime": 0
+              "expiryTime": 0,
+              "subId": "' . RandomString(16) . '"
 			}
 		  ],
 		  "fallbacks": []
@@ -4264,7 +4289,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
         		  "email": "' . $remark. '",
                   "limitIp": 0,
                   "totalGB": 0,
-                  "expiryTime": 0
+                  "expiryTime": 0,
+                  "subId": "' . RandomString(16) . '"
         		}
         	  ],
         	  "decryption": "none",
@@ -4310,7 +4336,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
                   "email": "' . $remark. '",
                   "limitIp": 0,
                   "totalGB": 0,
-                  "expiryTime": 0
+                  "expiryTime": 0,
+                  "subId": "' . RandomString(16) . '"
                 }
               ],
               "disableInsecureEncryption": false
@@ -4378,7 +4405,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
         		  "email": "' . $remark. '",
                   "limitIp": 0,
                   "totalGB": 0,
-                  "expiryTime": 0
+                  "expiryTime": 0,
+                  "subId": "' . RandomString(16) . '"
         		}
         	  ],
         	  "decryption": "none",
@@ -4491,7 +4519,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
                           "flow": "' . $flow .'",
                           "limitIp": 0,
                           "totalGB": 0,
-                          "expiryTime": 0
+                          "expiryTime": 0,
+                          "subId": "' . RandomString(16) . '"
         				}
         			  ],
         			  "decryption": "none",
@@ -4507,7 +4536,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
                           "email": "' . $remark. '",
                           "limitIp": 0,
                           "totalGB": 0,
-                          "expiryTime": 0
+                          "expiryTime": 0,
+                          "subId": "' . RandomString(16) . '"
         				}
         			  ],
         			  "decryption": "none",
