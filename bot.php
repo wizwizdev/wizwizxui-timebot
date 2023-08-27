@@ -1,7 +1,6 @@
 <?php
 include_once 'config.php';
 check();
-
 $robotState = $botState['botState']??"on";
 if ($userInfo['step'] == "banned" && $from_id != $admin && $userInfo['isAdmin'] != true) {
     sendMessage($mainValues['banned']);
@@ -1166,7 +1165,7 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
         }
     
         $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
-        $subLink = $botUrl . "settings/subLink.php?token=" . $token;
+        $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
         foreach($vraylink as $vray_link){
             $acc_text = "
     
@@ -1191,61 +1190,6 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
     }
     sendMessage("☑️|❤️ اکانت های جدید با موفقیت ساخته شد",getMainKeys());
     setUser();
-}
-if(preg_match('/payWithCartToCart(.*)/',$data,$match)) {
-    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ?");
-    $stmt->bind_param("s", $match[1]);
-    $stmt->execute();
-    $payInfo = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
-    
-    $fid = $payInfo['plan_id'];
-    
-    $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `id`=?");
-    $stmt->bind_param("i", $fid);
-    $stmt->execute();
-    $file_detail = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
-    
-    $server_id = $file_detail['server_id'];
-    $acount = $file_detail['acount'];
-    $inbound_id = $file_detail['inbound_id'];
-
-
-    if($acount == 0 and $inbound_id != 0){
-        alert($mainValues['out_of_connection_capacity']);
-        exit;
-    }
-    if($inbound_id == 0) {
-        $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
-        $stmt->bind_param("i", $server_id);
-        $stmt->execute();
-        $server_info = $stmt->get_result()->fetch_assoc();
-        $stmt->close();
-
-        if($server_info['ucount'] == 0) {
-            alert($mainValues['out_of_server_capacity']);
-            exit;
-        }
-    }else{
-        if($acount != 0 && $acount <= 0){
-            alert(str_replace("AMOUNT", $acount, $mainValues['can_create_specific_account']));
-            exit();
-        }
-    }
-    
-    $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = 'PAYMENT_KEYS'");
-    $stmt->execute();
-    $paymentKeys = $stmt->get_result()->fetch_assoc()['value'];
-    if(!is_null($paymentKeys)) $paymentKeys = json_decode($paymentKeys,true);
-    else $paymentKeys = array();
-    $stmt->close();
-    
-    
-    setUser($data);
-    delMessage();
-    sendMessage(str_replace(["ACCOUNT-NUMBER", "HOLDER-NAME"],[$paymentKeys['bankAccount'],$paymentKeys['holderName']], $mainValues['buy_account_cart_to_cart']),$cancelKey, "HTML");
-    exit;
 }
 if(preg_match('/payWithWeSwap(.*)/',$data,$match)) {
     $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ?");
@@ -1494,8 +1438,8 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
         }
         
         $token = RandomString(30);
-        $subLink = $botUrl . "settings/subLink.php?token=" . $token;
-        
+        $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+
         $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
         foreach($vraylink as $vray_link){
         $acc_text = "
@@ -1615,11 +1559,21 @@ $keys = json_encode(['inline_keyboard'=>[
 
 sendMessage($msg, $keys,"html", $admin);
 }
-elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)_(.+)_(\d+)/',$payType, $increaseInfo)){
-    $server_id = $increaseInfo[1];
-    $inbound_id = $increaseInfo[2];
-    $remark = $increaseInfo[3];
-    $planid = $increaseInfo[4];
+elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType, $increaseInfo)){
+    $orderId = $increaseInfo[1];
+    
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $orderId);
+    $stmt->execute();
+    $orderInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $server_id = $orderInfo['server_id'];
+    $inbound_id = $orderInfo['inbound_id'];
+    $remark = $orderInfo['remark'];
+    
+    $planid = $increaseInfo[2];
+
     
     
     $stmt = $connection->prepare("SELECT * FROM `increase_day` WHERE `id` = ?");
@@ -1674,11 +1628,20 @@ sendMessage("
     exit;
 }
 }
-elseif(preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)_(.+)_(\d+)/',$payType, $increaseInfo)){
-$server_id = $increaseInfo[1];
-$inbound_id = $increaseInfo[2];
-$remark = $increaseInfo[3];
-$planid = $increaseInfo[4];
+elseif(preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)/',$payType, $increaseInfo)){
+$orderId = $increaseInfo[1];
+
+$stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+$stmt->bind_param("i", $orderId);
+$stmt->execute();
+$orderInfo = $stmt->get_result()->fetch_assoc();
+$stmt->close();
+
+$server_id = $orderInfo['server_id'];
+$inbound_id = $orderInfo['inbound_id'];
+$remark = $orderInfo['remark'];
+
+$planid = $increaseInfo[2];
 
 $stmt = $connection->prepare("SELECT * FROM `increase_plan` WHERE `id` = ?");
 $stmt->bind_param("i", $planid);
@@ -2504,8 +2467,8 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
     $stmt->execute();
     include 'phpqrcode/qrlib.php';
     $token = RandomString(30);
-    $subLink = $botUrl . "settings/subLink.php?token=" . $token;
-    
+    $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+
     $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
     delMessage();
     foreach($vraylink as $vray_link){
@@ -2802,7 +2765,7 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
     
     include 'phpqrcode/qrlib.php';
     $token = RandomString(30);
-    $subLink = $botUrl . "settings/subLink.php?token=" . $token;
+    $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
 
     $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id);
     foreach($vraylink as $vray_link){
@@ -3067,8 +3030,8 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         
         
             $token = RandomString(30);
-            $subLink = $botUrl . "settings/subLink.php?token=" . $token;
-        
+            $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+
             $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
             foreach($vraylink as $vray_link){
                 $acc_text = "
@@ -3157,7 +3120,6 @@ if(preg_match('/payWithCartToCart(.*)/',$data,$match)) {
     $server_id = $file_detail['server_id'];
     $acount = $file_detail['acount'];
     $inbound_id = $file_detail['inbound_id'];
-
 
     if($payInfo['type'] != "RENEW_SCONFIG"){
         if($acount == 0 and $inbound_id != 0){
@@ -3534,7 +3496,7 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
             }
                 
             $token = RandomString(30);
-            $subLink = $botUrl . "settings/subLink.php?token=" . $token;
+            $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
     
             $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
             foreach($vraylink as $vray_link){
@@ -4861,7 +4823,8 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
     $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
 	include 'phpqrcode/qrlib.php';
     $token = RandomString(30);
-    $subLink = $botUrl . "settings/subLink.php?token=" . $token;
+    $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+    
     foreach($vraylink as $vray_link){
         $acc_text = "
 😍 سفارش جدید شما
@@ -4907,6 +4870,24 @@ if(preg_match('/^showMainButtonAns(\d+)/',$data,$match)){
     editText($message_id,$info['value'],json_encode(['inline_keyboard'=>[
         [['text'=>$buttonValues['back_button'],'callback_data'=>"mainMenu"]]
         ]]));
+}
+if($data=="rejectedAgentList"){
+    $keys = getRejectedAgentList();
+    if($keys != null){
+        editText($message_id,"لیست کاربران رد شده از نمایندگی",$keys);
+    }else alert("کاربری یافت نشد");
+}
+if(preg_match('/^releaseRejectedAgent(\d+)/',$data,$match)){
+    $stmt = $connection->prepare("UPDATE `users` SET `is_agent` = 0 WHERE `userid` = ?");
+    $stmt->bind_param("i", $match[1]);
+    $stmt->execute();
+    $stmt->close();
+    
+    alert($mainValues['saved_successfuly']);
+    $keys = getRejectedAgentList();
+    if($keys != null){
+        editText($message_id,"لیست کاربران رد شده از نمایندگی",$keys);
+    }else editText($message_id,"کاربری یافت نشد",json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"managePanel"]]]]));
 }
 if($data=="showUUIDLeft" && ($botState['searchState']=="on" || $from_id== $admin)){
     delMessage();
@@ -5113,15 +5094,29 @@ if($userInfo['step'] == "showAccount" and $text != $buttonValues['cancel']){
                     ['text'=>$expiryDay??" ",'callback_data'=>"wizwizch"],
                     ['text'=>"تعداد روز باقیمانده",'callback_data'=>"wizwizch"],
                     ],
-                [
-                    ['text'=>"♻️ تمدید کانفیگ",'callback_data'=>"sConfigRenew" . $serverId],
-                    ['text'=>"🛅 بروزرسانی کانفیگ",'callback_data'=>"sConfigUpdate" . $serverId],
-                    ],
+                (($botState['renewAccountState'] == "on" && $botState['updateConfigLinkState'] == "on")?
+                    [
+                        ['text'=>$buttonValues['renew_config'],'callback_data'=>"sConfigRenew" . $serverId],
+                        ['text'=>$buttonValues['update_config_connection'],'callback_data'=>"sConfigUpdate" . $serverId],
+                        ]:[]
+                        ),
+                (($botState['renewAccountState'] != "on" && $botState['updateConfigLinkState'] == "on")?
+                    [
+                        ['text'=>$buttonValues['update_config_connection'],'callback_data'=>"sConfigUpdate" . $serverId]
+                        ]:[]
+                        ),
+                (($botState['renewAccountState'] == "on" && $botState['updateConfigLinkState'] != "on")?
+                    [
+                        ['text'=>$buttonValues['renew_config'],'callback_data'=>"sConfigRenew" . $serverId]
+                        ]:[]
+                        ),
                 [['text'=>"صفحه اصلی",'callback_data'=>"mainMenu"]]
                 ]]);
                 setUser($configLocation, "temp");
                 sendMessage("🔰مشخصات حسابت:",$keys,"MarkDown");
                 break;
+                
+
             }
         }
     }
@@ -5145,7 +5140,7 @@ if(preg_match('/sConfigRenew(\d+)/', $data,$match)){
         $inboundId = 0;
         $remark = $userInfo['temp'];
     }
-    
+    setUser($remark, "temp");
     $response = getJson($server_id)->obj;
     if($response == null){delMessage(); exit();}
     
@@ -6089,7 +6084,7 @@ if(preg_match('/orderDetails(\d+)/', $data, $match) && ($botState['sellState']==
     $keys = getOrderDetailKeys($from_id, $match[1]);
     if($keys == null){
         alert($mainValues['no_order_found']);exit;
-    }else $res = editText($message_id, $keys['msg'], $keys['keyboard'], "HTML");
+    }else editText($message_id, $keys['msg'], $keys['keyboard'], "HTML");
 }
 if($data=="cantEditGrpc"){
     alert("نوعیت این کانفیگ رو تغییر داده نمیتونید!");
@@ -6992,18 +6987,22 @@ if(preg_match('/switchServer(.+)_(.+)/',$data,$match)){
                     $newArr = [
                       "$id_label" => $uniqid,
                       "email" => $newRemark,
+                      "enable" => true,
                       "flow" => $flow,
                       "limitIp" => $remove_response['limitIp'],
                       "totalGB" => $total - $up - $down,
-                      "expiryTime" => $remove_response['expiryTime']
+                      "expiryTime" => $remove_response['expiryTime'],
+                      "subId" => RandomString(16)
                     ];			        
 			    }else{
                     $newArr = [
                       "$id_label" => $uniqid,
                       "email" => $newRemark,
+                      "enable" => true,
                       "limitIp" => $remove_response['limitIp'],
                       "totalGB" => $total - $up - $down,
-                      "expiryTime" => $remove_response['expiryTime']
+                      "expiryTime" => $remove_response['expiryTime'],
+                      "subId" => RandomString(16)
                     ];
 			    }
 			}else{
@@ -7174,9 +7173,9 @@ if(preg_match('/increaseADay(.*)/', $data, $match)){
             'inline_keyboard' => $keyboard
         ]));
 }
-if(preg_match('/selectPlanDayIncrease(.+)_(.+)_(.+)_(.+)/',$data,$match)){
+if(preg_match('/selectPlanDayIncrease(?<orderId>.+)_(?<dayId>.+)/',$data,$match)){
     $data = str_replace('selectPlanDayIncrease','',$data);
-    $pid = $match[4];
+    $pid = $match['dayId'];
     $stmt = $connection->prepare("SELECT * FROM `increase_day` WHERE `id` = ?");
     $stmt->bind_param("i", $pid);
     $stmt->execute();
@@ -7260,11 +7259,21 @@ if(preg_match('/payIncreaseDayWithCartToCart(.*)/',$userInfo['step'], $match) an
         $payType = $payParam['type'];
     
     
-        preg_match('/^INCREASE_DAY_(\d+)_(\d+)_(.+)_(\d+)/',$payType,$increaseInfo);
-        $server_id = $increaseInfo[1];
-        $inbound_id = $increaseInfo[2];
-        $remark = $increaseInfo[3];
-        $planid = $increaseInfo[4];
+        preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType,$increaseInfo);
+        $orderId = $increaseInfo[1];
+        
+        $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+        $stmt->bind_param("i", $orderId);
+        $stmt->execute();
+        $orderInfo = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        
+        $server_id = $orderInfo['server_id'];
+        $inbound_id = $orderInfo['inbound_id'];
+        $remark = $orderInfo['remark'];
+        
+        $planid = $increaseInfo[2];
+
         
         
         $stmt = $connection->prepare("SELECT * FROM `increase_day` WHERE `id` = ?");
@@ -7309,11 +7318,20 @@ if(preg_match('/approveIncreaseDay(.*)/',$data,$match)){
     $payType = $payParam['type'];
 
 
-    preg_match('/^INCREASE_DAY_(\d+)_(\d+)_(.+)_(\d+)/',$payType,$increaseInfo);
-    $server_id = $increaseInfo[1];
-    $inbound_id = $increaseInfo[2];
-    $remark = $increaseInfo[3];
-    $planid = $increaseInfo[4];
+    preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType,$increaseInfo);
+    $orderId = $increaseInfo[1];
+    
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $orderId);
+    $stmt->execute();
+    $orderInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $server_id = $orderInfo['server_id'];
+    $inbound_id = $orderInfo['inbound_id'];
+    $remark = $orderInfo['remark'];
+    
+    $planid = $increaseInfo[2];
 
     
     $uid = $payParam['user_id'];
@@ -7369,11 +7387,21 @@ if(preg_match('/payIncraseDayWithWallet(.*)/', $data,$match)){
     $payType = $payParam['type'];
 
 
-    preg_match('/^INCREASE_DAY_(\d+)_(\d+)_(.+)_(\d+)/',$payType, $increaseInfo);
-    $server_id = $increaseInfo[1];
-    $inbound_id = $increaseInfo[2];
-    $remark = $increaseInfo[3];
-    $planid = $increaseInfo[4];
+    preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType, $increaseInfo);
+    $orderId = $increaseInfo[1];
+    
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $orderId);
+    $stmt->execute();
+    $orderInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $server_id = $orderInfo['server_id'];
+    $inbound_id = $orderInfo['inbound_id'];
+    $remark = $orderInfo['remark'];
+    
+    $planid = $increaseInfo[2];
+
 
 
     
@@ -7464,12 +7492,11 @@ if(preg_match('/^increaseAVolume(.*)/', $data, $match)){
     $res = editText($message_id, "لطفا یکی از پلن های حجمی را انتخاب کنید :",json_encode([
             'inline_keyboard' => $keyboard
         ]));
-        sendMessage(json_encode($res,488));
 }
-if(preg_match('/increaseVolumePlan(.+)_(.+)_(.+)_(.+)/',$data,$match)){
+if(preg_match('/increaseVolumePlan(?<orderId>.+)_(?<volumeId>.+)/',$data,$match)){
     $data = str_replace('increaseVolumePlan','',$data);
     $stmt = $connection->prepare("SELECT * FROM `increase_plan` WHERE `id` = ?");
-    $stmt->bind_param("i", $match[4]);
+    $stmt->bind_param("i", $match['volumeId']);
     $stmt->execute();
     $res = $stmt->get_result()->fetch_assoc();
     $stmt->close();
@@ -7550,11 +7577,20 @@ if(preg_match('/payIncreaseWithCartToCart(.*)/',$userInfo['step'],$match) and $t
         $payType = $payParam['type'];
     
     
-        preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)_(.+)_(\d+)/',$payType, $increaseInfo);
-        $server_id = $increaseInfo[1];
-        $inbound_id = $increaseInfo[2];
-        $remark = $increaseInfo[3];
-        $planid = $increaseInfo[4];
+        preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)/',$payType, $increaseInfo);
+        $orderId = $increaseInfo[1];
+        
+        $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+        $stmt->bind_param("i", $orderId);
+        $stmt->execute();
+        $orderInfo = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        
+        $server_id = $orderInfo['server_id'];
+        $inbound_id = $orderInfo['inbound_id'];
+        $remark = $orderInfo['remark'];
+        
+        $planid = $increaseInfo[2];
     
     
         $stmt = $connection->prepare("SELECT * FROM `increase_plan` WHERE `id` = ?");
@@ -7598,11 +7634,20 @@ if(preg_match('/approveIncreaseVolume(.*)/',$data,$match) && ($from_id == $admin
     $payType = $payParam['type'];
 
 
-    preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)_(.+)_(\d+)/',$payType, $increaseInfo);
-    $server_id = $increaseInfo[1];
-    $inbound_id = $increaseInfo[2];
-    $remark = $increaseInfo[3];
-    $planid = $increaseInfo[4];
+    preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)/',$payType, $increaseInfo);
+    $orderId = $increaseInfo[1];
+    
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $orderId);
+    $stmt->execute();
+    $orderInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $server_id = $orderInfo['server_id'];
+    $inbound_id = $orderInfo['inbound_id'];
+    $remark = $orderInfo['remark'];
+    
+    $planid = $increaseInfo[2];
 
     $uid = $payParam['user_id'];
     $stmt = $connection->prepare("SELECT * FROM `increase_plan` WHERE `id` = ?");
@@ -7648,11 +7693,21 @@ if(preg_match('/decIncreaseVolume(.*)/',$data,$match) && ($from_id == $admin || 
     $payType = $payParam['type'];
 
 
-    preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)_(.+)_(\d+)/',$payType, $increaseInfo);
-    $server_id = $increaseInfo[1];
-    $inbound_id = $increaseInfo[2];
-    $remark = $increaseInfo[3];
-    $planid = $increaseInfo[4];
+    preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)/',$payType, $increaseInfo);
+    $orderId = $increaseInfo[1];
+    
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $orderId);
+    $stmt->execute();
+    $orderInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $server_id = $orderInfo['server_id'];
+    $inbound_id = $orderInfo['inbound_id'];
+    $remark = $orderInfo['remark'];
+    
+    $planid = $increaseInfo[2];
+
 
     $uid = $payParam['user_id'];
     $stmt = $connection->prepare("SELECT * FROM `increase_plan` WHERE `id` = ?");
@@ -7681,11 +7736,21 @@ if(preg_match('/decIncreaseDay(.*)/',$data,$match) && ($from_id == $admin || $us
     $payType = $payParam['type'];
 
 
-    preg_match('/^INCREASE_DAY_(\d+)_(\d+)_(.+)_(\d+)/',$payType, $increaseInfo);
-    $server_id = $increaseInfo[1];
-    $inbound_id = $increaseInfo[2];
-    $remark = $increaseInfo[3];
-    $planid = $increaseInfo[4];
+    preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType, $increaseInfo);
+    $orderId = $increaseInfo[1];
+    
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $orderId);
+    $stmt->execute();
+    $orderInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $server_id = $orderInfo['server_id'];
+    $inbound_id = $orderInfo['inbound_id'];
+    $remark = $orderInfo['remark'];
+    
+    $planid = $increaseInfo[2];
+
 
     $uid = $payParam['user_id'];
     $stmt = $connection->prepare("SELECT * FROM `increase_day` WHERE `id` = ?");
@@ -7714,11 +7779,21 @@ if(preg_match('/payIncraseWithWallet(.*)/', $data,$match)){
     $payType = $payParam['type'];
 
 
-    preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)_(.+)_(\d+)/',$payType, $increaseInfo);
-    $server_id = $increaseInfo[1];
-    $inbound_id = $increaseInfo[2];
-    $remark = $increaseInfo[3];
-    $planid = $increaseInfo[4];
+    preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)/',$payType, $increaseInfo);
+    $orderId = $increaseInfo[1];
+    
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $orderId);
+    $stmt->execute();
+    $orderInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $server_id = $orderInfo['server_id'];
+    $inbound_id = $orderInfo['inbound_id'];
+    $remark = $orderInfo['remark'];
+    
+    $planid = $increaseInfo[2];
+
 
     $stmt = $connection->prepare("SELECT * FROM `increase_plan` WHERE `id` = ?");
     $stmt->bind_param("i", $planid);
