@@ -48,8 +48,8 @@ if(isset($_GET['NP_id'])){
         elseif($payType == "RENEW_ACCOUNT") $payDescription = "تمدید اکانت";
         elseif($payType == "RENEW_SCONFIG") $payDescription = "تمدید اکانت";
         elseif($payType == "INCREASE_WALLET") $payDescription ="شارژ کیف پول";
-        elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)_(.+)_(\d+)/',$payType)) $payDescription = "افزایش زمان اکانت";
-        elseif(preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)_(.+)_(\d+)/',$payType)) $payDescription = "افزایش حجم اکانت";    
+        elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType)) $payDescription = "افزایش زمان اکانت";
+        elseif(preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)/',$payType)) $payDescription = "افزایش حجم اکانت";    
     
         //==============================================================
         if($res->payment_status == 'finished' or $res->payment_status == 'confirmed' or $res->payment_status == 'sending'){
@@ -194,8 +194,8 @@ $agentBought = $payParam['agent_bought'];
 if($payType == "BUY_SUB") $payDescription = "خرید اشتراک";
 elseif($payType == "RENEW_ACCOUNT") $payDescription = "تمدید اکانت";
 elseif($payType == "INCREASE_WALLET") $payDescription ="شارژ کیف پول";
-elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)_(.+)_(\d+)/',$payType)) $payDescription = "افزایش زمان اکانت";
-elseif(preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)_(.+)_(\d+)/',$payType)) $payDescription = "افزایش حجم اکانت";    
+elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType)) $payDescription = "افزایش زمان اکانت";
+elseif(preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)/',$payType)) $payDescription = "افزایش حجم اکانت";    
 
 if($gateType == "zarinpal" || $gateType == "nextpay") $payDescription = "خرید اشتراک";
 
@@ -372,7 +372,8 @@ if($payType == "BUY_SUB"){
     
         $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar);
         $token = RandomString(30);
-        $subLink = $botUrl . "settings/subLink.php?token=" . $token;
+        $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+
         foreach($vraylink as $vray_link){
             $acc_text = "
     😍 سفارش جدید شما
@@ -540,11 +541,20 @@ sendMessage("
 exit;
 
 }
-elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)_(.+)_(\d+)/',$payType,$match)){
-    $server_id = $match[1];
-    $inbound_id = $match[2];
-    $remark = $match[3];
-    $planid = $match[4];
+elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType,$match)){
+    $orderId = $match[1];
+    
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $orderId);
+    $stmt->execute();
+    $orderInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $server_id = $orderInfo['server_id'];
+    $inbound_id = $orderInfo['inbound_id'];
+    $remark = $orderInfo['remark'];
+    
+    $planid = $match[2];
 
     
     $stmt = $connection->prepare("SELECT * FROM `increase_day` WHERE `id` = ?");
@@ -605,11 +615,21 @@ exit;
         exit;
     }
 }
-elseif(preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)_(.+)_(\d+)/',$payType, $match)){
-    $server_id = $match[1];
-    $inbound_id = $match[2];
-    $remark = $match[3];
-    $planid = $match[4];
+elseif(preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)/',$payType, $match)){
+    $orderId = $match[1];
+    
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $orderId);
+    $stmt->execute();
+    $orderInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $server_id = $orderInfo['server_id'];
+    $inbound_id = $orderInfo['inbound_id'];
+    $remark = $orderInfo['remark'];
+    
+    $planid = $match[2];
+
     $stmt = $connection->prepare("SELECT * FROM `increase_plan` WHERE `id` = ?");
     $stmt->bind_param("i",$planid);
     $stmt->execute();
