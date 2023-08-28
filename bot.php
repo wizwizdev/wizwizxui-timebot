@@ -1841,7 +1841,9 @@ if(preg_match('/selectServer(\d+)/',$data, $match) && ($botState['sellState']=="
             alert($mainValues['category_not_avilable']);exit;
         }
         alert($mainValues['receive_categories']);
-        $keyboard[] = ['text' => $buttonValues['back_to_main'], 'callback_data' => "buySubscription"];
+
+        $keyboard[] = ['text' => $buttonValues['back_to_main'], 'callback_data' => 
+        ($userInfo['temp'] == "agentBuy"?"agentOneBuy":($userInfo['temp'] == "agentMuchBuy"?"agentMuchBuy":"buySubscription"))];
         $keyboard = array_chunk($keyboard,1);
         editText($message_id,$mainValues['buy_sub_select_category'], json_encode(['inline_keyboard'=>$keyboard]));
     }
@@ -3138,7 +3140,7 @@ if(preg_match('/payWithCartToCart(.*)/',$data,$match)) {
                 exit;
             }
         }else{
-            if($acount != 0 && $acount < $text){
+            if($acount <= 0){
                 alert(str_replace("AMOUNT", $acount, $mainValues['can_create_specific_account']));
                 exit();
             }
