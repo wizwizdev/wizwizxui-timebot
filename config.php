@@ -334,7 +334,7 @@ function getAdminKeys(){
         [['text'=>$buttonValues['tickets_list'],'callback_data'=>"ticketsList"],['text'=>$buttonValues['message_to_all'],'callback_data'=>"message2All"]],
         [
             ['text'=>$buttonValues['agent_list'],'callback_data'=>"agentsList"],
-            ['text'=>'درخواست رد شده نماینده','callback_data'=>"rejectedAgentList"]
+            ['text'=>'درخواست های رد شده','callback_data'=>"rejectedAgentList"]
             ],
         [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]],
     ]]);
@@ -343,7 +343,7 @@ function getAdminKeys(){
 function getRejectedAgentList(){
     global $connection, $mainValues, $buttonValues;
     
-    $stmt = $connection->prepare("SELECT * FROM `users` WHERE `is_agent` = -1");
+    $stmt = $connection->prepare("SELECT * FROM `users` WHERE `is_agent` = 2");
     $stmt->execute();
     $list = $stmt->get_result();
     $stmt->close();
