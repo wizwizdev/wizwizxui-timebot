@@ -2036,8 +2036,8 @@ function deleteClient($server_id, $inbound_id, $remark, $delete = 0){
         
         $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
         if($serverType == "sanaei" || $serverType == "alireza"){
-            if($serverType == "sanaei") $url = "$panel_url/panel/inbound/" . $inbound_id . "/delClient/" . urlencode($uuid);
-            elseif($serverType == "alireza") $url = "$panel_url/xui/inbound/" . $inbound_id . "/delClient/" . urlencode($uuid);
+            if($serverType == "sanaei") $url = "$panel_url/panel/inbound/" . $inbound_id . "/delClient/" . rawurlencode($uuid);
+            elseif($serverType == "alireza") $url = "$panel_url/xui/inbound/" . $inbound_id . "/delClient/" . rawurlencode($uuid);
 
             curl_setopt_array($curl, array(
                 CURLOPT_URL => $url,
@@ -2433,8 +2433,8 @@ function renewClientUuid($server_id, $inbound_id, $remark){
             "settings" => $newSetting
             );
             
-        if($serverType == "sanaei") $url = "$panel_url/panel/inbound/updateClient/" . urlencode($uuid);
-        else $url = "$panel_url/xui/inbound/updateClient/" . urlencode($uuid);
+        if($serverType == "sanaei") $url = "$panel_url/panel/inbound/updateClient/" . rawurlencode($uuid);
+        else $url = "$panel_url/xui/inbound/updateClient/" . rawurlencode($uuid);
         
         curl_setopt_array($curl, array(
             CURLOPT_URL => $url,
@@ -2562,8 +2562,8 @@ function editClientRemark($server_id, $inbound_id, $remark, $newRemark){
             "settings" => $newSetting
             );
             
-        if($serverType == "sanaei") $url = "$panel_url/panel/inbound/updateClient/" . urlencode($uuid);
-        else $url = "$panel_url/xui/inbound/updateClient/" . urlencode($uuid);
+        if($serverType == "sanaei") $url = "$panel_url/panel/inbound/updateClient/" . rawurlencode($uuid);
+        else $url = "$panel_url/xui/inbound/updateClient/" . rawurlencode($uuid);
         
         curl_setopt_array($curl, array(
             CURLOPT_URL => $url,
@@ -2707,8 +2707,8 @@ function editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, $ed
             "settings" => $newSetting
             );
             
-        if($serverType == "sanaei") $url = "$panel_url/panel/inbound/updateClient/" . urlencode($uuid);
-        else $url = "$panel_url/xui/inbound/updateClient/" . urlencode($uuid);
+        if($serverType == "sanaei") $url = "$panel_url/panel/inbound/updateClient/" . rawurlencode($uuid);
+        else $url = "$panel_url/xui/inbound/updateClient/" . rawurlencode($uuid);
         
         curl_setopt_array($curl, array(
             CURLOPT_URL => $url,
@@ -2871,9 +2871,9 @@ function resetClientTraffic($server_id, $remark, $inboundId = null){
         return $loginResponse;
     }
     $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
-    if($serverType == "sanaei") $url = "$panel_url/panel/inbound/$inboundId/resetClientTraffic/" . urlencode($remark);
-    elseif($inboundId == null) $url = "$panel_url/xui/inbound/resetClientTraffic/" . urlencode($remark);
-    else $url = "$panel_url/xui/inbound/$inboundId/resetClientTraffic/" . urlencode($remark);
+    if($serverType == "sanaei") $url = "$panel_url/panel/inbound/$inboundId/resetClientTraffic/" . rawurlencode($remark);
+    elseif($inboundId == null) $url = "$panel_url/xui/inbound/resetClientTraffic/" . rawurlencode($remark);
+    else $url = "$panel_url/xui/inbound/$inboundId/resetClientTraffic/" . rawurlencode($remark);
     curl_setopt_array($curl, array(
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
@@ -3302,7 +3302,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                 if(strlen($serverName)>1 && $tlsStatus=="xtls") $server_ip = $serverName;
                 if($tlsStatus == "xtls" && $netType == "tcp") $psting .= "&flow=xtls-rprx-direct";
                 if($tlsStatus=="reality") $psting .= "&fp=$fp&pbk=$pbk&sni=$sni" . ($flow != ""?"&flow=$flow":"") . "&sid=$sid&spx=$spiderX";
-                if($rahgozar == true) $psting .= "&path=" . urlencode($path . ($customPath == true?"?ed=2048":"")) . "&encryption=none&host=$host";
+                if($rahgozar == true) $psting .= "&path=" . rawurlencode($path . ($customPath == true?"?ed=2048":"")) . "&encryption=none&host=$host";
                 $outputlink = "$protocol://$uniqid@$server_ip:" . ($rahgozar == true?($customPort!="0"?$customPort:"443"):$port) . "?type=$netType&security=" . ($rahgozar==true?"tls":$tlsStatus) . "{$psting}#$remark";
                 if($netType == 'grpc' && $tlsStatus != "reality"){
                     if($tlsStatus == 'tls'){
@@ -3405,7 +3405,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                     if($header_type == "http") $psting .= "&path=/&host=$host";
                     $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus{$psting}#$remark";
                 }elseif($netType == 'ws'){
-                    if($rahgozar == true)$outputlink = "$protocol://$uniqid@$server_ip:" . ($customPort!=0?$customPort:"443") . "?type=$netType&security=tls&path=" . urlencode($path . ($customPath == true?"?ed=2048":"")) . "&encryption=none&host=$server_ip{$psting}#$remark";
+                    if($rahgozar == true)$outputlink = "$protocol://$uniqid@$server_ip:" . ($customPort!=0?$customPort:"443") . "?type=$netType&security=tls&path=" . rawurlencode($path . ($customPath == true?"?ed=2048":"")) . "&encryption=none&host=$server_ip{$psting}#$remark";
                     else $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus&path=/&host=$host{$psting}#$remark";
                 }
                 elseif($netType == 'kcp')
