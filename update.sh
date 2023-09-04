@@ -228,7 +228,7 @@ do
 			wget https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/main/dbbackupwizwiz.sh | chmod +x dbbackupwizwiz.sh
 			./dbbackupwizwiz.sh
 			
-			echo -e "\e[92m The backup settings have been successfully completed.\033[0m\n"
+			echo -e "\n\e[92m The backup settings have been successfully completed.\033[0m\n"
 
 			break ;;
 		"Delete")
