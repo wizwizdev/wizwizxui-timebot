@@ -163,6 +163,7 @@ if(isset($update->message)){
     $text = $update->message->text;
     $first_name = $update->message->from->first_name;
     $caption = $update->message->caption;
+    $chat_id = $update->message->chat->id;
     $last_name = $update->message->from->last_name;
     $username = $update->message->from->username?? " ندارد ";
     $message_id = $update->message->message_id;
@@ -262,6 +263,7 @@ function getMainKeys(){
         :
         [['text'=>$buttonValues['my_subscriptions'],'callback_data'=>'mySubscriptions']]
             ),
+        [['text'=>$buttonValues['sharj'],'callback_data'=>"increaseMyWallet"]],
         [['text'=>$buttonValues['invite_friends'],'callback_data'=>"inviteFriends"],['text'=>$buttonValues['my_info'],'callback_data'=>"myInfo"]],
         (($botState['sharedExistence'] == "on" && $botState['individualExistence'] == "on")?
         [['text'=>$buttonValues['shared_existence'],'callback_data'=>"availableServers"],['text'=>$buttonValues['individual_existence'],'callback_data'=>"availableServers2"]]:[]),
@@ -332,6 +334,7 @@ function getAdminKeys(){
         [['text'=>$buttonValues['discount_settings'],'callback_data'=>"discount_codes"],['text'=>$buttonValues['main_button_settings'],'callback_data'=>"mainMenuButtons"]],
         [['text'=>$buttonValues['gateways_settings'],'callback_data'=>"gateWays_Channels"],['text'=>$buttonValues['bot_settings'],'callback_data'=>'botSettings']],
         [['text'=>$buttonValues['tickets_list'],'callback_data'=>"ticketsList"],['text'=>$buttonValues['message_to_all'],'callback_data'=>"message2All"]],
+        [['text'=>$buttonValues['forward_to_all'],'callback_data'=>"forwardToAll"]],
         [
             ['text'=>$buttonValues['agent_list'],'callback_data'=>"agentsList"],
             ['text'=>'درخواست های رد شده','callback_data'=>"rejectedAgentList"]
@@ -418,6 +421,32 @@ function getAgentDetails($userId){
             ],
         [['text' => $buttonValues['back_button'], 'callback_data' => "agentsList"]]
         ]]);
+}
+function checkSpam(){
+    global $connection, $from_id, $userInfo, $admin;
+    
+    if($userInfo != null && $from_id != $admin){
+        $spamInfo = json_decode($userInfo['spam_info'],true)??array();
+        $spamDate = $spamInfo['date'];
+        if(isset($spamInfo['banned'])){
+            if(time() <= $spamInfo['banned']) return $spamInfo['banned'];
+        }
+        
+        if(time() <= $spamDate) $spamInfo['count'] += 1;
+        else{
+            $spamInfo['count'] = 1;
+            $spamInfo['date'] = strtotime("+1 minute");
+        }
+        if($spamInfo['count'] >= 20){
+            $spamInfo['banned'] = strtotime("+1 day");
+        }
+        $spamInfo = json_encode($spamInfo);
+        
+        $stmt = $connection->prepare("UPDATE `users` SET `spam_info` = ? WHERE `userid` = ?");
+        $stmt->bind_param("si", $spamInfo, $from_id);
+        $stmt->execute();
+        $stmt->close();
+    }else return null;
 }
 function getAgentsList(){
     global $connection, $mainValues, $buttonValues;
@@ -810,6 +839,7 @@ function getBotSettingKeys(){
     $sellState = $botState['sellState']=="on"?$buttonValues['on']:$buttonValues['off'];
     $robotState = $botState['botState']=="on"?$buttonValues['on']:$buttonValues['off'];
     $searchState = $botState['searchState']=="on"?$buttonValues['on']:$buttonValues['off'];
+    $updateConnectionState = $botState['updateConnectionState']=="robot"?"از روی ربات":"از روی سایت";
     $rewaredTime = ($botState['rewaredTime']??0) . " ساعت";
     $remarkType = $botState['remark']=="digits"?"عدد رندم 5 حرفی"
                                                         :"آیدی و عدد رندوم";
@@ -823,6 +853,10 @@ function getBotSettingKeys(){
     return json_encode(['inline_keyboard'=>[
         [
             ['text'=>"🎗 بنر بازاریابی 🎗",'callback_data'=>"inviteSetting"]
+            ],
+        [
+            ['text'=> $updateConnectionState,'callback_data'=>"changeUpdateConfigLinkState"],
+            ['text'=>"آپدیت کانفیگ",'callback_data'=>"wizwizch"]
             ],
         [
             ['text'=> $agency,'callback_data'=>"changeBotagencyState"],
@@ -1930,7 +1964,7 @@ function setUser($value = 'none', $field = 'step'){
         $stmt->close();
     }
 }
-function generateRandomString($length = 10, $protocol) {
+function generateRandomString($length, $protocol) {
     return ($protocol == 'trojan') ? substr(md5(time()),5,15) : generateUID();
 }
 function addBorderImage($add){
@@ -1955,6 +1989,18 @@ function sumerize($amount){
         $gb *= 1024;
         return round($gb,2) . " مگابایت";
     }
+
+}
+
+function sumerize2($amount){
+    $gb = $amount / (1024 * 1024 * 1024);
+    // if($gb > 1){
+      return round($gb,2);
+    // }
+    // else{
+        // $gb *= 1024;
+        // return round($gb,2) . " مگابایت";
+    // }
 
 }
 function deleteClient($server_id, $inbound_id, $remark, $delete = 0){
@@ -2184,6 +2230,11 @@ function editInboundTraffic($server_id, $remark, $volume, $days, $editType = nul
             $expiryTime = $row->expiryTime;
             $port = $row->port;
             $netType = json_decode($row->streamSettings)->network;
+            
+            $settings = json_decode($row->settings);
+            $clients = $settings->clients;
+            $email = $clients[0]->email;
+
             break;
         }
     }
@@ -2201,8 +2252,11 @@ function editInboundTraffic($server_id, $remark, $volume, $days, $editType = nul
             $total = $extend_volume;
             $up = 0;
             $down = 0;
+            $volume = $extend_volume;
+            if($serverType == "sanaei") resetClientTraffic($server_id, $email, $inbound_id);
+            else resetClientTraffic($server_id, $email);
         }
-        else $total = ($leftGB > 0) ? $leftGB + $extend_volume : $extend_volume;
+        else $total = ($leftGB > 0) ? $total + $extend_volume : $extend_volume;
     }
 
 
@@ -3486,6 +3540,276 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
     }
 
     return $outputLink;
+}
+function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $security = 'none', $rahgozar = false){
+    global $connection;
+    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    $panel_url = $server_info['panel_url'];
+    $security = $server_info['security'];
+    $tlsSettings = $server_info['tlsSettings'];
+    $header_type = $server_info['header_type'];
+    $request_header = $server_info['request_header'];
+    $response_header = $server_info['response_header'];
+    $cookie = 'Cookie: session='.$server_info['cookie'];
+    $serverType = $server_info['type'];
+    $xtlsTitle = ($serverType == "sanaei" || $serverType == "alireza")?"XTLSSettings":"xtlsSettings";
+    $sni = $server_info['sni'];
+    if(!empty($sni) && ($serverType == "sanaei" || $serverType == "alireza")){
+        $tlsSettings = json_decode($tlsSettings,true);
+        $tlsSettings['settings']['serverName'] = $sni;
+        $tlsSettings = json_encode($tlsSettings,488|JSON_UNESCAPED_UNICODE);
+    }
+    
+    $response = getJson($server_id);
+    if(!$response) return null;
+    $response = $response->obj;
+    foreach($response as $row){
+        if($row->id == $inboundId) {
+            $iid = $row->id;
+            $remark = $row->remark;
+            $streamSettings = $row->streamSettings;
+            $settings = $row->settings;
+            break;
+        }
+    }
+    if(!intval($iid)) return;
+    $headers = getNewHeaders($netType, $request_header, $response_header, $header_type);
+    $headers = empty($headers)?"{}":$headers;
+
+    if($protocol == 'trojan'){
+        if($security == 'none'){
+            $tcpSettings = '{
+        	  "network": "tcp",
+        	  "security": "'.$security.'",
+        	  "tlsSettings": '.$tlsSettings.',
+        	  "tcpSettings": {
+                "header": '.$headers.'
+              }
+        	}';
+                $wsSettings = '{
+              "network": "ws",
+              "security": "'.$security.'",
+        	  "tlsSettings": '.$tlsSettings.',
+              "wsSettings": {
+                "path": "/",
+                "headers": '.$headers.'
+              }
+            }';
+
+        }elseif($security == 'xtls' && $serverType != "sanaei" && $serverType != "alireza") {
+            
+            $tcpSettings = '{
+        	  "network": "tcp",
+        	  "security": "'.$security.'",
+        	  "' . $xtlsTitle . '": '.$tlsSettings.',
+        	  "tcpSettings": {
+                "header": '.$headers.'
+              }
+        	}';
+                $wsSettings = '{
+              "network": "ws",
+              "security": "'.$security.'",
+        	  "' . $xtlsTitle . '": '.$tlsSettings.',
+              "wsSettings": {
+                "path": "/",
+                "headers": '.$headers.'
+              }
+            }';
+        }
+        else{
+            $tcpSettings = '{
+        	  "network": "tcp",
+        	  "security": "'.$security.'",
+        	  "tlsSettings": '.$tlsSettings.',
+        	  "tcpSettings": {
+                "header": '.$headers.'
+              }
+        	}';
+            $wsSettings = '{
+              "network": "ws",
+              "security": "'.$security.'",
+        	  "tlsSettings": '.$tlsSettings.',
+              "wsSettings": {
+                "path": "/",
+                "headers": '.$headers.'
+              }
+            }';
+        }
+        
+        
+                $streamSettings = ($netType == 'tcp') ? $tcpSettings : $wsSettings;
+		if($netType == 'grpc'){
+			if($security == 'tls') {
+				$streamSettings = '{
+  "network": "grpc",
+  "security": "tls",
+  "tlsSettings": {
+    "serverName": "' . parse_url($panel_url, PHP_URL_HOST) . '",
+    "certificates": [
+      {
+        "certificateFile": "/root/cert.crt",
+        "keyFile": "/root/private.key"
+      }
+    ],
+    "alpn": []'
+    .
+    (!empty($sni) && ($serverType == "sanaei" || $serverType == "alireza") ? ',
+    "settings": {
+            "serverName": "' . $sni . '"
+            }':'')
+    .'
+  },
+  "grpcSettings": {
+    "serviceName": ""
+  }
+}';
+		    }else{
+			$streamSettings = '{
+  "network": "grpc",
+  "security": "none",
+  "grpcSettings": {
+    "serviceName": "' . parse_url($panel_url, PHP_URL_HOST) . '"
+  }
+}';
+		}
+	    }
+
+
+        $dataArr = array('up' => $row->up,'down' => $row->down,'total' => $row->total,'remark' => $remark,'enable' => 'true',
+            'expiryTime' => $row->expiryTime,'listen' => '','port' => $row->port,'protocol' => $protocol,'settings' => $settings,'streamSettings' => $streamSettings,
+            'sniffing' => $row->sniffing);
+    }else{
+        if($netType != "grpc"){
+            if($rahgozar == true){
+                $wsSettings = '{
+                      "network": "ws",
+                      "security": "none",
+                      "wsSettings": {
+                        "path": "/wss' . $row->port . '",
+                        "headers": {}
+                      }
+                    }';
+            }
+            else{
+                if($security == 'tls') {
+                    $tcpSettings = '{
+            	  "network": "tcp",
+            	  "security": "'.$security.'",
+            	  "tlsSettings": '.$tlsSettings.',
+            	  "tcpSettings": {
+                    "header": '.$headers.'
+                  }
+            	}';
+                    $wsSettings = '{
+                  "network": "ws",
+                  "security": "'.$security.'",
+            	  "tlsSettings": '.$tlsSettings.',
+                  "wsSettings": {
+                    "path": "/",
+                    "headers": '.$headers.'
+                  }
+                }';
+                }
+                elseif($security == 'xtls' && $serverType != "sanaei" && $serverType != "alireza") {
+                    $tcpSettings = '{
+            	  "network": "tcp",
+            	  "security": "'.$security.'",
+            	  "' . $xtlsTitle . '": '.$tlsSettings.',
+            	  "tcpSettings": {
+                    "header": '.$headers.'
+                  }
+            	}';
+                    $wsSettings = '{
+                  "network": "ws",
+                  "security": "'.$security.'",
+            	  "' . $xtlsTitle . '": '.$tlsSettings.',
+                  "wsSettings": {
+                    "path": "/",
+                    "headers": '.$headers.'
+                  }
+                }';
+                }
+                else {
+                    $tcpSettings = '{
+            	  "network": "tcp",
+            	  "security": "none",
+            	  "tcpSettings": {
+            		"header": '.$headers.'
+            	  }
+            	}';
+                    $wsSettings = '{
+                  "network": "ws",
+                  "security": "none",
+                  "wsSettings": {
+                    "path": "/",
+                    "headers": {}
+                  }
+                }';
+                }
+            }
+            $streamSettings = ($netType == 'tcp') ? $tcpSettings : $wsSettings;
+        }
+
+        $dataArr = array('up' => $row->up,'down' => $row->down,'total' => $row->total,'remark' => $remark,'enable' => 'true',
+            'expiryTime' => $row->expiryTime,'listen' => '','port' => $row->port,'protocol' => $protocol,'settings' => $settings,
+            'streamSettings' => $streamSettings,
+            'sniffing' => $row->sniffing);
+    }
+
+    $serverName = $server_info['username'];
+    $serverPass = $server_info['password'];
+    
+    $loginUrl = $panel_url . '/login';
+    
+    $postFields = array(
+        "username" => $serverName,
+        "password" => $serverPass
+        );
+        
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $loginUrl);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_POST, 1);
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
+    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
+    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
+    $loginResponse = json_decode(curl_exec($curl),true);
+    if(!$loginResponse['success']){
+        curl_close($curl);
+        return $loginResponse;
+    }
+    
+    if($serverType == "sanaei") $url = "$panel_url/panel/inbound/update/$iid";
+    else $url = "$panel_url/xui/inbound/update/$iid";
+    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_CONNECTTIMEOUT => 15,
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_POSTFIELDS => $dataArr,
+        CURLOPT_SSL_VERIFYHOST => false,
+        CURLOPT_SSL_VERIFYPEER => false,
+        CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+    ));
+
+    $response = curl_exec($curl);
+    unlink("tempCookie.txt");
+
+    curl_close($curl);
+    return $response = json_decode($response);
 }
 function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', $security = 'none', $rahgozar = false){
     global $connection;
