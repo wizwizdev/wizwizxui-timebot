@@ -66,8 +66,8 @@ do
 			
 			sleep 1
 
-           		url="${bot_url}updateShareConfig.php"
-  			curl $url
+           		url2="${bot_url}updateShareConfig.php"
+  			curl $url2
      
 			sleep 1
    
