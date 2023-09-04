@@ -170,7 +170,7 @@ $connection->query("CREATE TABLE `server_config` (
 
 $connection->query("CREATE TABLE `server_info` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `title` varchar(200) CHARACTER SET utf8 COLLATE utf8_persian_ci NOT NULL,
+  `title` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
   `ucount` varchar(20) CHARACTER SET latin1 COLLATE latin1_swedish_ci NOT NULL,
   `remark` varchar(100) NOT NULL,
   `flag` varchar(100) NOT NULL,
@@ -247,6 +247,7 @@ $connection->query("CREATE TABLE `users` (
   `is_agent` int(1) NOT NULL DEFAULT 0,
   `discount_percent` int(255) NOT NULL DEFAULT 0,
   `agent_date` int(255) NOT NULL DEFAULT 0,
+  `spam_info` varchar(500),
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci");
 
