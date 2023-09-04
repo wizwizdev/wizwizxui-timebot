@@ -220,7 +220,7 @@ do
 			echo " "
 			wait
 
-			(crontab -l ; echo "*/60 * * * * ./dbbackupwizwiz.sh") | sort - | uniq - | crontab -
+			(crontab -l ; echo "0 * * * * ./dbbackupwizwiz.sh") | sort - | uniq - | crontab -
 			
 			wget https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/main/dbbackupwizwiz.sh | chmod +x dbbackupwizwiz.sh
 			./dbbackupwizwiz.sh
