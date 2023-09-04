@@ -9,9 +9,12 @@ include_once '../baseInfo.php';
 include_once '../config.php';
 include_once 'jdf.php';
 if($offset == '0'){
+    if($messageParam->type == "forwardall") $msg = "عملیات هدایت همگانی شروع شد";
+    else $msg = "عملیات ارسال پیام همگانی شروع شد";
+    
     bot('sendMessage',[
         'chat_id'=>$admin,
-        'text'=>"عملیات ارسال پیام همگانی شروع شد"
+        'text'=>$msg
         ]);
 }
 $stmt = $connection->prepare("SELECT * FROM `users`ORDER BY `id` LIMIT 150 OFFSET ?");
@@ -24,53 +27,57 @@ if( $usersList->num_rows > 1 ) {
     while($user = $usersList->fetch_assoc()){
         if($messageParam->type == 'text'){
             sendMessage($messageParam->value,null,null,$user['userid']);
-        }else {
-            if($messageParam->type == 'music'){
-                bot('sendAudio',[
-                    'chat_id' => $user['userid'],
-                    'audio' => $messageParam->value->fileid,
-                    'caption' => $messageParam->value->caption,
-                ]);
-            }elseif($messageParam->type == 'video'){
-                bot('sendVideo',[
-                    'chat_id' => $user['userid'],
-                    'video' => $messageParam->value->fileid,
-                    'caption' => $messageParam->value->caption,
-                ]);
-            }elseif($messageParam->type == 'voice'){
-                bot('sendVoice',[
-                    'chat_id' => $user['userid'],
-                    'voice' => $messageParam->value->fileid,
-                    'caption' => $messageParam->value->caption,
-                ]);
-            }elseif($messageParam->type == 'document'){
-                bot('sendDocument',[
-                    'chat_id' => $user['userid'],
-                    'document' => $messageParam->value->fileid,
-                    'caption' => $messageParam->value->caption,
-                ]);
-            }elseif($messageParam->type == 'photo'){
-                bot('sendPhoto', [
-                    'chat_id' => $user['userid'],
-                    'photo' => $messageParam->value->fileid,
-                    'caption' => $messageParam->value->caption,
-                ]); 
-            }else {
-                bot('sendDocument',[
-                    'chat_id' => $user['userid'],
-                    'document' => $messageParam->value->fileid,
-                    'caption' => $messageParam->value->caption,
-                ]);
-            }
+        }elseif($messageParam->type == 'music'){
+            bot('sendAudio',[
+                'chat_id' => $user['userid'],
+                'audio' => $messageParam->value->fileid,
+                'caption' => $messageParam->value->caption,
+            ]);
+        }elseif($messageParam->type == 'video'){
+            bot('sendVideo',[
+                'chat_id' => $user['userid'],
+                'video' => $messageParam->value->fileid,
+                'caption' => $messageParam->value->caption,
+            ]);
+        }elseif($messageParam->type == 'voice'){
+            bot('sendVoice',[
+                'chat_id' => $user['userid'],
+                'voice' => $messageParam->value->fileid,
+                'caption' => $messageParam->value->caption,
+            ]);
+        }elseif($messageParam->type == 'document'){
+            bot('sendDocument',[
+                'chat_id' => $user['userid'],
+                'document' => $messageParam->value->fileid,
+                'caption' => $messageParam->value->caption,
+            ]);
+        }elseif($messageParam->type == 'photo'){
+            bot('sendPhoto', [
+                'chat_id' => $user['userid'],
+                'photo' => $messageParam->value->fileid,
+                'caption' => $messageParam->value->caption,
+            ]); 
+        }elseif($messageParam->type == "forwardall"){
+            forwardmessage($user['userid'], $messageParam->chat_id, $messageParam->message_id);
+        }
+        else {
+            bot('sendDocument',[
+                'chat_id' => $user['userid'],
+                'document' => $messageParam->value->fileid,
+                'caption' => $messageParam->value->caption,
+            ]);
         }
         $offset++;
     }
     $msgInfo['offset'] = $offset;
     file_put_contents("messagewizwiz.json",json_encode($msgInfo));
 }else{
+    if($messageParam->type == "forwardall") $msg = "عملیات هدایت همگانی با موفقیت انجام شد";
+    else $msg = "عملیات ارسال پیام همگانی با موفقیت انجام شد";
+    
     bot('sendMessage',[
         'chat_id'=>$admin,
-        'text'=>"عملیات ارسال پیام همگانی با موفقیت انجام شد\nبه " . $offset . " نفر پیامتو فرستادم"
+        'text'=>$msg . "\nبه " . $offset . " نفر پیامتو فرستادم"
         ]);
     $msgInfo['offset'] = -1;
     file_put_contents("messagewizwiz.json",json_encode($msgInfo));
