@@ -22,7 +22,7 @@ do
 			echo " "
 			if [ "$answer" != "${answer#[Yy]}" ]; then
 			mv /var/www/html/wizwizxui-timebot/baseInfo.php /root/
-      			mv /var/www/html/wizwizxui-timebot/settings/values.php /root/
+      			# mv /var/www/html/wizwizxui-timebot/settings/values.php /root/
 			sudo apt-get install -y git
 			sudo apt-get install -y wget
 			sudo apt-get install -y unzip
@@ -37,7 +37,7 @@ do
 			sudo chmod -R 755 /var/www/html/wizwizxui-timebot/
 			sleep 3
 			mv /root/baseInfo.php /var/www/html/wizwizxui-timebot/
-      			mv /root/values.php /var/www/html/wizwizxui-timebot/settings/
+      			# mv /root/values.php /var/www/html/wizwizxui-timebot/settings/
 # 			if [ $? -ne 0 ]; then
 # 			echo -e "\n\e[41mError: The update failed!\033[0m\n"
 # 			exit 1
