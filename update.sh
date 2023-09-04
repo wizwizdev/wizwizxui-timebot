@@ -223,10 +223,10 @@ do
 			(crontab -l ; echo "*/60 * * * * ./dbbackupwizwiz.sh") | sort - | uniq - | crontab -
 			
 			wget https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/main/dbbackupwizwiz.sh | chmod +x dbbackupwizwiz.sh
-			./back29.sh
+			./dbbackupwizwiz.sh
    
 			wget https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/main/dbbackupwizwiz.sh | chmod +x dbbackupwizwiz.sh
-			./back29.sh
+			./dbbackupwizwiz.sh
 			
 			echo -e "\e[92m The backup settings have been successfully completed.\033[0m\n"
 
