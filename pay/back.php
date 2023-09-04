@@ -508,7 +508,7 @@ elseif($payType == "RENEW_ACCOUNT"){
 		exit;
 	}
 	$stmt = $connection->prepare("UPDATE `orders_list` SET `expire_date` = ?, `notif` = 0 WHERE `id` = ?");
-	$newExpire = $expire_date + $days * 86400;
+	$newExpire = $time + $days * 86400;
 	$stmt->bind_param("ii", $newExpire, $oid);
 	$stmt->execute();
 	$stmt->close();
