@@ -56,7 +56,7 @@ if($giftList->num_rows>0){
                     $orderExistStmt->bind_param("iis", $server_id, $inbound_id, $clientRemark);
                 }
                 else{
-                    $response = editInboundTraffic($server_id, $clientRemark, ($volume/1024), $day);
+                    $response = editInboundTraffic($server_id, $remark, ($volume/1024), $day);
                     $orderExistStmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `server_id` = ? AND `inbound_id` = 0 AND `remark` = ?");
                     $orderExistStmt->bind_param("is", $server_id, $clientRemark);
                 }
