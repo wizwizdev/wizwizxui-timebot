@@ -200,9 +200,9 @@ function showForm($type){
     </head>
     <body style="background: <?php if(!isset($state)) echo "#f7f0f5"; elseif($state) echo "#f7f0f5"; elseif(!$state) echo "#FF5733";?>;">
     <?php if ($type=="configInfo"){
-        $download = $download != 0? round(100 * $download / $total,2):0;
-        $upload = $upload != 0 ? round(100 * $upload / $total,2):0;
-        $leftMb = $leftMb != "نامحدود"?round(100 * $leftMb / $total,2):"100";
+        $download = $download != 0 && $total != "نامحدود"? round(100 * $download / $total,2):0;
+        $upload = $upload != 0 && $total != "نامحدود"? round(100 * $upload / $total,2):0;
+        $leftMb = $leftMb != "نامحدود" && $total != "نامحدود"?round(100 * $leftMb / $total,2):"100";
         ?>
         <div class="container" style="">
             <form id="contact" class="contactw">
@@ -252,6 +252,7 @@ function showForm($type){
                         <div class="progress-bar" style="display:flex; background: radial-gradient(closest-side, #F9F9F9 79%, transparent 80% 100%),conic-gradient(<?php if($upload <= 50) echo "#467599 "; elseif($upload <= 70 && $upload > 50) echo "#467599 "; elseif($upload > 70) echo "#467599 "; echo $upload . "%";?>, #467599 0);">
                         <?php echo (is_numeric($total) ? $total . "GB": $total);?></div>
                     </div>
+    
                 </div>
         <div class="container">
                     <p class="tarikh" style="font-size:14px;margin-top:10px">
