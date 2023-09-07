@@ -1137,7 +1137,8 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
     $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
-    $srv_remark = $stmt->get_result()->fetch_assoc()['remark'];
+    $serverInfo = $stmt->get_result()->fetch_assoc();
+    $srv_remark = $serverInfo['remark'];
     $stmt->close();
     $savedinfo = file_get_contents('settings/temp.txt');
     $savedinfo = explode('-',$savedinfo);
@@ -1192,6 +1193,7 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
     	}
     	if(!$response->success){
             sendMessage('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
+            sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
             break;
         }
     
@@ -1410,7 +1412,8 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
     $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
-    $srv_remark = $stmt->get_result()->fetch_assoc()['remark'];
+    $serverInfo = $stmt->get_result()->fetch_assoc();
+    $srv_remark = $serverInfo['remark'];
     $stmt->close();
 
     $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
@@ -1456,15 +1459,16 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
         }
         
         if(is_null($response)){
-            alert('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
+            sendMessage('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
             exit;
         }
         if($response == "inbound not Found"){
-            alert("❌ | 🥺 سطر (inbound) با آیدی $inbound_id تو این سرور وجود نداره ، مدیر رو در جریان بزار ...");
+            sendMessage("❌ | 🥺 سطر (inbound) با آیدی $inbound_id تو این سرور وجود نداره ، مدیر رو در جریان بزار ...");
         	exit;
         }
         if(!$response->success){
-            alert('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
+            sendMessage('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
+            sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
             exit;
         }
         
@@ -2496,7 +2500,8 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
     $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
-    $srv_remark = $stmt->get_result()->fetch_assoc()['remark'];
+    $serverInfo = $stmt->get_result()->fetch_assoc();
+    $srv_remark = $serverInfo['remark'];
     $stmt->close();
     
     $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
@@ -2537,6 +2542,7 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
 	}
 	if(!$response->success){
         alert('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
+        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
         exit;
     }
     alert('🚀 | 😍 در حال ارسال کانفیگ به مشتری ...');
@@ -2797,7 +2803,8 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
     $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
-    $srv_remark = $stmt->get_result()->fetch_assoc()['remark'];
+    $serverInfo = $stmt->get_result()->fetch_assoc();
+    $srv_remark = $serverInfo['remark'];
     $stmt->close();
 
     $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
@@ -2838,6 +2845,7 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
 	}
 	if(!$response->success){
         alert('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
+        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
         exit;
     }
     alert('🚀 | 😍 در حال ارسال کانفیگ به مشتری ...');
@@ -3042,7 +3050,8 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
         $stmt->bind_param("i", $server_id);
         $stmt->execute();
-        $srv_remark = $stmt->get_result()->fetch_assoc()['remark'];
+        $serverInfo = $stmt->get_result()->fetch_assoc();
+        $srv_remark = $serverInfo['remark'];
         $stmt->close();
     
         $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
@@ -3095,15 +3104,16 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
             }
         
             if(is_null($response)){
-                alert('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
+                sendMessage('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
                 exit;
             }
         	if($response == "inbound not Found"){
-                alert("❌ | 🥺 سطر (inbound) با آیدی $inbound_id تو این سرور وجود نداره ، مدیر رو در جریان بزار ...");
+                sendMessage("❌ | 🥺 سطر (inbound) با آیدی $inbound_id تو این سرور وجود نداره ، مدیر رو در جریان بزار ...");
         		exit;
         	}
         	if(!$response->success){
-                alert('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
+                sendMessage('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
+                sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
                 exit;
             }
         
@@ -3515,7 +3525,8 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
         $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
         $stmt->bind_param("i", $server_id);
         $stmt->execute();
-        $srv_remark = $stmt->get_result()->fetch_assoc()['remark'];
+        $serverInfo = $stmt->get_result()->fetch_assoc();
+        $srv_remark = $serverInfo['remark'];
         $stmt->close();
     
         $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
@@ -3562,15 +3573,16 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
                 } 
             }
             if(is_null($response)){
-                alert('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
+                sendMessage('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
                 exit;
             }
         	if($response == "inbound not Found"){
-                alert("❌ | 🥺 سطر (inbound) با آیدی $inbound_id تو این سرور وجود نداره ، مدیر رو در جریان بزار ...");
+                sendMessage("❌ | 🥺 سطر (inbound) با آیدی $inbound_id تو این سرور وجود نداره ، مدیر رو در جریان بزار ...");
         		exit;
         	}
         	if(!$response->success){
-                alert('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
+                sendMessage('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
+                sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
                 exit;
             }
                 
@@ -4859,7 +4871,8 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
     $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
-    $srv_remark = $stmt->get_result()->fetch_assoc()['remark'];
+    $serverInfo = $stmt->get_result()->fetch_assoc();
+    $srv_remark = $serverInfo['remark'];
     $stmt->close();
 
     $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
@@ -4902,6 +4915,7 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
 	}
 	if(!$response->success){
         alert('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
+        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
         exit;
     }
     alert('🚀 | 😍 در حال ارسال کانفیگ به مشتری ...');
@@ -6617,6 +6631,8 @@ if(preg_match('/^discountRenew(\d+)_(\d+)/',$userInfo['step'], $match) || preg_m
     $order = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     $fid = $order['fileid'];
+    $agentBought = $order['agent_bought'];
+    $discountPercent = $userInfo['discount_percent'];
     
     $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `id` = ? AND `active` = 1");
     $stmt->bind_param("i", $fid);
@@ -6624,7 +6640,7 @@ if(preg_match('/^discountRenew(\d+)_(\d+)/',$userInfo['step'], $match) || preg_m
     $respd = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     $price = $respd['price'];
-
+    if($agentBought == true) $price -= ($price * $discountPercent / 100);
     if(!preg_match('/^discountRenew/', $userInfo['step'])){
         $hash_id = RandomString();
         $stmt = $connection->prepare("DELETE FROM `pays` WHERE `user_id` = ? AND `type` = 'RENEW_ACCOUNT' AND `state` = 'pending'");
@@ -6641,11 +6657,12 @@ if(preg_match('/^discountRenew(\d+)_(\d+)/',$userInfo['step'], $match) || preg_m
         $stmt->close();
     }else $price = $afterDiscount;
 
-
+    if($price == 0) $price = "رایگان";
+    else $price .= " تومان";
     $keyboard = array();
     $temp = array();
     if($botState['cartToCartState'] == "on"){
-	    $temp[] = ['text' => "💳 کارت به کارت مبلغ $price تومان ",  'callback_data' => "payRenewWithCartToCart$hash_id"];
+	    $temp[] = ['text' => "💳 کارت به کارت مبلغ $price",  'callback_data' => "payRenewWithCartToCart$hash_id"];
     }
     if($botState['nowPaymentOther'] == "on"){
 	    $temp[] = ['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id];
@@ -6677,7 +6694,7 @@ if(preg_match('/^discountRenew(\d+)_(\d+)/',$userInfo['step'], $match) || preg_m
         $temp = array();
     }
     if($botState['walletState'] == "on"){
-	    $temp[] = ['text' => "پرداخت با موجودی مبلغ $price تومان 💰",  'callback_data' => "payRenewWithWallet$hash_id"];
+	    $temp[] = ['text' => "پرداخت با موجودی مبلغ $price",  'callback_data' => "payRenewWithWallet$hash_id"];
     }
     array_push($keyboard, $temp);
     if(!preg_match('/^discountRenew/', $userInfo['step'])) $keyboard[] = [['text' => " 🎁 نکنه کد تخفیف داری؟ ",  'callback_data' => "haveDiscountRenew_" . $match[1] . "_" . $rowId]];
@@ -7275,6 +7292,14 @@ if(preg_match('/increaseADay(.*)/', $data, $match)){
     $stmt->execute();
     $res = $stmt->get_result();
     $stmt->close();
+    
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $match[1]);
+    $stmt->execute();
+    $orderInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $agentBought = $orderInfo['agent_bought'];
+
     if($res->num_rows == 0){
         alert("در حال حاضر هیچ پلنی برای افزایش مدت زمان سرویس وجود ندارد");
         exit;
@@ -7284,7 +7309,10 @@ if(preg_match('/increaseADay(.*)/', $data, $match)){
         $id = $cat['id'];
         $title = $cat['volume'];
         $price = number_format($cat['price']);
-        $keyboard[] = ['text' => "$title روز $price تومان", 'callback_data' => "selectPlanDayIncrease{$match[1]}_$id"];
+        if($agentBought == true) $price -= ($price * $userInfo['discount_percent'] / 100);
+        if($price == 0) $price = "رایگان";
+        else $price .= " تومان";
+        $keyboard[] = ['text' => "$title روز $price", 'callback_data' => "selectPlanDayIncrease{$match[1]}_$id"];
     }
     $keyboard = array_chunk($keyboard,2);
     $keyboard[] = [['text' => "صفحه اصلی 🏘", 'callback_data' => "mainMenu"]];
@@ -7302,6 +7330,14 @@ if(preg_match('/selectPlanDayIncrease(?<orderId>.+)_(?<dayId>.+)/',$data,$match)
     $stmt->close();
     $planprice = $res['price'];
     
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $match['orderId']);
+    $stmt->execute();
+    $orderInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $agentBought = $orderInfo['agent_bought'];
+    
+    if($agentBought == true) $planprice -= ($planprice * $userInfo['discount_percent'] / 100);
     
     
     $hash_id = RandomString();
@@ -7595,6 +7631,13 @@ if(preg_match('/^increaseAVolume(.*)/', $data, $match)){
     $res = $stmt->get_result();
     $stmt->close();
     
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $match[1]);
+    $stmt->execute();
+    $orderInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $agentBought = $orderInfo['agent_bought'];
+    
     if($res->num_rows==0){
         alert("در حال حاضر هیچ پلن حجمی وجود ندارد");
         exit;
@@ -7604,7 +7647,11 @@ if(preg_match('/^increaseAVolume(.*)/', $data, $match)){
         $id = $cat['id'];
         $title = $cat['volume'];
         $price = number_format($cat['price']);
-        $keyboard[] = ['text' => "$title گیگ $price تومان", 'callback_data' => "increaseVolumePlan{$match[1]}_{$id}"];
+        if($agentBought == true) $price -= ($price * $userInfo['discount_percent'] /100);
+        if($price == 0) $price = "رایگان";
+        else $price .=  ' تومان';
+        
+        $keyboard[] = ['text' => "$title گیگ $price", 'callback_data' => "increaseVolumePlan{$match[1]}_{$id}"];
     }
     $keyboard = array_chunk($keyboard,2);
     $keyboard[] = [['text'=>"صفحه ی اصلی 🏘",'callback_data'=>"mainMenu"]];
@@ -7622,6 +7669,14 @@ if(preg_match('/increaseVolumePlan(?<orderId>.+)_(?<volumeId>.+)/',$data,$match)
     $planprice = $res['price'];
     $plangb = $res['volume'];
     
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $match['orderId']);
+    $stmt->execute();
+    $orderInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $agentBought = $orderInfo['agent_bought'];
+ 
+    if($agentBought == true) $planprice -= ($planprice * $userInfo['discount_percent'] /100);
 
     $hash_id = RandomString();
     $stmt = $connection->prepare("DELETE FROM `pays` WHERE `user_id` = ? AND `type` LIKE '%INCREASE_VOLUME%' AND `state` = 'pending'");
@@ -7639,8 +7694,13 @@ if(preg_match('/increaseVolumePlan(?<orderId>.+)_(?<volumeId>.+)/',$data,$match)
     
     $keyboard = array();
     $temp = array();
+    
+    if($planprice == 0) $planprice = ' رایگان';
+    else $planprice = " " . number_format($planprice) . " تومان";
+    
+    
     if($botState['cartToCartState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['cart_to_cart'] . number_format($planprice) . " تومان",  'callback_data' => "payIncreaseWithCartToCart$hash_id"];
+	    $temp[] = ['text' => $buttonValues['cart_to_cart'] . $planprice,  'callback_data' => "payIncreaseWithCartToCart$hash_id"];
     }
     if($botState['nowPaymentOther'] == "on"){
 	    $temp[] = ['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id];
@@ -7671,7 +7731,7 @@ if(preg_match('/increaseVolumePlan(?<orderId>.+)_(?<volumeId>.+)/',$data,$match)
         $temp = array();
     }
     if($botState['walletState'] == "on"){
-	    $temp[] = ['text' => "💰پرداخت با موجودی  " . number_format($planprice) . " تومان",  'callback_data' => "payIncraseWithWallet$hash_id"];
+	    $temp[] = ['text' => "💰پرداخت با موجودی  " . $planprice,  'callback_data' => "payIncraseWithWallet$hash_id"];
     }
     array_push($keyboard, $temp);
     $keyboard[] = [['text'=>$buttonValues['cancel'], 'callback_data'=> "mainMenu"]];
