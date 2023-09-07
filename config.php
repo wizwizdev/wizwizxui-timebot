@@ -2259,7 +2259,6 @@ function editInboundTraffic($server_id, $remark, $volume, $days, $editType = nul
         else $total = ($leftGB > 0) ? $total + $extend_volume : $extend_volume;
     }
 
-
     $dataArr = array('up' => $up,'down' => $down,'total' => is_null($total) ? $row->total : $total,'remark' => $row->remark,'enable' => 'true',
         'expiryTime' => is_null($expire_microdate) ? $row->expiryTime : $expire_microdate, 'listen' => '','port' => $row->port,'protocol' => $row->protocol,'settings' => $row->settings,
         'streamSettings' => $row->streamSettings, 'sniffing' => $row->sniffing);
@@ -2310,6 +2309,9 @@ function editInboundTraffic($server_id, $remark, $volume, $days, $editType = nul
 
     $response = curl_exec($curl);
     curl_close($curl);
+    
+    resetIpLog($server_id, $email);
+
     unlink("tempCookie.txt");
     return $response = json_decode($response);
 
@@ -2712,7 +2714,7 @@ function editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, $ed
         $settings['clients'][$client_key]['totalGB'] = $volume;
         if(!isset($settings['clients'][$client_key]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['subId'] = RandomString(16);
     }
-
+    
     if($days != 0){
         $expiryTime = $settings['clients'][$client_key]['expiryTime'];
         $now_microdate = floor(microtime(true) * 1000);
@@ -2804,6 +2806,9 @@ function editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, $ed
     unlink("tempCookie.txt");
 
     curl_close($curl);
+    
+    resetIpLog($server_id, $remark);
+
     return $response = json_decode($response);
 
 }
@@ -2891,6 +2896,67 @@ function deleteInbound($server_id, $remark, $delete = 0){
         curl_close($curl);
     }
     return $oldData;
+
+}
+function resetIpLog($server_id, $remark){
+    global $connection;
+    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $panel_url = $server_info['panel_url'];
+    $cookie = 'Cookie: session='.$server_info['cookie'];
+    $serverType = $server_info['type'];
+
+
+    $serverName = $server_info['username'];
+    $serverPass = $server_info['password'];
+    
+    $loginUrl = $panel_url . '/login';
+    
+    $postFields = array(
+        "username" => $serverName,
+        "password" => $serverPass
+        );
+        
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $loginUrl);
+    curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($curl, CURLOPT_POST, 1);
+    curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
+    curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
+    curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
+    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
+    $loginResponse = json_decode(curl_exec($curl),true);
+    if(!$loginResponse['success']){
+        curl_close($curl);
+        return $loginResponse;
+    }
+    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
+    
+    if($serverType == "sanaei") $url = $panel_url. "/panel/inbound/clearClientIps/" . urlencode($remark);
+    else $url = $panel_url. "/xui/inbound/clearClientIps/" . urlencode($remark);
+
+    curl_setopt_array($curl, array(
+        CURLOPT_URL => $url,
+        CURLOPT_RETURNTRANSFER => true,
+        CURLOPT_ENCODING => '',
+        CURLOPT_MAXREDIRS => 10,
+        CURLOPT_CONNECTTIMEOUT => 15,
+        CURLOPT_TIMEOUT => 15,
+        CURLOPT_FOLLOWLOCATION => true,
+        CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
+        CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+    ));
+
+    $response = curl_exec($curl);
+    unlink("tempCookie.txt");
+
+    curl_close($curl);
+    return $response = json_decode($response);
 
 }
 function resetClientTraffic($server_id, $remark, $inboundId = null){
