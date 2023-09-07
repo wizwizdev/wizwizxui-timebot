@@ -437,7 +437,7 @@ function checkSpam(){
             $spamInfo['count'] = 1;
             $spamInfo['date'] = strtotime("+1 minute");
         }
-        if($spamInfo['count'] >= 50){
+        if($spamInfo['count'] >= 20){
             $spamInfo['banned'] = strtotime("+1 day");
         }
         $spamInfo = json_encode($spamInfo);
@@ -1676,7 +1676,7 @@ function getOrderDetailKeys($from_id, $id){
                     ];
                     
                     $temp = array();
-                    if($price != 0){
+                    if($price != 0 && $agentBought == true){
                         if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
                         if($botState['switchLocationState']=="on") $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date']];
                     }
@@ -1711,7 +1711,7 @@ function getOrderDetailKeys($from_id, $id){
                     
                     
                     $temp = array();
-                    if($price != 0){
+                    if($price != 0 || $agentBought == true){
                         if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
                         if($botState['switchLocationState']=="on") $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
                     }
@@ -1747,7 +1747,7 @@ function getOrderDetailKeys($from_id, $id){
                     
                     
                     $temp = array();
-                    if($price != 0){
+                    if($price != 0 || $agentBought == true){
                         if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
                         if($botState['switchLocationState']=="on") $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
                     }
@@ -1781,7 +1781,7 @@ function getOrderDetailKeys($from_id, $id){
                     ];
                     
                     $temp = array();
-                    if($price != 0){
+                    if($price != 0 || $agentBought == true){
                         if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
                         if($botState['switchLocationState']=="on") $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
                     }
@@ -1822,7 +1822,7 @@ function getOrderDetailKeys($from_id, $id){
                     ];
                     
                     $temp = array();
-                    if($price != 0){
+                    if($price != 0 || $agentBought == true){
                         if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
                         if($botState['switchLocationState']=="on" && $rahgozar != true) $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
                     }
@@ -1857,7 +1857,7 @@ function getOrderDetailKeys($from_id, $id){
             ];
             
             $temp = array();
-            if($price != 0){
+            if($price != 0 || $agentBought == true){
                 if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
                 if($botState['switchLocationState']=="on" && $rahgozar != true) $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
             }
@@ -1877,8 +1877,8 @@ function getOrderDetailKeys($from_id, $id){
         $msg = str_replace(['NAME','CONNECT-LINK', 'SUB-LINK'], [$remark, $configLinks, $subLink], $mainValues['config_details_message']);
     
         $extrakey = [];
-        if($botState['increaseVolumeState']=="on" && $price != 0) $extrakey[] = ['text' => $buttonValues['increase_config_volume'], 'callback_data' => "increaseAVolume{$id}"];
-        if($botState['increaseTimeState']=="on" && $price != 0) $extrakey[] = ['text' => $buttonValues['increase_config_days'], 'callback_data' => "increaseADay{$id}"];
+        if($botState['increaseVolumeState']=="on" && ($price != 0 || $agentBought == true)) $extrakey[] = ['text' => $buttonValues['increase_config_volume'], 'callback_data' => "increaseAVolume{$id}"];
+        if($botState['increaseTimeState']=="on" && ($price != 0 || $agentBought == true)) $extrakey[] = ['text' => $buttonValues['increase_config_days'], 'callback_data' => "increaseADay{$id}"];
         $keyboard[] = $extrakey;
         
          
@@ -2345,6 +2345,7 @@ function renewInboundUuid($server_id, $remark){
 
     $newUuid = generateUID();
     $settings['clients'][0]['id'] = $newUuid;
+    if(!isset($settings['clients'][0]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][0]['subId'] = RandomString(16);
 
     $editedClient = $settings['clients'][$client_key];
     $settings['clients'] = array_values($settings['clients']);
@@ -2442,6 +2443,7 @@ function renewClientUuid($server_id, $inbound_id, $remark){
     
     $newUuid = generateUID();
     $settings['clients'][$client_key]['id'] = $newUuid;
+    if(!isset($settings['clients'][$client_key]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['subId'] = RandomString(16);
 
     $editedClient = $settings['clients'][$client_key];
     $settings['clients'] = array_values($settings['clients']);
@@ -2571,6 +2573,7 @@ function editClientRemark($server_id, $inbound_id, $remark, $newRemark){
         }
     }
     $settings['clients'][$client_key]['email'] = $newRemark;
+    if(!isset($settings['clients'][$client_key]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['subId'] = RandomString(16);
 
     $editedClient = $settings['clients'][$client_key];
     $settings['clients'] = array_values($settings['clients']);
@@ -2707,6 +2710,7 @@ function editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, $ed
             else resetClientTraffic($server_id, $remark);
         }
         $settings['clients'][$client_key]['totalGB'] = $volume;
+        if(!isset($settings['clients'][$client_key]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['subId'] = RandomString(16);
     }
 
     if($days != 0){
@@ -2716,6 +2720,7 @@ function editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, $ed
         if($editType == "renew") $expire_microdate = $now_microdate + $extend_date;
         else $expire_microdate = ($now_microdate > $expiryTime) ? $now_microdate + $extend_date : $expiryTime + $extend_date;
         $settings['clients'][$client_key]['expiryTime'] = $expire_microdate;
+        if(!isset($settings['clients'][$client_key]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['subId'] = RandomString(16);
     }
     $editedClient = $settings['clients'][$client_key];
     $settings['clients'] = array_values($settings['clients']);
