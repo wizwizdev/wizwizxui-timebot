@@ -288,7 +288,8 @@ if($payType == "BUY_SUB"){
     $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
-    $srv_remark = $stmt->get_result()->fetch_assoc()['remark'];
+    $serverInfo = $stmt->get_result()->fetch_assoc();
+    $srv_remark = $serverInfo['remark'];
     $stmt->close();
 
     $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
@@ -360,7 +361,7 @@ if($payType == "BUY_SUB"){
     	}
     	if(!$response->success){
             showForm('پرداخت شما با موفقیت انجام شد ولی خطا داد لطفا سریع به مدیر بگو ... مبلغ '. number_format($amount) . " تومان به کیف پولت اضافه شد",$payDescription);
-    
+            sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
             $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` + ? WHERE `userid` = ?");
             $stmt->bind_param("ii", $amount, $user_id);
             $stmt->execute();
