@@ -599,9 +599,11 @@ if($data=="myInfo"){
             $keys,"html");
 }
 if($data=="transferMyWallet"){
-    delMessage();
-    sendMessage("لطفا آیدی عددی کاربر مورد نظر رو وارد کن",$cancelKey);
-    setUser($data);
+    if($userInfo['wallet'] > 0 ){
+        delMessage();
+        sendMessage("لطفا آیدی عددی کاربر مورد نظر رو وارد کن",$cancelKey);
+        setUser($data);
+    }else alert("موجودی حساب شما کم است");
 }
 if($userInfo['step'] =="transferMyWallet" && $text != $buttonValues['cancel']){
     if(is_numeric($text)){
@@ -621,22 +623,24 @@ if($userInfo['step'] =="transferMyWallet" && $text != $buttonValues['cancel']){
 }
 if(preg_match('/^tranfserUserAmount(\d+)/',$userInfo['step'],$match) && $text != $buttonValues['cancel']){
     if(is_numeric($text)){
-        if($userInfo['wallet'] >= $text){
-            $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` + ? WHERE `userid` = ?");
-            $stmt->bind_param("ii", $text, $match[1]);
-            $stmt->execute();
-            $stmt->close();
-            
-            $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` - ? WHERE `userid` = ?");
-            $stmt->bind_param("ii", $text, $from_id);
-            $stmt->execute();
-            $stmt->close();
-            
-            sendMessage("✅|مبلغ " . number_format($text) . " تومان به کیف پول شما توسط کاربر $from_id انتقال یافت",null,null,$match[1]);
-            setUser();
-            sendMessage("✅|مبلغ " . number_format($text) . " تومان به کیف پول کاربر مورد نظر شما انتقال یافت",$removeKeyboard);
-            sendMessage("لطفا یکی از کلید های زیر را انتخاب کنید",getMainKeys());
-        }else sendMessage("موجودی حساب شما کم است");
+        if($text > 0){
+            if($userInfo['wallet'] >= $text){
+                $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` + ? WHERE `userid` = ?");
+                $stmt->bind_param("ii", $text, $match[1]);
+                $stmt->execute();
+                $stmt->close();
+                
+                $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` - ? WHERE `userid` = ?");
+                $stmt->bind_param("ii", $text, $from_id);
+                $stmt->execute();
+                $stmt->close();
+                
+                sendMessage("✅|مبلغ " . number_format($text) . " تومان به کیف پول شما توسط کاربر $from_id انتقال یافت",null,null,$match[1]);
+                setUser();
+                sendMessage("✅|مبلغ " . number_format($text) . " تومان به کیف پول کاربر مورد نظر شما انتقال یافت",$removeKeyboard);
+                sendMessage("لطفا یکی از کلید های زیر را انتخاب کنید",getMainKeys());
+            }else sendMessage("موجودی حساب شما کم است");
+        }else sendMessage("لطفا عددی بزرگتر از صفر وارد کنید");
     }else sendMessage($mainValues['send_only_number']);
 }
 if($data=="increaseMyWallet"){
@@ -1193,7 +1197,7 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
     	}
     	if(!$response->success){
             sendMessage('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-            sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
+            sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
             break;
         }
     
@@ -1468,7 +1472,7 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
         }
         if(!$response->success){
             sendMessage('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-            sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
+            sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
             exit;
         }
         
@@ -2542,7 +2546,7 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
 	}
 	if(!$response->success){
         alert('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
+        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
         exit;
     }
     alert('🚀 | 😍 در حال ارسال کانفیگ به مشتری ...');
@@ -2845,7 +2849,7 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
 	}
 	if(!$response->success){
         alert('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
+        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
         exit;
     }
     alert('🚀 | 😍 در حال ارسال کانفیگ به مشتری ...');
@@ -3061,7 +3065,7 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         $stmt->close();
 
         include 'phpqrcode/qrlib.php';
-        delMessage();
+        $msg = $message_id;
 
         $agent_bought = false;
 	    $eachPrice = $price / $accountCount;
@@ -3113,7 +3117,7 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         	}
         	if(!$response->success){
                 sendMessage('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-                sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
+                sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
                 exit;
             }
         
@@ -3157,7 +3161,7 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
             $stmt->close();
         }
     
-    
+        delMessage($msg);
         if($userInfo['refered_by'] != null){
             $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = 'INVITE_BANNER_AMOUNT'");
             $stmt->execute();
@@ -3582,7 +3586,7 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
         	}
         	if(!$response->success){
                 sendMessage('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-                sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
+                sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
                 exit;
             }
                 
@@ -4915,7 +4919,7 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
 	}
 	if(!$response->success){
         alert('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . json_encode($response,488), null, null, $admin);
+        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
         exit;
     }
     alert('🚀 | 😍 در حال ارسال کانفیگ به مشتری ...');
