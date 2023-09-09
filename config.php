@@ -2348,6 +2348,7 @@ function renewInboundUuid($server_id, $remark){
     $newUuid = generateUID();
     $settings['clients'][0]['id'] = $newUuid;
     if(!isset($settings['clients'][0]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][0]['subId'] = RandomString(16);
+    if(!isset($settings['clients'][0]['enable']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][0]['enable'] = true;
 
     $editedClient = $settings['clients'][$client_key];
     $settings['clients'] = array_values($settings['clients']);
@@ -2446,6 +2447,7 @@ function renewClientUuid($server_id, $inbound_id, $remark){
     $newUuid = generateUID();
     $settings['clients'][$client_key]['id'] = $newUuid;
     if(!isset($settings['clients'][$client_key]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['subId'] = RandomString(16);
+    if(!isset($settings['clients'][$client_key]['enable']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['enable'] = true;
 
     $editedClient = $settings['clients'][$client_key];
     $settings['clients'] = array_values($settings['clients']);
@@ -2576,6 +2578,7 @@ function editClientRemark($server_id, $inbound_id, $remark, $newRemark){
     }
     $settings['clients'][$client_key]['email'] = $newRemark;
     if(!isset($settings['clients'][$client_key]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['subId'] = RandomString(16);
+    if(!isset($settings['clients'][$client_key]['enable']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['enable'] = true;
 
     $editedClient = $settings['clients'][$client_key];
     $settings['clients'] = array_values($settings['clients']);
@@ -2713,6 +2716,7 @@ function editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, $ed
         }
         $settings['clients'][$client_key]['totalGB'] = $volume;
         if(!isset($settings['clients'][$client_key]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['subId'] = RandomString(16);
+        if(!isset($settings['clients'][$client_key]['enable']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['enable'] = true;
     }
     
     if($days != 0){
@@ -2723,6 +2727,7 @@ function editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, $ed
         else $expire_microdate = ($now_microdate > $expiryTime) ? $now_microdate + $extend_date : $expiryTime + $extend_date;
         $settings['clients'][$client_key]['expiryTime'] = $expire_microdate;
         if(!isset($settings['clients'][$client_key]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['subId'] = RandomString(16);
+        if(!isset($settings['clients'][$client_key]['enable']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['enable'] = true;
     }
     $editedClient = $settings['clients'][$client_key];
     $settings['clients'] = array_values($settings['clients']);
