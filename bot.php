@@ -1810,14 +1810,27 @@ if ($data == 'message2All' and ($from_id == $admin || $userInfo['isAdmin'] == tr
         
         $leftMessages = $offset == 0 ? $usersCount - $offset : $usersCount - $offset;
         $offset = $offset == 0 ? $offset : $offset;
-        sendMessage("
-❗️ یک پیام همگانی در صف انتشار می باشد لطفا صبور باشید ...
-
-🔰 تعداد کاربران : $usersCount
-☑️ ارسال شده : $offset
-📣 باقیمانده : $leftMessages
-⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
-");exit;
+        
+        if(json_decode($sendInfo['text'],true)['type'] == "forwardall"){
+            sendMessage("
+            ❗️ یک فروارد همگانی در صف انتشار می باشد لطفا صبور باشید ...
+            
+            🔰 تعداد کاربران : $usersCount
+            ☑️ فروارد شده : $offset
+            📣 باقیمانده : $leftMessages
+            ⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
+            ");
+        }else{
+            sendMessage("
+            ❗️ یک پیام همگانی در صف انتشار می باشد لطفا صبور باشید ...
+            
+            🔰 تعداد کاربران : $usersCount
+            ☑️ ارسال شده : $offset
+            📣 باقیمانده : $leftMessages
+            ⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
+            ");
+        }
+        exit;
     }
     setUser('s2a');
     sendMessage("لطفا پیامت رو بنویس ، میخوام برا همه بفرستمش: 🙂",$cancelKey);
@@ -1858,22 +1871,36 @@ if($data=="forwardToAll" && ($from_id == $admin || $userInfo['isAdmin'] == true)
     $sendInfo = json_decode(file_get_contents("settings/messagewizwiz.json"),true);
     $offset = $sendInfo['offset'];
     
-    if($offset != -1) {
+
+    if($offset != -1 && !is_null($offset)) {
         $stmt = $connection->prepare("SELECT * FROM `users`");
         $stmt->execute();
         $usersCount = $stmt->get_result()->num_rows;
         $stmt->close();
         
+        
         $leftMessages = $offset == 0 ? $usersCount - $offset : $usersCount - $offset;
         $offset = $offset == 0 ? $offset : $offset;
-        sendMessage("
-❗️ یک فروارد همگانی در صف انتشار می باشد لطفا صبور باشید ...
-
-🔰 تعداد کاربران : $usersCount
-☑️ فروارد شده : $offset
-📣 باقیمانده : $leftMessages
-⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
-");exit;
+        if(json_decode($sendInfo['text'],true)['type'] == "forwardall"){
+            sendMessage("
+            ❗️ یک فروارد همگانی در صف انتشار می باشد لطفا صبور باشید ...
+            
+            🔰 تعداد کاربران : $usersCount
+            ☑️ فروارد شده : $offset
+            📣 باقیمانده : $leftMessages
+            ⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
+            ");
+        }else{
+            sendMessage("
+            ❗️ یک پیام همگانی در صف انتشار می باشد لطفا صبور باشید ...
+            
+            🔰 تعداد کاربران : $usersCount
+            ☑️ ارسال شده : $offset
+            📣 باقیمانده : $leftMessages
+            ⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
+            ");
+        }
+        exit;
     }
     
     delMessage();
