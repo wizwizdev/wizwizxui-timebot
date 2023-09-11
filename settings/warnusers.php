@@ -74,12 +74,21 @@ if($orders){
             $now_microdate = floor(microtime(true) * 1000);
             if($expiryTime != null && $total != null){
                 $send = "";
-                if($expiryTime < $now_microdate + 86400) $send = "روز"; elseif($leftgb < 1) $send = "گیگ";
+                if($expiryTime < $now_microdate + 86400000 && $expiryTime > $now_microdate) {
+                    $send = "24 ساعت";
+                    $action = "تمدید";
+                } elseif($leftgb <= 1) {
+                    $send = "1 گیگابایت";
+                    $action = "افزایش حجم";
+                }
                 if($send != ""){  
-                    $msg = "💡 کاربر گرامی، 
-        از سرویس اشتراک $remark تنها (۱ $send) باقی مانده است. میتواند از قسمت خرید های من سرویس فعلی خود را تمدید کنید یا سرویس جدید خریداری کنید.";
+                    $msg = "⚠️ از اشتراک سرویس $remark کمتر از $send باقی مانده است 
+
+✅ با کلیک روی /start و مراجعه به بخش سرویس‌های من، می‌توانید اقدام به $action سرویس کنید
+
+❌ در صورت عدم $action ، سرویس پس از 48 ساعت به صورت اتوماتیک از ربات حذف خواهد شد";
                     sendMessage( $msg, null, null, $from_id);
-                    $newTIme = $time + 86400 * 2;
+                    $newTIme = $time + 172800;
                     $stmt = $connection->prepare("UPDATE `orders_list` SET `notif`= ? WHERE `remark`=?");
                     $stmt->bind_param("is", $newTIme, $remark);
                     $stmt->execute();
@@ -146,11 +155,18 @@ if($orders){
             } 
             $leftgb = round( ($total - $up - $down) / 1073741824, 2);
             $now_microdate = floor(microtime(true) * 1000);
-            if($expiryTime <= $now_microdate) $send = true; elseif($leftgb <= 0) $send = true;
+            if($expiryTime <= $now_microdate) {
+                $send = true;
+                $action = "تمدید";
+            } elseif($leftgb <= 2) {
+                $send = true;
+                $action = "افزایش حجم";
+            }
             if($send){  
                 if($inbound_id > 0) deleteClient($server_id, $inbound_id, $remark); else deleteInbound($server_id, $remark); 
-                $msg = "💡 کاربر گرامی،
-اشتراک سرویس $remark منقضی شد و از لیست سفارش ها حذف گردید. لطفا از فروشگاه, سرویس جدید خریداری کنید.";
+                $msg = "⚠️ سرویس $remark به دلیل عدم $action منقضی و از ربات حذف شد
+
+✅ با کلیک روی /start و مراجعه به بخش خرید سرویس جدید ، می‌توانید اقدام به تهیه سرویس کنید";
                 sendMessage( $msg, null, null, $from_id);
                 $stmt = $connection->prepare("DELETE FROM `orders_list` WHERE `remark`=?");
                 $stmt->bind_param("s", $remark);
