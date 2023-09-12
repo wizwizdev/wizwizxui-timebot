@@ -1115,24 +1115,12 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
         $server_info = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
-        if($server_info['ucount'] != 0) {
-            $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - 1 WHERE `id`=?");
-            $stmt->bind_param("i", $server_id);
-            $stmt->execute();
-            $stmt->close();
-
-        } else {
+        if($server_info['ucount'] <= 0) {
             alert($mainValues['out_of_server_capacity']);
             exit;
         }
     }else{
-        if($acount != 0 && $acount >= $text) {
-            $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - ? WHERE id=?");
-            $stmt->bind_param("ii", $text, $fid);
-            $stmt->execute();
-            $stmt->close();
-        }
-        else{
+        if($acount < $text) {
             sendMessage(str_replace("AMOUNT", $acount, $mainValues['can_create_specific_account']));
             exit();
         }
@@ -1225,6 +1213,17 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
     if($portType == "auto"){
         file_put_contents('settings/temp.txt',$port.'-'.$last_num);
     }
+    if($inbound_id == 0) {
+        $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - 1 WHERE `id`=?");
+        $stmt->bind_param("i", $server_id);
+        $stmt->execute();
+        $stmt->close();
+    }else{
+        $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - ? WHERE id=?");
+        $stmt->bind_param("ii", $text, $fid);
+        $stmt->execute();
+        $stmt->close();
+    }
     sendMessage("☑️|❤️ اکانت های جدید با موفقیت ساخته شد",getMainKeys());
     setUser();
 }
@@ -1249,7 +1248,7 @@ if(preg_match('/payWithWeSwap(.*)/',$data,$match)) {
     $inbound_id = $file_detail['inbound_id'];
 
     if($type != "INCREASE_WALLET" && $type != "RENEW_ACCOUNT"){
-        if($acount == 0 and $inbound_id != 0){
+        if($acount <= 0 and $inbound_id != 0){
             alert($mainValues['out_of_connection_capacity']);
             exit;
         }
@@ -1260,12 +1259,12 @@ if(preg_match('/payWithWeSwap(.*)/',$data,$match)) {
             $server_info = $stmt->get_result()->fetch_assoc();
             $stmt->close();
     
-            if($server_info['ucount'] == 0) {
+            if($server_info['ucount'] <= 0) {
                 alert($mainValues['out_of_server_capacity']);
                 exit; 
             }
         }else{
-            if($acount == 0){
+            if($acount <= 0){
                 alert($mainValues['out_of_server_capacity']);
                 exit();
             }
@@ -1394,22 +1393,9 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
         $server_info = $stmt->get_result()->fetch_assoc();
         $stmt->close();
     
-        if($server_info['ucount'] != 0) {
-            $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - ? WHERE `id`=?");
-            $stmt->bind_param("ii", $accountCount, $server_id);
-            $stmt->execute();
-            $stmt->close();
-    
-        } else {
+        if($server_info['ucount'] <= 0) {
             alert($mainValues['out_of_server_capacity']);
             exit;
-        }
-    }else{
-        if($acount != 0) {
-            $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - ? WHERE id=?");
-            $stmt->bind_param("ii", $accountCount, $fid);
-            $stmt->execute();
-            $stmt->close();
         }
     }
 
@@ -1538,7 +1524,18 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
             ['text'=>"بنازم خرید جدید ❤️",'callback_data'=>"wizwizch"]
         ],
         ]]);
-    
+        
+    if($inbound_id == 0) {
+        $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - ? WHERE `id`=?");
+        $stmt->bind_param("ii", $accountCount, $server_id);
+        $stmt->execute();
+        $stmt->close();
+    }else{
+        $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - ? WHERE id=?");
+        $stmt->bind_param("ii", $accountCount, $fid);
+        $stmt->execute();
+        $stmt->close();
+    }
     $msg = str_replace(['TYPE', 'USER-ID', 'USERNAME', 'NAME', 'PRICE', 'REMARK', 'VOLUME', 'DAYS'],
                 ['ارزی ریالی', $from_id, $username, $first_name, $price, $remark,$volume, $days], $mainValues['buy_new_account_request']);
     
@@ -2502,22 +2499,9 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
         $server_info = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
-        if($server_info['ucount'] != 0) {
-            $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - 1 WHERE `id`=?");
-            $stmt->bind_param("i", $server_id);
-            $stmt->execute();
-            $stmt->close();
-
-        } else {
+        if($server_info['ucount'] <= 0) {
             alert($mainValues['out_of_server_capacity']);
             exit;
-        }
-    }else{
-        if($acount != 0) {
-            $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - 1 WHERE id=?");
-            $stmt->bind_param("i", $fid);
-            $stmt->execute();
-            $stmt->close();
         }
     }
 
@@ -2635,6 +2619,19 @@ if($botState['subLinkState'] == "on") $acc_text .= "
     $stmt->execute();
     $order = $stmt->get_result(); 
     $stmt->close();
+    
+    if($inbound_id == 0) {
+        $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - 1 WHERE `id`=?");
+        $stmt->bind_param("i", $server_id);
+        $stmt->execute();
+        $stmt->close();
+    }else{
+        $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - 1 WHERE id=?");
+        $stmt->bind_param("i", $fid);
+        $stmt->execute();
+        $stmt->close();
+    }
+
     $keys = json_encode(['inline_keyboard'=>[
         [
             ['text'=>"بنازم خرید جدید ❤️",'callback_data'=>"wizwizch"]
@@ -2675,7 +2672,7 @@ if(preg_match('/payCustomWithCartToCart(.*)/',$data, $match)) {
         $server_info = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
-        if($server_info['ucount'] == 0) {
+        if($server_info['ucount'] <= 0) {
             alert($mainValues['out_of_server_capacity']);
             exit;
         }
@@ -2805,22 +2802,9 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
         $server_info = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
-        if($server_info['ucount'] != 0) {
-            $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - 1 WHERE `id`=?");
-            $stmt->bind_param("i", $server_id);
-            $stmt->execute();
-            $stmt->close();
-
-        } else {
+        if($server_info['ucount'] <= 0) {
             alert($mainValues['out_of_server_capacity']);
             exit;
-        }
-    }else{
-        if($acount != 0) {
-            $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - 1 WHERE id=?");
-            $stmt->bind_param("i", $fid);
-            $stmt->execute();
-            $stmt->close();
         }
     }
 
@@ -2952,6 +2936,17 @@ if($botState['subLinkState'] == "on") $acc_text .= "
         sendMessage("تبریک یکی از زیر مجموعه های شما خرید انجام داد شما مبلغ " . number_format($inviteAmount) . " تومان جایزه دریافت کردید",null,null,$inviterId);
     }
 
+    if($inbound_id == 0) {
+        $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - 1 WHERE `id`=?");
+        $stmt->bind_param("i", $server_id);
+        $stmt->execute();
+        $stmt->close();
+    }else{
+        $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - 1 WHERE id=?");
+        $stmt->bind_param("i", $fid);
+        $stmt->execute();
+        $stmt->close();
+    }
 
     $uname = $user_detail['name'];
     $user_name = $user_detail['username'];
@@ -3007,6 +3002,11 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         exit();
     }
 
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+    $stmt->bind_param("s", $match[1]);
+    $stmt->execute();
+    $stmt->close();
+
     
     
     $server_id = $file_detail['server_id'];
@@ -3053,31 +3053,12 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
             $server_info = $stmt->get_result()->fetch_assoc();
             $stmt->close();
     
-            if($server_info['ucount'] != 0) {
-                $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - ? WHERE `id`=?");
-                $stmt->bind_param("ii", $accountCount, $server_id);
-                $stmt->execute();
-                $stmt->close();
-    
-            } else {
+            if($server_info['ucount'] <= 0) {
                 alert($mainValues['out_of_server_capacity']);
                 exit;
             }
-        }else{
-        
-            if($acount != 0) {
-                $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - ? WHERE id=?");
-                $stmt->bind_param("ii", $accountCount, $fid);
-                $stmt->execute();
-                $stmt->close();
-            }
-        }
+        }        
     
-        $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
-        $stmt->bind_param("s", $match[1]);
-        $stmt->execute();
-        $stmt->close();
-
         $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
         $stmt->bind_param("i", $server_id);
         $stmt->execute();
@@ -3203,7 +3184,17 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
              
             sendMessage("تبریک یکی از زیر مجموعه های شما خرید انجام داد شما مبلغ " . number_format($inviteAmount) . " تومان جایزه دریافت کردید",null,null,$inviterId);
         }
-        
+        if($inbound_id == 0) {
+            $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - ? WHERE `id`=?");
+            $stmt->bind_param("ii", $accountCount, $server_id);
+            $stmt->execute();
+            $stmt->close();
+        }else{
+            $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - ? WHERE id=?");
+            $stmt->bind_param("ii", $accountCount, $fid);
+            $stmt->execute();
+            $stmt->close();
+        }
     }
     $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` - ? WHERE `userid` = ?");
     $stmt->bind_param("ii", $price, $uid);
@@ -3253,7 +3244,7 @@ if(preg_match('/payWithCartToCart(.*)/',$data,$match)) {
             $server_info = $stmt->get_result()->fetch_assoc();
             $stmt->close();
     
-            if($server_info['ucount'] == 0) {
+            if($server_info['ucount'] <= 0) {
                 alert($mainValues['out_of_server_capacity']);
                 exit;
             }
@@ -3534,22 +3525,9 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
             $server_info = $stmt->get_result()->fetch_assoc();
             $stmt->close();
     
-            if($server_info['ucount'] != 0) {
-                $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - ? WHERE `id`=?");
-                $stmt->bind_param("ii", $accountCount, $server_id);
-                $stmt->execute();
-                $stmt->close();
-    
-            } else {
+            if($server_info['ucount'] <= 0){
                 alert($mainValues['out_of_server_capacity']);
                 exit;
-            }
-        }else{
-            if($acount != 0) {
-                $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - ? WHERE id=?");
-                $stmt->bind_param("ii", $accountCount, $fid);
-                $stmt->execute();
-                $stmt->close();
             }
         }
         
@@ -3656,7 +3634,18 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
             $stmt->close();
         }
         sendMessage('✅ کانفیگ و براش ارسال کردم', getMainKeys());
-        
+        if($inbound_id == 0) {
+            $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - ? WHERE `id`=?");
+            $stmt->bind_param("ii", $accountCount, $server_id);
+            $stmt->execute();
+            $stmt->close();
+        }else{
+            $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - ? WHERE id=?");
+            $stmt->bind_param("ii", $accountCount, $fid);
+            $stmt->execute();
+            $stmt->close();
+        }
+
     }
 
     unset($markup[count($markup)-1]);
@@ -4874,21 +4863,9 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
         $server_info = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
-        if($server_info['ucount'] != 0){ 
-            $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - 1 WHERE `id`=?");
-            $stmt->bind_param("i", $server_id);
-            $stmt->execute();
-            $stmt->close();
-        } else {
+        if($server_info['ucount'] <= 0){
             alert($mainValues['out_of_server_capacity']);
             exit;
-        }
-    }else{
-        if($acount != 0) {
-            $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - 1 WHERE `id`=?");
-            $stmt->bind_param("i", $id);
-            $stmt->execute();
-            $stmt->close();
         }
     }
     
@@ -4987,6 +4964,18 @@ if($botState['subLinkState'] == "on") $acc_text .= "
     $stmt->execute();
     $order = $stmt->get_result();
     $stmt->close();
+    
+    if($inbound_id == 0) {
+        $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - 1 WHERE `id`=?");
+        $stmt->bind_param("i", $server_id);
+        $stmt->execute();
+        $stmt->close();
+    }else{
+        $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - 1 WHERE `id`=?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $stmt->close();
+    }
 
     setUser('used','freetrial');    
 }
@@ -5458,6 +5447,7 @@ if(preg_match('/sConfigUpdate(\d+)/', $data,$match)){
     $vraylink = getConnectionLink($server_id, $uuid, $protocol, $remark, $port, $netType, $inboundId);
     
     if($vraylink == null){delMessage(); exit();}
+    include 'phpqrcode/qrlib.php';  
     foreach($vraylink as $vray_link){
         $acc_text = "<code>$vray_link</code>";
     
@@ -5465,7 +5455,6 @@ if(preg_match('/sConfigUpdate(\d+)/', $data,$match)){
         $pixel_Size = 10;
         $frame_Size = 10;
         
-        include 'phpqrcode/qrlib.php';  
         $file = RandomString() .".png";
         QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
     	addBorderImage($file);
@@ -6802,6 +6791,12 @@ if(preg_match('/approveRenewAcc(.*)/',$data,$match)){
     $hash_id = $payInfo['hash_id'];
     $stmt->close();
     
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+    $stmt->bind_param("s", $match[1]);
+    $stmt->execute();
+    $stmt->close();
+
+    
     $uid = $payInfo['user_id'];
     $oid = $payInfo['plan_id'];
     $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
@@ -6906,6 +6901,11 @@ if(preg_match('/payRenewWithWallet(.*)/', $data,$match)){
     $hash_id = $payInfo['hash_id'];
     $stmt->close();
     
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+    $stmt->bind_param("s", $match[1]);
+    $stmt->execute();
+    $stmt->close();
+
     $oid = $payInfo['plan_id'];
     $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
     $stmt->bind_param("i", $oid);
@@ -7500,6 +7500,11 @@ if(preg_match('/approveIncreaseDay(.*)/',$data,$match)){
     $payInfo = $stmt->get_result();
     $stmt->close();
     
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+    $stmt->bind_param("s", $match[1]);
+    $stmt->execute();
+    $stmt->close();
+    
     $payParam = $payInfo->fetch_assoc();
     $payType = $payParam['type'];
 
@@ -7572,6 +7577,10 @@ if(preg_match('/payIncraseDayWithWallet(.*)/', $data,$match)){
     $payParam = $payInfo->fetch_assoc();
     $payType = $payParam['type'];
 
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+    $stmt->bind_param("s", $match[1]);
+    $stmt->execute();
+    $stmt->close();
 
     preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType, $increaseInfo);
     $orderId = $increaseInfo[1];
@@ -7843,6 +7852,11 @@ if(preg_match('/approveIncreaseVolume(.*)/',$data,$match) && ($from_id == $admin
     $payParam = $payInfo->fetch_assoc();
     $payType = $payParam['type'];
 
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+    $stmt->bind_param("s", $match[1]);
+    $stmt->execute();
+    $stmt->close();
+
 
     preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)/',$payType, $increaseInfo);
     $orderId = $increaseInfo[1];
@@ -7987,6 +8001,11 @@ if(preg_match('/payIncraseWithWallet(.*)/', $data,$match)){
     
     $payParam = $payInfo->fetch_assoc();
     $payType = $payParam['type'];
+
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+    $stmt->bind_param("s", $match[1]);
+    $stmt->execute();
+    $stmt->close();
 
 
     preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)/',$payType, $increaseInfo);
