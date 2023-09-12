@@ -94,7 +94,8 @@ $arrays = [
     "ALTER TABLE `orders_list` ADD `agent_bought` INT(1) NOT NULL DEFAULT '0' AFTER `rahgozar`;",
     "ALTER TABLE `pays` ADD `agent_count` INT(255) NOT NULL DEFAULT '0' AFTER `agent_bought`;",
     "ALTER TABLE `users` ADD `spam_info` VARCHAR(500) NULL AFTER `agent_date`;",
-    "ALTER TABLE `server_info` CHANGE `title` `title` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;"
+    "ALTER TABLE `server_info` CHANGE `title` `title` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;",
+    "UPDATE `orders_list` SET `status` = 1"
     ];
 
 
