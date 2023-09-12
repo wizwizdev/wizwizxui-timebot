@@ -62,19 +62,13 @@ if($orders){
                     }
                 }
             }
-            if(!$found){
-                $warnOffset--;
-				$stmt = $connection->prepare("UPDATE `orders_list` SET `status`= 0 WHERE `remark`=?");
-				$stmt->bind_param("s", $remark);
-				$stmt->execute();
-				$stmt->close();
-				continue;
-            }
+            if(!$found) continue;
+            
             $leftgb = round( ($total - $up - $down) / 1073741824, 2);
             $now_microdate = floor(microtime(true) * 1000);
             if($expiryTime != null && $total != null){
                 $send = "";
-                if($expiryTime < $now_microdate + 86400) $send = "روز"; elseif($leftgb < 1) $send = "گیگ";
+                if($expiryTime < $now_microdate + 86400000) $send = "روز"; elseif($leftgb < 1) $send = "گیگ";
                 if($send != ""){  
                     $msg = "💡 کاربر گرامی، 
         از سرویس اشتراک $remark تنها (۱ $send) باقی مانده است. میتواند از قسمت خرید های من سرویس فعلی خود را تمدید کنید یا سرویس جدید خریداری کنید.";
