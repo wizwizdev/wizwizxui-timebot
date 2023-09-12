@@ -15,7 +15,7 @@ if($rewaredTime>0 && $rewaredChannel != null){
         $stmt = $connection->prepare("SELECT SUM(amount) as total FROM `orders_list` WHERE `date` > ?");
         $stmt->bind_param("i", $time);
         $stmt->execute();
-        $totalRewards = number_format($stmt->get_result()->fetch_assoc()['total']) . " تومان";
+        $totalRewards = number_format($stmt->get_result()->fetch_assoc()['total']);
         $stmt->close();
         
         $botState['lastRewardMessage']=time() + ($rewaredTime * 60 * 60);
