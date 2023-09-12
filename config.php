@@ -2253,7 +2253,7 @@ function editInboundTraffic($server_id, $remark, $volume, $days, $editType = nul
             $up = 0;
             $down = 0;
             $volume = $extend_volume;
-            if($serverType == "sanaei") resetClientTraffic($server_id, $email, $inbound_id);
+            if($serverType == "sanaei" || $serverType == "alireza") resetClientTraffic($server_id, $email, $inbound_id);
             else resetClientTraffic($server_id, $email);
         }
         else $total = ($leftGB > 0) ? $total + $extend_volume : $extend_volume;
@@ -2711,7 +2711,7 @@ function editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, $ed
         $volume = ($client_total > 0) ? $client_total + $extend_volume : $extend_volume;
         if($editType == "renew"){
             $volume = $extend_volume;
-            if($serverType == "sanaei") resetClientTraffic($server_id, $remark, $inbound_id);
+            if($serverType == "sanaei" || $serverType == "alireza") resetClientTraffic($server_id, $remark, $inbound_id);
             else resetClientTraffic($server_id, $remark);
         }
         $settings['clients'][$client_key]['totalGB'] = $volume;
