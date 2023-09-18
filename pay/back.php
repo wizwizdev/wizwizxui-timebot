@@ -171,6 +171,7 @@ exit();
 
 function doAction($payRowId, $gateType){
 global $connection, $admin, $botUrl, $mainKeys;
+$time = time();
 $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `id` = ? AND `state` = 'pending'");
 $stmt->bind_param("i", $payRowId);
 $stmt->execute();
@@ -259,13 +260,7 @@ if($payType == "BUY_SUB"){
         $server_info = $stmt->get_result()->fetch_assoc();
         $stmt->close();
 
-        if($server_info['ucount'] != 0) {
-            $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - ? WHERE `id`=?");
-            $stmt->bind_param("ii", $accountCount, $server_id);
-            $stmt->execute();
-            $stmt->close();
-
-        } else {
+        if($server_info['ucount'] <= 0) {
             showForm('پرداخت شما انجام شد ولی ظرفیت این سرور پر شده است، مبلغ ' . number_format($amount) . " تومان به کیف پول شما اضافه شد",$payDescription, false);
             
             $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` + ? WHERE `userid` = ?");
@@ -275,13 +270,6 @@ if($payType == "BUY_SUB"){
             sendMessage("✅ مبلغ " . number_format($amount). " تومان به حساب شما اضافه شد",null,null,$user_id);
             sendMessage("✅ مبلغ " . number_format($amount) . " تومان به کیف پول کاربر $user_id توسط درگاه اضافه شد میخواست کانفیگ بخره، ظرفیت پر بود",null,null,$admin);                
             exit;
-        }
-    }else{
-        if($acount != 0) {
-            $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - ? WHERE id=?");
-            $stmt->bind_param("ii", $accountCount, $fid);
-            $stmt->execute();
-            $stmt->close();
         }
     }
     
@@ -377,17 +365,24 @@ if($payType == "BUY_SUB"){
 
         foreach($vraylink as $vray_link){
             $acc_text = "
-    😍 سفارش جدید شما
-    📡 پروتکل: $protocol
-    🔮 نام سرویس: $remark
-    🔋حجم سرویس: $volume گیگ
-    ⏰ مدت سرویس: $days روز
+😍 سفارش جدید شما
+📡 پروتکل: $protocol
+🔮 نام سرویس: $remark
+🔋حجم سرویس: $volume گیگ
+⏰ مدت سرویس: $days روز
+".
+($botState['configLinkState'] == "on"?
+"
+💝 config : <code>$vray_link</code>":"").
+($botState['subLinkState']=="on"?
+"
+
+🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
+
+
+🌐 subscription : <code>$subLink</code>
     
-    💝 config : <code>$vray_link</code>
-    
-    🌐 subscription : <code>$subLink</code>
-    
-            ";
+            ":"");
         
             $file = RandomString() .".png";
             $ecc = 'L';
@@ -421,7 +416,17 @@ if($payType == "BUY_SUB"){
     $user_info = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
-    
+    if($inbound_id == 0) {
+        $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - ? WHERE `id`=?");
+        $stmt->bind_param("ii", $accountCount, $server_id);
+        $stmt->execute();
+        $stmt->close();
+    }else{
+        $stmt = $connection->prepare("UPDATE `server_plans` SET `acount` = `acount` - ? WHERE id=?");
+        $stmt->bind_param("ii", $accountCount, $fid);
+        $stmt->execute();
+        $stmt->close();
+    }
     
     if($user_info['refered_by'] != null){
         $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = 'INVITE_BANNER_AMOUNT'");
