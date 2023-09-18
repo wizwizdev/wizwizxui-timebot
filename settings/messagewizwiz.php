@@ -26,36 +26,65 @@ $stmt->close();
 if( $usersList->num_rows > 1 ) {
     while($user = $usersList->fetch_assoc()){
         if($messageParam->type == 'text'){
-            sendMessage($messageParam->value,null,null,$user['userid']);
+            sendMessage($messageParam->value,json_encode([
+                        'inline_keyboard' => [
+                            [['text'=>$buttonValues['start_bot'],'callback_data'=>"mainMenu"]]
+                            ]
+                    ]),null,$user['userid']);
         }elseif($messageParam->type == 'music'){
             bot('sendAudio',[
                 'chat_id' => $user['userid'],
                 'audio' => $messageParam->value->fileid,
                 'caption' => $messageParam->value->caption,
+                'reply_markup'=>json_encode([
+                        'inline_keyboard' => [
+                            [['text'=>$buttonValues['start_bot'],'callback_data'=>"mainMenu"]]
+                            ]
+                    ])
             ]);
         }elseif($messageParam->type == 'video'){
             bot('sendVideo',[
                 'chat_id' => $user['userid'],
                 'video' => $messageParam->value->fileid,
                 'caption' => $messageParam->value->caption,
+                'reply_markup'=>json_encode([
+                        'inline_keyboard' => [
+                            [['text'=>$buttonValues['start_bot'],'callback_data'=>"mainMenu"]]
+                            ]
+                    ])
             ]);
         }elseif($messageParam->type == 'voice'){
             bot('sendVoice',[
                 'chat_id' => $user['userid'],
                 'voice' => $messageParam->value->fileid,
                 'caption' => $messageParam->value->caption,
+                'reply_markup'=>json_encode([
+                        'inline_keyboard' => [
+                            [['text'=>$buttonValues['start_bot'],'callback_data'=>"mainMenu"]]
+                            ]
+                    ])
             ]);
         }elseif($messageParam->type == 'document'){
             bot('sendDocument',[
                 'chat_id' => $user['userid'],
                 'document' => $messageParam->value->fileid,
                 'caption' => $messageParam->value->caption,
+                'reply_markup'=>json_encode([
+                        'inline_keyboard' => [
+                            [['text'=>$buttonValues['start_bot'],'callback_data'=>"mainMenu"]]
+                            ]
+                    ])
             ]);
         }elseif($messageParam->type == 'photo'){
             bot('sendPhoto', [
                 'chat_id' => $user['userid'],
                 'photo' => $messageParam->value->fileid,
                 'caption' => $messageParam->value->caption,
+                'reply_markup'=>json_encode([
+                        'inline_keyboard' => [
+                            [['text'=>$buttonValues['start_bot'],'callback_data'=>"mainMenu"]]
+                            ]
+                    ])
             ]); 
         }elseif($messageParam->type == "forwardall"){
             forwardmessage($user['userid'], $messageParam->chat_id, $messageParam->message_id);
@@ -65,6 +94,11 @@ if( $usersList->num_rows > 1 ) {
                 'chat_id' => $user['userid'],
                 'document' => $messageParam->value->fileid,
                 'caption' => $messageParam->value->caption,
+                'reply_markup'=>json_encode([
+                        'inline_keyboard' => [
+                            [['text'=>$buttonValues['start_bot'],'callback_data'=>"mainMenu"]]
+                            ]
+                    ])
             ]);
         }
         $offset++;
