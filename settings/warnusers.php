@@ -142,15 +142,17 @@ if($orders){
             $now_microdate = floor(microtime(true) * 1000);
             if($expiryTime <= $now_microdate) $send = true; elseif($leftgb <= 0) $send = true;
             if($send){  
-                if($inbound_id > 0) deleteClient($server_id, $inbound_id, $remark); else deleteInbound($server_id, $remark); 
-                $msg = "💡 کاربر گرامی،
-اشتراک سرویس $remark منقضی شد و از لیست سفارش ها حذف گردید. لطفا از فروشگاه, سرویس جدید خریداری کنید.";
-                sendMessage( $msg, null, null, $from_id);
-                $stmt = $connection->prepare("DELETE FROM `orders_list` WHERE `remark`=?");
-                $stmt->bind_param("s", $remark);
-                $stmt->execute();
-                $stmt->close();
-                continue;
+                if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $remark); else $res = deleteInbound($server_id, $remark); 
+        		if(!is_null($res)){
+                    $msg = "💡 کاربر گرامی،
+    اشتراک سرویس $remark منقضی شد و از لیست سفارش ها حذف گردید. لطفا از فروشگاه, سرویس جدید خریداری کنید.";
+                    sendMessage( $msg, null, null, $from_id);
+                    $stmt = $connection->prepare("DELETE FROM `orders_list` WHERE `remark`=?");
+                    $stmt->bind_param("s", $remark);
+                    $stmt->execute();
+                    $stmt->close();
+                    continue;
+        		}
             }                
             else{
                 $stmt = $connection->prepare("UPDATE `orders_list` SET `notif`= 0 WHERE `remark`=?");
