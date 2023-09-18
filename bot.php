@@ -157,7 +157,10 @@ if (preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main
     if(isset($data) and $data == "mainMenu"){
         $res = editText($message_id, $mainValues['start_message'], getMainKeys());
         if(!$res->ok){
-            sendMessage($mainValues['start_message'], getMainKeys());
+            // sendMessage($mainValues['start_message'], getMainKeys());
+            
+            sendMessage(str_replace(["FULLNAME"], ["$first_name"],$mainValues['start_message']), getMainKeys());
+
         }
     }else{
         if($from_id != $admin && !isset($userInfo['first_start'])){
@@ -169,7 +172,8 @@ if (preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main
             sendMessage(str_replace(["FULLNAME", "USERNAME", "USERID"], ["<a href='tg://user?id=$from_id'>$first_name</a>", $username, $from_id], $mainValues['new_member_joined'])
                 ,$keys, "html",$admin);
         }
-        sendMessage($mainValues['start_message'],getMainKeys());
+        // sendMessage($mainValues['start_message'],getMainKeys());
+        sendMessage(str_replace(["FULLNAME"], ["$first_name"],$mainValues['start_message']), getMainKeys());
     }
 }
 if(preg_match('/^sendMessageToUser(\d+)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true) && $text != $buttonValues['cancel']){
@@ -565,29 +569,6 @@ if($data=="myInfo"){
     
     $keys = json_encode(['inline_keyboard'=>[
         [
-            ['text'=>$from_id,'callback_data'=>"wizwizch"],
-            ['text'=>"آیدی عددی",'callback_data'=>"wizwizch"]
-        ],
-        [
-            ['text'=>"@$username",'callback_data'=>"wizwizch"],
-            ['text'=>"یوزرنیم",'callback_data'=>"wizwizch"]
-        ],
-        [
-            ['text'=>$first_name,'callback_data'=>"wizwizch"],
-            ['text'=>"اسم",'callback_data'=>"wizwizch"]
-        ],
-        [
-            ['text'=>$totalBuys,'callback_data'=>"wizwizch"],
-            ['text'=>"تعداد خرید ها",'callback_data'=>"wizwizch"]
-        ],
-        [
-            ['text'=>$myWallet,'callback_data'=>"wizwizch"],
-            ['text'=>"موجودی کیف پول",'callback_data'=>"wizwizch"]
-        ],
-        [
-            ['text'=>"🔻🔻🔻🔻",'callback_data'=>"wizwizch"],
-        ],
-        [
             ['text'=>"شارژ کیف پول 💰",'callback_data'=>"increaseMyWallet"],
             ['text'=>"انتقال موجودی",'callback_data'=>"transferMyWallet"]
         ],
@@ -595,7 +576,17 @@ if($data=="myInfo"){
             ['text'=>$buttonValues['back_button'],'callback_data'=>"mainMenu"]
             ]
         ]]);
-    editText($message_id, "💞 اطلاعات حساب شما:",
+    editText($message_id, "
+💞 اطلاعات حساب شما:
+    
+🔰 شناسه کاربری: <code> $from_id </code>
+🍄 یوزرنیم: <code> @$username </code>
+👤 اسم:  <code> $first_name </code>
+💰 موجودی: <code> $myWallet </code>
+
+👈🏻 کل سرویس ها : <code> $totalBuys </code> عدد
+⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
+",
             $keys,"html");
 }
 if($data=="transferMyWallet"){
@@ -673,36 +664,22 @@ if($userInfo['step'] == "increaseMyWallet" && $text != $buttonValues['cancel']){
     
     
     $keyboard = array();
-    $temp = array();
     if($botState['cartToCartState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['cart_to_cart'],  'callback_data' => "increaseWalletWithCartToCart" . $text];
+	    $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "increaseWalletWithCartToCart" . $text]];
     }
     if($botState['nowPaymentWallet'] == "on"){
-	    $temp[] = ['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
     }
     if($botState['zarinpal'] == "on"){
-	    $temp[] = ['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
     }
     if($botState['nextpay'] == "on"){
-	    $temp[] = ['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
     }
     if($botState['weSwapState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id];
+	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
     }
 
-    array_push($keyboard, $temp);
     $keyboard[] = [['text'=>$buttonValues['cancel'], 'callback_data'=> "mainMenu"]];
 
     
@@ -949,8 +926,8 @@ if (($data == "agentOneBuy" || $data=='buySubscription' || $data == "agentMuchBu
         $flag = $cat['flag'];
         $keyboard[] = ['text' => "$flag $name", 'callback_data' => "selectServer$id"];
     }
-    $keyboard[] = ['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"];
-    $keyboard = array_chunk($keyboard,1);
+    $keyboard = array_chunk($keyboard,2);
+    $keyboard[] = [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]];
     editText($message_id, $mainValues['buy_sub_select_location'], json_encode(['inline_keyboard'=>$keyboard]));
 }
 if ($data=='createMultipleAccounts' && ($from_id == $admin || $userInfo['isAdmin'] == true)){
@@ -1185,7 +1162,7 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
     	}
     	if(!$response->success){
             sendMessage('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-            sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
+            sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . ($response->msg), null, null, $admin);
             break;
         }
     
@@ -1194,15 +1171,14 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
         foreach($vraylink as $vray_link){
             $acc_text = "
     
-        🔮 $remark \n <code>$vray_link</code>
-            ";
+        🔮 $remark \n " . ($botState['configLinkState'] == "on"?"<code>$vray_link</code>":"");
             if($botState['subLinkState'] == "on") $acc_text .= 
             " \n🌐 subscription : <code>$subLink</code>";
         
             $file = RandomString() .".png";
             QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
         	addBorderImage($file);
-        	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>"صفحه اصلی 🏘",'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
+        	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
             unlink($file);
         }
         $vray_link = json_encode($vraylink);
@@ -1403,6 +1379,7 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
     $serverInfo = $stmt->get_result()->fetch_assoc();
+    $serverTitle = $serverInfo['title'];
     $srv_remark = $serverInfo['remark'];
     $stmt->close();
 
@@ -1458,7 +1435,7 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
         }
         if(!$response->success){
             sendMessage('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-            sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
+            sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . ($response->msg), null, null, $admin);
             exit;
         }
         
@@ -1469,16 +1446,20 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
         foreach($vraylink as $vray_link){
         $acc_text = "
         
-        😍 سفارش جدید شما
-        📡 پروتکل: $protocol
-        🔮 نام سرویس: $remark
-        🔋حجم سرویس: $volume گیگ
-        ⏰ مدت سرویس: $days روز
-        ⁮⁮ ⁮⁮
-        💝 config : <code>$vray_link</code>";
-        if($botState['subLinkState'] == "on") $acc_text .= "
-        
-        🌐 subscription : <code>$subLink</code>
+😍 سفارش جدید شما
+📡 پروتکل: $protocol
+🔮 نام سرویس: $remark
+🔋حجم سرویس: $volume گیگ
+⏰ مدت سرویس: $days روز⁮⁮ ⁮⁮
+" . ($botState['configLinkState'] == "on"?"
+💝 config : <code>$vray_link</code>":"");
+
+"🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>";
+
+
+if($botState['subLinkState'] == "on") $acc_text .= "
+
+🌐 subscription : <code>$subLink</code>
         
         ";
               
@@ -1489,7 +1470,7 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
             
             QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
         	addBorderImage($file);
-        	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>"صفحه اصلی 🏘",'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
+        	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
             unlink($file);
         }
         
@@ -1536,8 +1517,8 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
         $stmt->execute();
         $stmt->close();
     }
-    $msg = str_replace(['TYPE', 'USER-ID', 'USERNAME', 'NAME', 'PRICE', 'REMARK', 'VOLUME', 'DAYS'],
-                ['ارزی ریالی', $from_id, $username, $first_name, $price, $remark,$volume, $days], $mainValues['buy_new_account_request']);
+    $msg = str_replace(['SERVERNAME', 'TYPE', 'USER-ID', 'USERNAME', 'NAME', 'PRICE', 'REMARK', 'VOLUME', 'DAYS'],
+                [$serverTitle, 'ارزی ریالی', $from_id, $username, $first_name, $price, $remark,$volume, $days], $mainValues['buy_new_account_request']);
     
     sendMessage($msg,$keys,"html", $admin);
 }
@@ -1591,7 +1572,7 @@ $keys = json_encode(['inline_keyboard'=>[
         ],
     ]]);
 
-    $msg = str_replace(['TYPE', "USER-ID", "USERNAME", "NAME", "PRICE", "REMARK"],['کیف پول', $from_id, $username, $first_name, $price, $remark], $mainValues['renew_account_request_message']);
+    $msg = str_replace(['TYPE', "USER-ID", "USERNAME", "NAME", "PRICE", "REMARK", "VOLUME", "DAYS"],['کیف پول', $from_id, $username, $first_name, $price, $remark, $volume, $days], $mainValues['renew_account_request_message']);
 
 sendMessage($msg, $keys,"html", $admin);
 }
@@ -2117,7 +2098,7 @@ if((preg_match('/^discountCustomPlanDay(\d+)/',$userInfo['step'], $match) || pre
     	$call_id = $match[2];
     	$volume = $match[3];
         $days = $match[4];
-        if(!preg_match("/^[^\W_]+$/",$text)){
+        if(preg_match('/[a-zA-z][0-9]/',$text)){} else{
             sendMessage("😡|اسم وارد شده معتبر نمی باشد");
             exit();
         }
@@ -2139,8 +2120,7 @@ if((preg_match('/^discountCustomPlanDay(\d+)/',$userInfo['step'], $match) || pre
 	$sid = $respd['server_id'];
 	$keyboard = array();
     $token = base64_encode("{$from_id}.{$id}");
-    $temp = array();
-    
+
     if(!preg_match('/^discountCustomPlanDay/', $userInfo['step'])){
         $discountPrice = 0;
         $gbPrice = $botState['gbPrice'];
@@ -2166,40 +2146,23 @@ if((preg_match('/^discountCustomPlanDay(\d+)/',$userInfo['step'], $match) || pre
     
     
     if($botState['cartToCartState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payCustomWithCartToCart$hash_id"];
+	    $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payCustomWithCartToCart$hash_id"]];
     }
     if($botState['nowPaymentOther'] == "on"){
-	    $temp[] = ['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
     }
     if($botState['zarinpal'] == "on"){
-	    $temp[] = ['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
     }
     if($botState['nextpay'] == "on"){
-	    $temp[] = ['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
     }
     if($botState['weSwapState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
     }
     if($botState['walletState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payCustomWithWallet$hash_id"];
+	    $keyboard[] = [['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payCustomWithWallet$hash_id"]];
     }
-    array_push($keyboard, $temp);
     if(!preg_match('/^discountCustomPlanDay/', $userInfo['step'])) $keyboard[] = [['text' => " 🎁 نکنه کد تخفیف داری؟ ",  'callback_data' => "haveDiscountCustom_" . $rowId]];
 	$keyboard[] = [['text' => $buttonValues['cancel'], 'callback_data' => "mainMenu"]];
     $price = ($price == 0) ? 'رایگان' : number_format($price).' تومان ';
@@ -2362,8 +2325,6 @@ if((preg_match('/^discountSelectPlan(\d+)_(\d+)_(\d+)/',$userInfo['step'],$match
         $keyboard[] = [['text' => '📥 دریافت رایگان', 'callback_data' => "freeTrial$id"]];
     }else{
         $token = base64_encode("{$from_id}.{$id}");
-        $temp = array();
-        
         
         if(!preg_match('/^discountSelectPlan/', $userInfo['step'])){
             $hash_id = RandomString();
@@ -2390,40 +2351,23 @@ if((preg_match('/^discountSelectPlan(\d+)_(\d+)_(\d+)/',$userInfo['step'],$match
         }
         
         if($botState['cartToCartState'] == "on"){
-		    $temp[] = ['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payWithCartToCart$hash_id"];
+		    $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payWithCartToCart$hash_id"]];
         }
         if($botState['nowPaymentOther'] == "on"){
-    	    $temp[] = ['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id];
-        }
-        if(count($temp) == 2){
-            array_push($keyboard, $temp);
-            $temp = array();
+    	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
         }
         if($botState['zarinpal'] == "on"){
-    	    $temp[] = ['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id];
-        }
-        if(count($temp) == 2){
-            array_push($keyboard, $temp);
-            $temp = array();
+    	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
         }
         if($botState['nextpay'] == "on"){
-    	    $temp[] = ['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id];
-        }
-        if(count($temp) == 2){
-            array_push($keyboard, $temp);
-            $temp = array();
+    	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
         }
         if($botState['weSwapState'] == "on"){
-    	    $temp[] = ['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id];
-        }
-        if(count($temp) == 2){
-            array_push($keyboard, $temp);
-            $temp = array();
+    	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
         }
         if($botState['walletState'] == "on"){
-		    $temp[] = ['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payWithWallet$hash_id"];
+		    $keyboard[] = [['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payWithWallet$hash_id"]];
         }
-        array_push($keyboard, $temp);
         
         if(!preg_match('/^discountSelectPlan/', $userInfo['step'])) $keyboard[] = [['text' => " 🎁 نکنه کد تخفیف داری؟ ",  'callback_data' => "haveDiscountSelectPlan_" . $match[1] . "_" . $match[2] . "_" . $rowId]];
 
@@ -2557,7 +2501,7 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
 	}
 	if(!$response->success){
         alert('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
+        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . ($response->msg), null, null, $admin);
         exit;
     }
     alert('🚀 | 😍 در حال ارسال کانفیگ به مشتری ...');
@@ -2577,10 +2521,13 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
 📡 پروتکل: $protocol
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
-⏰ مدت سرویس: $days روز
-⁮⁮ ⁮⁮
-💝 config : <code>$vray_link</code>";
+⏰ مدت سرویس: $days روز⁮⁮ ⁮⁮
+" . ($botState['configLinkState'] == "on"?"
+💝 config : <code>$vray_link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
+
+🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
+
 
 🌐 subscription : <code>$subLink</code>"; 
     
@@ -2591,7 +2538,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
         
         QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
     	addBorderImage($file);
-    	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>"صفحه اصلی 🏘",'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
+    	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
         unlink($file);
     }
 
@@ -2640,6 +2587,41 @@ if($botState['subLinkState'] == "on") $acc_text .= "
     $msg = str_replace(['TYPE', 'USER-ID', 'USERNAME', 'NAME', 'PRICE', 'REMARK', 'VOLUME', 'DAYS'],
                 ['کیف پول', $from_id, $username, $first_name, $price, $remark,$volume, $days], $mainValues['buy_custom_account_request']);
     sendMessage($msg,$keys,"html", $admin);
+}
+if(preg_match('/^showQr(Sub|Config)(\d+)/',$data,$match)){
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid`=? AND `id`=?");
+    $stmt->bind_param("ii", $from_id, $match[2]);
+    $stmt->execute();
+    $order = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    include 'phpqrcode/qrlib.php';
+    if($match[1] == "Sub"){
+        $subLink = $botUrl . "settings/subLink.php?token=" . $order['token'];
+        $file = RandomString() .".png";
+        $ecc = 'L';
+        $pixel_Size = 10;
+        $frame_Size = 10;
+        
+        QRcode::png($subLink, $file, $ecc, $pixel_Size, $frame_Size);
+    	addBorderImage($file);
+    	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
+        unlink($file);
+    }
+    elseif($match[1] == "Config"){
+        $vraylink = json_decode($order['link'],true);
+        foreach($vraylink as $vray_link){
+            $file = RandomString() .".png";
+            $ecc = 'L';
+            $pixel_Size = 10;
+            $frame_Size = 10;
+            
+            QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
+        	addBorderImage($file);
+        	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
+            unlink($file);
+        }
+    }
 }
 if(preg_match('/payCustomWithCartToCart(.*)/',$data, $match)) {
     $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ?");
@@ -2860,7 +2842,7 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
 	}
 	if(!$response->success){
         alert('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
+        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . ($response->msg), null, null, $admin);
         exit;
     }
     alert('🚀 | 😍 در حال ارسال کانفیگ به مشتری ...');
@@ -2876,10 +2858,12 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
 📡 پروتکل: $protocol
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
-⏰ مدت سرویس: $days روز
-⁮⁮ ⁮⁮
-💝 config : <code>$vray_link</code>";
+⏰ مدت سرویس: $days روز⁮⁮ ⁮⁮
+" . ($botState['configLinkState'] == "on"?"
+💝 config : <code>$vray_link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
+
+🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
 
 \n🌐 subscription : <code>$subLink</code>";
     
@@ -2890,7 +2874,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
     
         QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
     	addBorderImage($file);
-    	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>"صفحه اصلی 🏘",'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
+    	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
         unlink($file);
     }
     sendMessage('✅ کانفیگ و براش ارسال کردم', getMainKeys());
@@ -3064,6 +3048,7 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         $stmt->execute();
         $serverInfo = $stmt->get_result()->fetch_assoc();
         $srv_remark = $serverInfo['remark'];
+        $serverTitle = $serverInfo['title'];
         $stmt->close();
     
         $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
@@ -3125,7 +3110,7 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         	}
         	if(!$response->success){
                 sendMessage('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-                sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
+                sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . ($response->msg), null, null, $admin);
                 exit;
             }
         
@@ -3136,16 +3121,18 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
             $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
             foreach($vraylink as $vray_link){
                 $acc_text = "
-        😍 سفارش جدید شما
-        📡 پروتکل: $protocol
-        🔮 نام سرویس: $remark
-        🔋حجم سرویس: $volume گیگ
-        ⏰ مدت سرویس: $days روز
-        ⁮⁮ ⁮⁮
-        💝 config : <code>$vray_link</code>";
-        if($botState['subLinkState'] == "on") $acc_text .= "
-        
-        \n🌐 subscription : <code>$subLink</code>";
+😍 سفارش جدید شما
+📡 پروتکل: $protocol
+🔮 نام سرویس: $remark
+🔋حجم سرویس: $volume گیگ
+⏰ مدت سرویس: $days روز⁮⁮ ⁮⁮
+" . ($botState['configLinkState'] == "on"?"
+💝 config : <code>$vray_link</code>":"");
+if($botState['subLinkState'] == "on") $acc_text .= "
+
+🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
+
+\n🌐 subscription : <code>$subLink</code>";
             
                 $file = RandomString() .".png";
                 $ecc = 'L';
@@ -3154,7 +3141,7 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
                 
                 QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
             	addBorderImage($file);
-            	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>"صفحه اصلی 🏘",'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
+            	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
                 unlink($file);
             }
     
@@ -3208,8 +3195,8 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         ]]);
     if($payInfo['type'] == "RENEW_SCONFIG"){$msg = str_replace(['TYPE', 'USER-ID', 'USERNAME', 'NAME', 'PRICE', 'REMARK', 'VOLUME', 'DAYS'],
                 ['کیف پول', $from_id, $username, $first_name, $price, $remark,$volume, $days], $mainValues['renew_account_request_message']);}
-    else{$msg = str_replace(['TYPE', 'USER-ID', 'USERNAME', 'NAME', 'PRICE', 'REMARK', 'VOLUME', 'DAYS'],
-                ['کیف پول', $from_id, $username, $first_name, $price, $remark,$volume, $days], $mainValues['buy_new_account_request']);}
+    else{$msg = str_replace(['SERVERNAME', 'TYPE', 'USER-ID', 'USERNAME', 'NAME', 'PRICE', 'REMARK', 'VOLUME', 'DAYS'],
+                [$serverTitle, 'کیف پول', $from_id, $username, $first_name, $price, $remark,$volume, $days], $mainValues['buy_new_account_request']);}
 
     sendMessage($msg,$keys,"html", $admin);
 }
@@ -3295,6 +3282,15 @@ if(preg_match('/payWithCartToCart(.*)/',$userInfo['step'], $match) and $text != 
         $stmt->execute();
         $res = $stmt->get_result()->fetch_assoc();
         $stmt->close();
+        $days = $res['days'];
+        $volume = $res['volume'];
+        
+        $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
+        $stmt->bind_param("i", $res['server_id']);
+        $stmt->execute();
+        $serverInfo = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        $serverTitle = $serverInfo['title'];
     
         if($payInfo['type'] == "RENEW_SCONFIG"){
             $filename = $payInfo['description'];
@@ -3312,7 +3308,7 @@ if(preg_match('/payWithCartToCart(.*)/',$userInfo['step'], $match) and $text != 
         sendMessage($mainValues['reached_main_menu'],getMainKeys());
     
         if($payInfo['agent_count'] != 0) $msg = str_replace(['ACCOUNT-COUNT', 'TYPE', 'USER-ID', "USERNAME", "NAME", "PRICE", "REMARK"],[$payInfo['agent_count'], 'کارت به کارت', $from_id, $username, $name, $fileprice, $filename], $mainValues['buy_new_much_account_request']);
-        else $msg = str_replace(['TYPE', 'USER-ID', "USERNAME", "NAME", "PRICE", "REMARK"],['کارت به کارت', $from_id, $username, $name, $fileprice, $filename], $mainValues['buy_new_account_request']);
+        else $msg = str_replace(['SERVERNAME', 'TYPE', 'USER-ID', "USERNAME", "NAME", "PRICE", "REMARK", "VOLUME", "DAYS"],[$serverTitle, 'کارت به کارت', $from_id, $username, $name, $fileprice, $filename, $volume, $days], $mainValues['buy_new_account_request']);
 
         $keyboard = json_encode([
             'inline_keyboard' => [
@@ -3509,6 +3505,7 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
     	$stmt->bind_param("iiisii", $uid, $server_id, $inbound_id, $remark, $price, $time);
     	$stmt->execute();
     	$stmt->close();
+        sendMessage(str_replace(["REMARK", "VOLUME", "DAYS"],[$remark, $volume, $days], $mainValues['renewed_config_to_user']), getMainKeys(),null,null);
         sendMessage("✅سرویس $remark با موفقیت تمدید شد",null,null,$uid);
     }else{
         $accountCount = $payInfo['agent_count'] != 0? $payInfo['agent_count']:1;
@@ -3591,7 +3588,7 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
         	}
         	if(!$response->success){
                 sendMessage('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-                sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
+                sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . ($response->msg), null, null, $admin);
                 exit;
             }
                 
@@ -3601,16 +3598,18 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
             $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
             foreach($vraylink as $vray_link){
                 $acc_text = "
-        😍 سفارش جدید شما
-        📡 پروتکل: $protocol
-        🔮 نام سرویس: $remark
-        🔋حجم سرویس: $volume گیگ
-        ⏰ مدت سرویس: $days روز
-        ⁮⁮ ⁮⁮
-        💝 config : <code>$vray_link</code>";
-        if($botState['subLinkState'] == "on") $acc_text .= "
-        
-        \n🌐 subscription : <code>$subLink</code>";
+😍 سفارش جدید شما
+📡 پروتکل: $protocol
+🔮 نام سرویس: $remark
+🔋حجم سرویس: $volume گیگ
+⏰ مدت سرویس: $days روز
+" . ($botState['configLinkState'] == "on"?"
+💝 config : <code>$vray_link</code>":"");
+if($botState['subLinkState'] == "on") $acc_text .= "
+
+🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
+
+\n🌐 subscription : <code>$subLink</code>";
             
                 $file = RandomString() .".png";
                 $ecc = 'L';
@@ -3619,7 +3618,7 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
             
                 QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
             	addBorderImage($file);
-            	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>"صفحه اصلی 🏘",'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
+            	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
                 unlink($file);
             }
             $agent_bought = $payInfo['agent_bought'];
@@ -3633,7 +3632,7 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
             $order = $stmt->get_result();
             $stmt->close();
         }
-        sendMessage('✅ کانفیگ و براش ارسال کردم', getMainKeys());
+        sendMessage(str_replace(["REMARK", "VOLUME", "DAYS"],[$remark, $volume, $days], $mainValues['sent_config_to_user']), getMainKeys());
         if($inbound_id == 0) {
             $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - ? WHERE `id`=?");
             $stmt->bind_param("ii", $accountCount, $server_id);
@@ -4144,46 +4143,60 @@ if(preg_match('/^changeVolumePlanVolume(\d+)/',$userInfo['step'], $match) and $t
 }
 if(preg_match('/^supportCat(.*)/',$data,$match)){
     delMessage();
-    sendMessage("💠لطفا موضوع تیکت را ارسال کنید!", $cancelKey);
+    sendMessage($mainValues['enter_ticket_title'], $cancelKey);
     setUser("newTicket_" . $match[1]);
 }
 if(preg_match('/^newTicket_(.*)/',$userInfo['step'],$match)  and $text!=$buttonValues['cancel']){
     file_put_contents("$from_id.txt",$text);
 	setUser("sendTicket_" . $match[1]);
-    sendMessage("💠لطفا متن تیکت خود را بصورت ساده و مختصر ارسال کنید!");
+    sendMessage($mainValues['enter_ticket_description']);
 }
 if(preg_match('/^sendTicket_(.*)/',$userInfo['step'],$match)  and $text!=$buttonValues['cancel']){
-    $ticketCat = $match[1];
-    
-    $ticketTitle = file_get_contents("$from_id.txt");
-    $time = time();
-    $txt = "تیکت جدید:\n\nکاربر: <a href='tg://user?id=$from_id'>$first_name</a>\nنام کاربری: @$username\nآیدی عددی: $from_id\n\nموضوع تیکت: $ticketCat\n\nعنوان تیکت: " .$ticketTitle . "\nمتن تیکت: $text";
-
-    $ticketTitle = str_replace(["/","'","#"],['\/',"\'","\#"],$ticketTitle);
-    $text = str_replace(["/","'","#"],['\/',"\'","\#"],$text);
-    $stmt = $connection->prepare("INSERT INTO `chats` (`user_id`,`create_date`, `title`,`category`,`state`,`rate`) VALUES 
-                        (?,?,?,?,'0','0')");
-    $stmt->bind_param("iiss", $from_id, $time, $ticketTitle, $ticketCat);
-    $stmt->execute();
-    $inserId = $stmt->get_result();
-    $chatRowId = $stmt->insert_id;
-    $stmt->close();
-    
-    $stmt = $connection->prepare("INSERT INTO `chats_info` (`chat_id`,`sent_date`,`msg_type`,`text`) VALUES
-                (?,?,'USER',?)");
-    $stmt->bind_param("iis", $chatRowId, $time, $text);
-    $stmt->execute();
-    $stmt->close();
-    
-    $keys = json_encode(['inline_keyboard'=>[
-        [['text'=>"پاسخ",'callback_data'=>"reply_{$chatRowId}"]]
-        ]]);
-    sendMessage($txt,$keys,"html", $admin);
-    sendMessage("پیام شما با موفقیت ثبت شد",$removeKeyboard,"HTML");
-    sendMessage("لطفا یکی از کلید های زیر را انتخاب کنید",getMainKeys());
+    if(isset($text) || isset($update->message->photo)){
+        $ticketCat = $match[1];
         
-    unlink("$from_id.txt");
-	setUser("none");
+        $ticketTitle = file_get_contents("$from_id.txt");
+        $time = time();
+    
+        $ticketTitle = str_replace(["/","'","#"],['\/',"\'","\#"],$ticketTitle);
+        $stmt = $connection->prepare("INSERT INTO `chats` (`user_id`,`create_date`, `title`,`category`,`state`,`rate`) VALUES 
+                            (?,?,?,?,'0','0')");
+        $stmt->bind_param("iiss", $from_id, $time, $ticketTitle, $ticketCat);
+        $stmt->execute();
+        $inserId = $stmt->get_result();
+        $chatRowId = $stmt->insert_id;
+        $stmt->close();
+        
+        $keys = json_encode(['inline_keyboard'=>[
+            [['text'=>"پاسخ",'callback_data'=>"reply_{$chatRowId}"]]
+            ]]);
+        if(isset($text)){
+            $txt = "تیکت جدید:\n\nکاربر: <a href='tg://user?id=$from_id'>$first_name</a>\nنام کاربری: @$username\nآیدی عددی: $from_id\n\nموضوع تیکت: $ticketCat\n\nعنوان تیکت: " .$ticketTitle . "\nمتن تیکت: $text";
+            $text = str_replace(["/","'","#"],['\/',"\'","\#"],$text);
+            $stmt = $connection->prepare("INSERT INTO `chats_info` (`chat_id`,`sent_date`,`msg_type`,`text`) VALUES
+                        (?,?,'USER',?)");
+            $stmt->bind_param("iis", $chatRowId, $time, $text);
+            sendMessage($txt,$keys,"html", $admin);
+        }else{
+            $txt = "تیکت جدید:\n\nکاربر: <a href='tg://user?id=$from_id'>$first_name</a>\nنام کاربری: @$username\nآیدی عددی: $from_id\n\nموضوع تیکت: $ticketCat\n\nعنوان تیکت: " .$ticketTitle . "\nمتن تیکت: $caption";
+            $stmt = $connection->prepare("INSERT INTO `chats_info` (`chat_id`,`sent_date`,`msg_type`,`text`) VALUES
+                        (?,?,'USER',?)");
+            $text = json_encode(['file_id'=>$fileid, 'caption'=>$caption]);
+            $stmt->bind_param("iis", $chatRowId, $time, $text);
+            sendPhoto($fileid, $txt,$keys, "HTML", $admin);
+        }
+        $stmt->execute();
+        $stmt->close();
+        
+        sendMessage("پیام شما با موفقیت ثبت شد",$removeKeyboard,"HTML");
+        sendMessage("لطفا یکی از کلید های زیر را انتخاب کنید",getMainKeys());
+            
+        unlink("$from_id.txt");
+    	setUser("none");
+    }else{
+        sendMessage("پیام مورد نظر پشتیبانی نمی شود");
+    }
+    
 }
 if($data== "usersOpenTickets" || $data == "userAllTickets"){
     if($data== "usersOpenTickets"){
@@ -4225,7 +4238,6 @@ if($data== "usersOpenTickets" || $data == "userAllTickets"){
             
             $lastmsg = $ticketInfo['text'];
             $sentType = $ticketInfo['msg_type']=="ADMIN"?"ادمین":"کاربر";
-            
             if($state !=2){
                 $keys = [
                         [['text'=>"بستن تیکت 🗳",'callback_data'=>"closeTicket_$rowId"],['text'=>"پاسخ به تیکت 📝",'callback_data'=>"replySupport_{$rowId}"]],
@@ -4238,10 +4250,21 @@ if($data== "usersOpenTickets" || $data == "userAllTickets"){
                     ];
             }
                 
-            sendMessage(" 🔘 موضوع: $title
-			💭 دسته بندی:  {$category}
-			\n
-			$sentType : $lastmsg",json_encode(['inline_keyboard'=>$keys]),"HTML");
+            if(isset(json_decode($lastmsg,true)['file_id'])){
+                $info = json_decode($lastmsg,true);
+                $fileid = $info['file_id'];
+                $caption = $info['caption'];
+                $txt ="🔘 موضوع: $title
+            		💭 دسته بندی:  {$category}
+            		\n
+            		$sentType : $caption";
+                sendPhoto($fileid, $txt,json_encode(['inline_keyboard'=>$keys]), "HTML");
+            }else{
+                sendMessage(" 🔘 موضوع: $title
+            		💭 دسته بندی:  {$category}
+            		\n
+            		$sentType : $lastmsg",json_encode(['inline_keyboard'=>$keys]),"HTML");
+            }
 
 			if($current>=$cont){
 			    break;
@@ -4326,19 +4349,34 @@ if(preg_match('/^sendMsg_(.*)/',$userInfo['step'],$match)  and $text!=$buttonVal
     $ticketTitle = $ticketInfo['title'];
     $ticketCat = $ticketInfo['category'];
 
-    $time = time();
-    $txt = "پیام جدید:\n[$ticketTitle] <i>{$ticketCat}</i>\n\nکاربر: <a href='tg://user?id=$from_id'>$first_name</a>\nنام کاربری: $username\nآیدی عددی: $from_id\n" . "\nمتن پیام: $text";
 
-    $text = str_replace(["/","'","#"],['\/',"\'","\#"],$text);
-    $stmt = $connection->prepare("INSERT INTO `chats_info` (`chat_id`,`sent_date`,`msg_type`,`text`) VALUES
-                (?,?,'USER',?)");
-    $stmt->bind_param("iis",$ticketRowId, $time, $text);
+
+    $time = time();
+    if(isset($text)){
+        $txt = "پیام جدید:\n[$ticketTitle] <i>{$ticketCat}</i>\n\nکاربر: <a href='tg://user?id=$from_id'>$first_name</a>\nنام کاربری: $username\nآیدی عددی: $from_id\n" . "\nمتن پیام: $text";
+    
+        $text = str_replace(["/","'","#"],['\/',"\'","\#"],$text);
+        $stmt = $connection->prepare("INSERT INTO `chats_info` (`chat_id`,`sent_date`,`msg_type`,`text`) VALUES
+                    (?,?,'USER',?)");
+        $stmt->bind_param("iis",$ticketRowId, $time, $text);
+        sendMessage($txt,json_encode(['inline_keyboard'=>[
+            [['text'=>"پاسخ",'callback_data'=>"reply_{$ticketRowId}"]]
+            ]]),"HTML",$admin);
+    }else{
+        $txt = "پیام جدید:\n[$ticketTitle] <i>{$ticketCat}</i>\n\nکاربر: <a href='tg://user?id=$from_id'>$first_name</a>\nنام کاربری: $username\nآیدی عددی: $from_id\n" . "\nمتن پیام: $caption";
+        
+        $stmt = $connection->prepare("INSERT INTO `chats_info` (`chat_id`,`sent_date`,`msg_type`,`text`) VALUES
+                    (?,?,'USER',?)");
+        $text = json_encode(['file_id'=>$fileid, 'caption'=>$caption]);
+        $stmt->bind_param("iis", $ticketRowId, $time, $text);
+        $keys = json_encode(['inline_keyboard'=>[
+            [['text'=>"پاسخ",'callback_data'=>"reply_{$ticketRowId}"]]
+            ]]);
+        sendPhoto($fileid, $txt,$keys, "HTML", $admin);
+    }
     $stmt->execute();
     $stmt->close();
                 
-    sendMessage($txt,json_encode(['inline_keyboard'=>[
-        [['text'=>"پاسخ",'callback_data'=>"reply_{$ticketRowId}"]]
-        ]]),"HTML",$admin);
     sendMessage("پیام شما با موفقیت ثبت شد",getMainKeys(),"HTML");
 	setUser("none");
 }
@@ -4663,12 +4701,37 @@ if(preg_match('/^latestMsg_(.*)/',$data,$match)){
     $stmt->close();
     $output = "";
     while($row = $chatList->fetch_assoc()){
+        $rowId = $row['id'];
         $type = $row['msg_type'] == "USER" ?"کاربر":"ادمین";
         $text = $row['text'];
+        if(isset(json_decode($text,true)['file_id'])) $text = "تصویر /dlPic" . $rowId; 
 
         $output .= "<i>[$type]</i>\n$text\n\n";
     }
     sendMessage($output, null, "html");
+}
+if(preg_match('/^\/dlPic(\d+)/',$text,$match)){
+     $stmt = $connection->prepare("SELECT * FROM `chats_info` WHERE `id` = ?");
+    $stmt->bind_param("i", $match[1]);
+    $stmt->execute();
+    $chatList = $stmt->get_result();
+    $stmt->close();
+    $output = "";
+    while($row = $chatList->fetch_assoc()){
+        $text = json_decode($row['text'],true);
+        $fileid = $text['file_id'];
+        $caption = $text['caption'];
+        $chatInfoId = $row['chat_id'];
+        $stmt = $connection->prepare("SELECT * FROM `chats` WHERE `id` = ?");
+        $stmt->bind_param("i", $chatInfoId);
+        $stmt->execute();
+        $info = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        
+        $userid = $info['user_id'];
+        
+        if($userid == $from_id || $from_id == $admin || $userInfo['isAdmin'] == true) sendPhoto($fileid, $caption);
+    }
 }
 if($data == "banUser" && ($from_id == $admin || $userInfo['isAdmin'] == true)){
     delMessage();
@@ -4791,21 +4854,40 @@ if(preg_match('/^answer_(.*)/',$userInfo['step'],$match) and  $from_id ==$admin 
     $ticketTitle = $ticketInfo['title'];
     $ticketCat = $ticketInfo['category'];
     
-    sendMessage("\[$ticketTitle] _{$ticketCat}_\n\n" . $text,json_encode(['inline_keyboard'=>[
-        [
-            ['text'=>'پاسخ به تیکت 📝','callback_data'=>"replySupport_$chatRowId"],
-            ['text'=>"بستن تیکت 🗳",'callback_data'=>"closeTicket_$chatRowId"]
-            ]
-        ]]),"MarkDown", $userId);
     $time = time();
 
-    $ticketTitle = str_replace(["/","'","#"],['\/',"\'","\#"],$ticketTitle);
-    $text = str_replace(["/","'","#"],['\/',"\'","\#"],$text);
-    $stmt = $connection->prepare("INSERT INTO `chats_info` (`chat_id`,`sent_date`,`msg_type`,`text`) VALUES
-                (?,?,'ADMIN',?)");
-    $stmt->bind_param("iis", $chatRowId, $time, $text);
+    
+    if(isset($text)){
+        $ticketTitle = str_replace(["/","'","#"],['\/',"\'","\#"],$ticketTitle);
+        $text = str_replace(["/","'","#"],['\/',"\'","\#"],$text);
+        $stmt = $connection->prepare("INSERT INTO `chats_info` (`chat_id`,`sent_date`,`msg_type`,`text`) VALUES
+                    (?,?,'ADMIN',?)");
+        $stmt->bind_param("iis", $chatRowId, $time, $text);
+        
+        sendMessage("\[$ticketTitle] _{$ticketCat}_\n\n" . $text,json_encode(['inline_keyboard'=>[
+            [
+                ['text'=>'پاسخ به تیکت 📝','callback_data'=>"replySupport_$chatRowId"],
+                ['text'=>"بستن تیکت 🗳",'callback_data'=>"closeTicket_$chatRowId"]
+                ]
+            ]]),"MarkDown", $userId);        
+    }else{
+        $text = json_encode(['file_id'=>$fileid, 'caption'=>$caption]);
+        $stmt = $connection->prepare("INSERT INTO `chats_info` (`chat_id`,`sent_date`,`msg_type`,`text`) VALUES
+                    (?,?,'ADMIN',?)");
+        $stmt->bind_param("iis", $chatRowId, $time, $text);
+        
+        $keyboard = json_encode(['inline_keyboard'=>[
+            [
+                ['text'=>'پاسخ به تیکت 📝','callback_data'=>"replySupport_$chatRowId"],
+                ['text'=>"بستن تیکت 🗳",'callback_data'=>"closeTicket_$chatRowId"]
+                ]
+            ]]);
+            
+        sendPhoto($fileid, "\[$ticketTitle] _{$ticketCat}_\n\n" . $caption,$keyboard, "MarkDown", $userId);
+    }
     $stmt->execute();
     $stmt->close();
+    
     $stmt = $connection->prepare("UPDATE `chats` SET `state` = 1 WHERE `id` = ?");
     $stmt->bind_param("i", $chatRowId);
     $stmt->execute();
@@ -4923,7 +5005,7 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
 	}
 	if(!$response->success){
         alert('❌ | 😮 وای خطا داد لطفا سریع به مدیر بگو ...');
-        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . $response['msg'], null, null, $admin);
+        sendMessage("خطای سرور {$serverInfo['title']}:\n\n" . ($response->msg), null, null, $admin);
         exit;
     }
     alert('🚀 | 😍 در حال ارسال کانفیگ به مشتری ...');
@@ -4939,9 +5021,11 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز
-⁮⁮ ⁮⁮
-💝 config : <code>$vray_link</code>";
+" . ($botState['configLinkState'] == "on"?"
+💝 config : <code>$vray_link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
+
+🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
 
 \n🌐 subscription : <code>$subLink</code>";
     
@@ -4951,7 +5035,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
         $frame_Size = 10;
         QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_size);
     	addBorderImage($file);
-        sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>"صفحه اصلی 🏘",'callback_data'=>"mainMenu"]]]]),"HTML");
+        sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML");
         unlink($file);
     }
     
@@ -5337,7 +5421,6 @@ if(preg_match('/sConfigRenewPlan(\d+)_(\d+)/',$data, $match) && ($botState['sell
 	$keyboard = array();
     $price =  $respd['price'];
     $token = base64_encode("{$from_id}.{$id}");
-    $temp = array();
     
     $hash_id = RandomString();
     $stmt = $connection->prepare("DELETE FROM `pays` WHERE `user_id` = ? AND `type` = 'RENEW_SCONFIG' AND `state` = 'pending'");
@@ -5357,40 +5440,23 @@ if(preg_match('/sConfigRenewPlan(\d+)_(\d+)/',$data, $match) && ($botState['sell
 
     
     if($botState['cartToCartState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payWithCartToCart$hash_id"];
+	    $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payWithCartToCart$hash_id"]];
     }
     if($botState['nowPaymentOther'] == "on"){
-	    $temp[] = ['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
     }
     if($botState['zarinpal'] == "on"){
-	    $temp[] = ['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
     }
     if($botState['nextpay'] == "on"){
-	    $temp[] = ['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
     }
     if($botState['weSwapState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
     }
     if($botState['walletState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payWithWallet$hash_id"];
+	    $keyboard[] = [['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payWithWallet$hash_id"]];
     }
-    array_push($keyboard, $temp);
 
 	$keyboard[] = [['text' => $buttonValues['back_to_main'], 'callback_data' => "mainMenu"]];
     sendMessage(str_replace(['PLAN-NAME', 'PRICE', 'DESCRIPTION'], [$name, $price, $desc], $mainValues['buy_subscription_detail']), json_encode(['inline_keyboard'=>$keyboard]), "HTML");
@@ -5449,7 +5515,7 @@ if(preg_match('/sConfigUpdate(\d+)/', $data,$match)){
     if($vraylink == null){delMessage(); exit();}
     include 'phpqrcode/qrlib.php';  
     foreach($vraylink as $vray_link){
-        $acc_text = "<code>$vray_link</code>";
+        $acc_text = $botState['configLinkState'] == "on"?"<code>$vray_link</code>":".";
     
         $ecc = 'L';
         $pixel_Size = 10;
@@ -5904,7 +5970,7 @@ if(preg_match('/^wizwizplanacclist(\d+)/',$data,$match) and ($from_id == $admin 
         $orderLink = json_decode($order['link'],true);
         $txt = "$sold \n  ☑️ $remark ";
         foreach($orderLink as $link){
-            $txt .= "<code>".$link."</code> \n";
+            $txt .= $botState['configLinkState'] == "on"?"<code>".$link."</code> \n":"";
         }
         $txt .= "\n ❗ $channelLock \n";
         sendMessage($txt, null, "HTML");
@@ -6159,7 +6225,7 @@ if(($data == 'mySubscriptions' || $data == "agentConfigsList" or preg_match('/(c
         $remark = $cat['remark'];
         $keyboard[] = ['text' => "$remark", 'callback_data' => "orderDetails$id"];
     }
-    $keyboard = array_chunk($keyboard,2);
+    $keyboard = array_chunk($keyboard,1);
     
     $prev = $page - 1;
     $next = $page + 1;
@@ -6680,43 +6746,25 @@ if(preg_match('/^discountRenew(\d+)_(\d+)/',$userInfo['step'], $match) || preg_m
     if($price == 0) $price = "رایگان";
     else $price .= " تومان";
     $keyboard = array();
-    $temp = array();
     if($botState['cartToCartState'] == "on"){
-	    $temp[] = ['text' => "💳 کارت به کارت مبلغ $price",  'callback_data' => "payRenewWithCartToCart$hash_id"];
+	    $keyboard[] = [['text' => "💳 کارت به کارت مبلغ $price",  'callback_data' => "payRenewWithCartToCart$hash_id"]];
     }
     if($botState['nowPaymentOther'] == "on"){
-	    $temp[] = ['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
     }
     if($botState['zarinpal'] == "on"){
-	    $temp[] = ['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
     }
     if($botState['nextpay'] == "on"){
-	    $temp[] = ['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
     }
     if($botState['weSwapState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id];
+	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
     }
 
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
-    }
     if($botState['walletState'] == "on"){
-	    $temp[] = ['text' => "پرداخت با موجودی مبلغ $price",  'callback_data' => "payRenewWithWallet$hash_id"];
+	    $keyboard[] = [['text' => "پرداخت با موجودی مبلغ $price",  'callback_data' => "payRenewWithWallet$hash_id"]];
     }
-    array_push($keyboard, $temp);
     if(!preg_match('/^discountRenew/', $userInfo['step'])) $keyboard[] = [['text' => " 🎁 نکنه کد تخفیف داری؟ ",  'callback_data' => "haveDiscountRenew_" . $match[1] . "_" . $rowId]];
 
     $keyboard[] = [['text'=>$buttonValues['cancel'], 'callback_data'=> "mainMenu"]];
@@ -6762,11 +6810,14 @@ if(preg_match('/payRenewWithCartToCart(.*)/',$userInfo['step'],$match) and $text
         $respd = $stmt->get_result()->fetch_assoc();
         $stmt->close();
         $price = $payInfo['price'];
+        $volume = $respd['volume'];
+        $days = $respd['days'];
+        
         sendMessage($mainValues['renew_order_sent'],$removeKeyboard);
         sendMessage($mainValues['reached_main_menu'],getMainKeys());
         // notify admin
         
-        $msg = str_replace(['TYPE', "USER-ID", "USERNAME", "NAME", "PRICE", "REMARK"],['کارت به کارت', $from_id, $username, $first_name, $price, $remark], $mainValues['renew_account_request_message']);
+        $msg = str_replace(['TYPE', "USER-ID", "USERNAME", "NAME", "PRICE", "REMARK", "VOLUME", "DAYS"],['کارت به کارت', $from_id, $username, $first_name, $price, $remark, $volume, $days], $mainValues['renew_account_request_message']);
     
         $keyboard = json_encode([
             'inline_keyboard' => [
@@ -6848,6 +6899,7 @@ if(preg_match('/approveRenewAcc(.*)/',$data,$match)){
 	$stmt->bind_param("iiisii", $uid, $server_id, $inbound_id, $remark, $price, $time);
 	$stmt->execute();
 	$stmt->close();
+    sendMessage(str_replace(["REMARK", "VOLUME", "DAYS"],[$remark, $volume, $days], $mainValues['renewed_config_to_user']), getMainKeys(),null,null);
     sendMessage("✅سرویس $remark با موفقیت تمدید شد",null,null,$uid);
     exit;
 }
@@ -6966,7 +7018,7 @@ if(preg_match('/payRenewWithWallet(.*)/', $data,$match)){
             ['text'=>"به به تمدید 😍",'callback_data'=>"wizwizch"]
             ],
         ]]);
-    $msg = str_replace(['TYPE', "USER-ID", "USERNAME", "NAME", "PRICE", "REMARK"],['کیف پول', $from_id, $username, $first_name, $price, $remark], $mainValues['renew_account_request_message']);
+    $msg = str_replace(['TYPE', "USER-ID", "USERNAME", "NAME", "PRICE", "REMARK", "VOLUME", "DAYS"],['کیف پول', $from_id, $username, $first_name, $price, $remark, $volume, $days], $mainValues['renew_account_request_message']);
 
     sendMessage($msg, $keys,"html", $admin);
     exit;
@@ -7246,7 +7298,7 @@ if(preg_match('/switchServer(.+)_(.+)/',$data,$match)){
         $keyboard[] = ['text' => "$cremark", 'callback_data' => "orderDetails$id"];
     }
     $keyboard = array_chunk($keyboard,2);
-    $keyboard[] = [['text'=>"صفحه اصلی 🏘",'callback_data'=>"mainMenu"]];
+    $keyboard[] = [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]];
     $msg = " 📍لوکیشن سرویس $remark به $server_title با ریمارک $newRemark تغییر یافت.\n لطفا برای مشاهده مشخصات, روی آن بزنید👇";
     
     editText($message_id, $msg,json_encode([
@@ -7272,7 +7324,7 @@ elseif(preg_match('/^deleteMyConfig(\d+)/',$data,$match)){
 elseif($data=="noDontDelete"){
     editText($message_id, "عملیه مورد نظر لغو شد",json_encode([
         'inline_keyboard' => [
-            [['text'=>"صفحه اصلی 🏘",'callback_data'=>"mainMenu"]]
+            [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]
             ]
     ]));
 }
@@ -7286,10 +7338,30 @@ elseif(preg_match('/^yesDeleteConfig(\d+)/',$data,$match)){
     $inbound_id = $order['inbound_id'];
     $server_id = $order['server_id'];
     $remark = $order['remark'];
-	
-    if($inbound_id > 0) deleteClient($server_id, $inbound_id, $remark, 1);
-    else deleteInbound($server_id, $remark, 1);
+    $fileid = $order['fileid'];
     
+    $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `id` = ?");
+    $stmt->bind_param("i", $fileid);
+    $stmt->execute();
+    $planDetail = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+	$volume = $planDetail['volume'];
+	$days = $planDetail['days'];
+	
+	
+    if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $remark, 1);
+    else $res = deleteInbound($server_id, $remark, 1);
+    
+    $leftMb = sumerize($res['total'] - $res['up'] - $res['down']);
+    $expiryDay = $res['expiryTime'] != 0?
+        floor(
+            (substr($res['expiryTime'],0,-3)-time())/(60 * 60 * 24))
+            :
+            "نامحدود";
+    if(is_numeric($expiryDay)){
+        if($expiryDay<0) $expiryDay = 0;
+    }
+
     $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - 1 WHERE `id` = ?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
@@ -7303,7 +7375,7 @@ elseif(preg_match('/^yesDeleteConfig(\d+)/',$data,$match)){
 
     editText($message_id, "کانفیگ $remark با موفقیت حذف شد",json_encode([
             'inline_keyboard' => [
-                [['text'=>"صفحه اصلی 🏘",'callback_data'=>"mainMenu"]]
+                [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]
                 ]
         ]));
         
@@ -7314,8 +7386,11 @@ sendMessage("
 👨‍💼اسم کاربر: $first_name
 ⚡️ نام کاربری: $username
 🎈 نام سرویس: $remark
-⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
-",$keys,"html", $admin);
+🔋حجم سرویس: $volume گیگ
+⏰ مدت زمان سرویس: $days روز
+❌ حجم باقی مانده: $leftMb
+📆 روز باقیمانده: $expiryDay روز
+",null,"html", $admin);
     exit();
 }
 if(preg_match('/increaseADay(.*)/', $data, $match)){
@@ -7346,7 +7421,7 @@ if(preg_match('/increaseADay(.*)/', $data, $match)){
         $keyboard[] = ['text' => "$title روز $price", 'callback_data' => "selectPlanDayIncrease{$match[1]}_$id"];
     }
     $keyboard = array_chunk($keyboard,2);
-    $keyboard[] = [['text' => "صفحه اصلی 🏘", 'callback_data' => "mainMenu"]];
+    $keyboard[] = [['text' => $buttonValues['back_to_main'], 'callback_data' => "mainMenu"]];
     editText($message_id, "لطفا یکی از پلن های افزایشی را انتخاب کنید :", json_encode([
             'inline_keyboard' => $keyboard
         ]));
@@ -7387,42 +7462,24 @@ if(preg_match('/selectPlanDayIncrease(?<orderId>.+)_(?<dayId>.+)/',$data,$match)
 
     
     $keyboard = array();
-    $temp = array();
     if($botState['cartToCartState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payIncreaseDayWithCartToCart$hash_id"];
+	    $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payIncreaseDayWithCartToCart$hash_id"]];
     }
     if($botState['nowPaymentOther'] == "on"){
-	    $temp[] = ['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
     }
     if($botState['zarinpal'] == "on"){
-	    $temp[] = ['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
     }
     if($botState['nextpay'] == "on"){
-	    $temp[] = ['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
     }
     if($botState['weSwapState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
     }
     if($botState['walletState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payIncraseDayWithWallet$hash_id"];
+	    $keyboard[] = [['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payIncraseDayWithWallet$hash_id"]];
     }
-    array_push($keyboard, $temp);
     $keyboard[] = [['text'=>$buttonValues['cancel'], 'callback_data'=> "mainMenu"]];
     editText($message_id, "لطفا با یکی از روش های زیر پرداخت خود را تکمیل کنید :",json_encode(['inline_keyboard' => $keyboard]));
 }
@@ -7733,47 +7790,29 @@ if(preg_match('/increaseVolumePlan(?<orderId>.+)_(?<volumeId>.+)/',$data,$match)
     $stmt->close();
     
     $keyboard = array();
-    $temp = array();
     
     if($planprice == 0) $planprice = ' رایگان';
     else $planprice = " " . number_format($planprice) . " تومان";
     
     
     if($botState['cartToCartState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['cart_to_cart'] . $planprice,  'callback_data' => "payIncreaseWithCartToCart$hash_id"];
+	    $keyboard[] = [['text' => $buttonValues['cart_to_cart'] . $planprice,  'callback_data' => "payIncreaseWithCartToCart$hash_id"]];
     }
     if($botState['nowPaymentOther'] == "on"){
-	    $temp[] = ['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
     }
     if($botState['zarinpal'] == "on"){
-	    $temp[] = ['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
     }
     if($botState['nextpay'] == "on"){
-	    $temp[] = ['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
     }
     if($botState['weSwapState'] == "on"){
-	    $temp[] = ['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id];
-    }
-    if(count($temp) == 2){
-        array_push($keyboard, $temp);
-        $temp = array();
+	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
     }
     if($botState['walletState'] == "on"){
-	    $temp[] = ['text' => "💰پرداخت با موجودی  " . $planprice,  'callback_data' => "payIncraseWithWallet$hash_id"];
+	    $keyboard[] = [['text' => "💰پرداخت با موجودی  " . $planprice,  'callback_data' => "payIncraseWithWallet$hash_id"]];
     }
-    array_push($keyboard, $temp);
     $keyboard[] = [['text'=>$buttonValues['cancel'], 'callback_data'=> "mainMenu"]];
     editText($message_id, "لطفا با یکی از روش های زیر پرداخت خود را تکمیل کنید :",json_encode(['inline_keyboard' => $keyboard]));
 }
