@@ -157,10 +157,8 @@ if (preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main
     if(isset($data) and $data == "mainMenu"){
         $res = editText($message_id, $mainValues['start_message'], getMainKeys());
         if(!$res->ok){
-            // sendMessage($mainValues['start_message'], getMainKeys());
+            sendMessage($mainValues['start_message'], getMainKeys());
             
-            sendMessage(str_replace(["FULLNAME"], ["$first_name"],$mainValues['start_message']), getMainKeys());
-
         }
     }else{
         if($from_id != $admin && !isset($userInfo['first_start'])){
@@ -172,8 +170,7 @@ if (preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main
             sendMessage(str_replace(["FULLNAME", "USERNAME", "USERID"], ["<a href='tg://user?id=$from_id'>$first_name</a>", $username, $from_id], $mainValues['new_member_joined'])
                 ,$keys, "html",$admin);
         }
-        // sendMessage($mainValues['start_message'],getMainKeys());
-        sendMessage(str_replace(["FULLNAME"], ["$first_name"],$mainValues['start_message']), getMainKeys());
+        sendMessage($mainValues['start_message'],getMainKeys());
     }
 }
 if(preg_match('/^sendMessageToUser(\d+)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true) && $text != $buttonValues['cancel']){
