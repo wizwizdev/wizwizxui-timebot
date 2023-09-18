@@ -254,14 +254,14 @@ function getMainKeys(){
                 ]:
                 []
             ),
-        (
-            ($botState['testAccount'] == "on")?[['text'=>$buttonValues['test_account'],'callback_data'=>"getTestAccount"]]:
-                []
-            ),
         (($botState['sellState'] == "on" || $from_id == $admin || $userInfo['isAdmin'] == true)?
         [['text'=>$buttonValues['my_subscriptions'],'callback_data'=>'mySubscriptions'],['text'=>$buttonValues['buy_subscriptions'],'callback_data'=>"buySubscription"]]
         :
         [['text'=>$buttonValues['my_subscriptions'],'callback_data'=>'mySubscriptions']]
+            ),
+        (
+            ($botState['testAccount'] == "on")?[['text'=>$buttonValues['test_account'],'callback_data'=>"getTestAccount"]]:
+                []
             ),
         [['text'=>$buttonValues['sharj'],'callback_data'=>"increaseMyWallet"]],
         [['text'=>$buttonValues['invite_friends'],'callback_data'=>"inviteFriends"],['text'=>$buttonValues['my_info'],'callback_data'=>"myInfo"]],
@@ -827,12 +827,15 @@ function getBotSettingKeys(){
     $increaseTime = $botState['increaseTimeState']=="on"?$buttonValues['on']:$buttonValues['off'];
     $increaseVolume = $botState['increaseVolumeState']=="on"?$buttonValues['on']:$buttonValues['off'];
     $subLink = $botState['subLinkState']=="on"?$buttonValues['on']:$buttonValues['off'];
+    $configLink = $botState['configLinkState']=="on"?$buttonValues['on']:$buttonValues['off'];
     $renewConfigLink = $botState['renewConfigLinkState']=="on"?$buttonValues['on']:$buttonValues['off'];
     $updateConfigLink = $botState['updateConfigLinkState']=="on"?$buttonValues['on']:$buttonValues['off'];
     $individualExistence = $botState['individualExistence']=="on"?$buttonValues['on']:$buttonValues['off'];
     $sharedExistence = $botState['sharedExistence']=="on"?$buttonValues['on']:$buttonValues['off'];
     $testAccount = $botState['testAccount']=="on"?$buttonValues['on']:$buttonValues['off'];
     $agency = $botState['agencyState']=="on"?$buttonValues['on']:$buttonValues['off'];
+    $qrConfig = $botState['qrConfigState']=="on"?$buttonValues['on']:$buttonValues['off'];
+    $qrSub = $botState['qrSubState']=="on"?$buttonValues['on']:$buttonValues['off'];
     
     $requirePhone = $botState['requirePhone']=="on"?$buttonValues['on']:$buttonValues['off'];
     $requireIranPhone = $botState['requireIranPhone']=="on"?$buttonValues['on']:$buttonValues['off'];
@@ -919,6 +922,10 @@ function getBotSettingKeys(){
             ['text'=>"لینک ساب",'callback_data'=>"wizwizch"]
         ],
         [
+            ['text'=>$configLink,'callback_data'=>"changeBotconfigLinkState"],
+            ['text'=>"لینک کانفیگ",'callback_data'=>"wizwizch"]
+        ],
+        [
             ['text'=>$searchState,'callback_data'=>"changeBotsearchState"],
             ['text'=>"مشخصات کانفیگ",'callback_data'=>"wizwizch"]
         ],
@@ -929,6 +936,14 @@ function getBotSettingKeys(){
         [
             ['text'=>$updateConfigLink,'callback_data'=>"changeBotupdateConfigLinkState"],
             ['text'=>"بروز رسانی لینک",'callback_data'=>"wizwizch"]
+        ],
+        [
+            ['text'=>$qrConfig,'callback_data'=>"changeBotqrConfigState"],
+            ['text'=>"کیو آر کد کانفیگ",'callback_data'=>"wizwizch"]
+        ],
+        [
+            ['text'=>$qrSub,'callback_data'=>"changeBotqrSubState"],
+            ['text'=>"کیو آر کد ساب",'callback_data'=>"wizwizch"]
         ],
         [
             ['text'=>$remarkType,'callback_data'=>"changeConfigRemarkType"],
@@ -969,11 +984,31 @@ function getBotReportKeys(){
     $allPlans = $stmt->get_result()->num_rows;
     $stmt->close();
     
-    $stmt = $connection->prepare("SELECT SUM(amount) as total FROM `orders_list`");
+    $stmt = $connection->prepare("SELECT SUM(price) as total FROM `pays`");
     $stmt->execute();
     $totalRewards = number_format($stmt->get_result()->fetch_assoc()['total']) . " تومان";
     $stmt->close();
     
+    $dayTime = strtotime(date("Y-m-01"));
+    $stmt = $connection->prepare("SELECT SUM(price) as total FROM `pays` WHERE `request_date` > ?");
+    $stmt->bind_param("i", $dayTime);
+    $stmt->execute();
+    $monthReward = number_format($stmt->get_result()->fetch_assoc()['total']) . " تومان";
+    $stmt->close();
+    
+    $dayTime = strtotime("-" . (date("w")+1) . " days");
+    $stmt = $connection->prepare("SELECT SUM(price) as total FROM `pays` WHERE `request_date` > ?");
+    $stmt->bind_param("i", $dayTime);
+    $stmt->execute();
+    $weekReward = number_format($stmt->get_result()->fetch_assoc()['total']) . " تومان";
+    $stmt->close();
+    
+    $dayTime = strtotime("today");
+    $stmt = $connection->prepare("SELECT SUM(price) as total FROM `pays` WHERE `request_date` > ?");
+    $stmt->bind_param("i", $dayTime);
+    $stmt->execute();
+    $dayReward = number_format($stmt->get_result()->fetch_assoc()['total']) . " تومان";
+    $stmt->close();
     
     return json_encode(['inline_keyboard'=>[
         [
@@ -999,6 +1034,18 @@ function getBotReportKeys(){
         [
             ['text'=>$totalRewards,'callback_data'=>'wizwizch'],
             ['text'=>"درآمد کل",'callback_data'=>'wizwizch']
+            ],
+        [
+            ['text'=>$dayReward,'callback_data'=>'wizwizch'],
+            ['text'=>"درآمد امروز",'callback_data'=>'wizwizch']
+            ],
+        [
+            ['text'=>$weekReward,'callback_data'=>'wizwizch'],
+            ['text'=>"درآمد هفته",'callback_data'=>'wizwizch']
+            ],
+        [
+            ['text'=>$monthReward,'callback_data'=>'wizwizch'],
+            ['text'=>"درآمد ماه",'callback_data'=>'wizwizch']
             ],
         [
             ['text'=>"برگشت به مدیریت",'callback_data'=>'managePanel']
@@ -1259,6 +1306,7 @@ function getUserOrderDetailKeys($id){
                 if($row->remark == $remark) {
                     $total = $row->total;
                     $up = $row->up;
+                    $enable = $row->enable;
                     $down = $row->down; 
                     $netType = json_decode($row->streamSettings)->network;
                     $security = json_decode($row->streamSettings)->security;
@@ -1275,6 +1323,7 @@ function getUserOrderDetailKeys($id){
                         if($client->email == $remark) {
                             $total = $client->total;
                             $up = $client->up;
+                            $enable = $client->enable;
                             $down = $client->down; 
                             break;
                         }
@@ -1286,7 +1335,7 @@ function getUserOrderDetailKeys($id){
         $leftgb = round( ($total - $up - $down) / 1073741824, 2) . " GB";
         $configLinks = "";
         foreach($acc_link as $acc_link){
-            $configLinks .= "\n <code>$acc_link</code>";
+            $configLinks .= $botState['configLinkState'] == "on"?"\n <code>$acc_link</code>":"";
         }
         $keyboard = array();
         if($inbound_id == 0){
@@ -1325,7 +1374,7 @@ function getUserOrderDetailKeys($id){
                             ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
                         ],
                         [
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
+                            // ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
                             ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
                         ],
                     ];
@@ -1364,7 +1413,7 @@ function getUserOrderDetailKeys($id){
                             ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
                         ],
                         [
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
+                            // ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
                             ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => "wizwizch"],
                             ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
                         ],
@@ -1448,7 +1497,7 @@ function getUserOrderDetailKeys($id){
                             ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
                         ],
                         [
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
+                            // ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
                             ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
                         ]
                     ];
@@ -1493,7 +1542,7 @@ function getUserOrderDetailKeys($id){
                             ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
                         ]:
                             [
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
+                            // ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
                             ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => "wizwizch"],
                             ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
                         ])
@@ -1551,7 +1600,9 @@ function getUserOrderDetailKeys($id){
         
         $subLink = $botState['subLinkState']=="on"?"<code>" . $botUrl . "settings/subLink.php?token=" . $token . "</code>":"";
 
-        $msg = str_replace(['NAME','CONNECT-LINK', 'SUB-LINK'], [$remark, $configLinks, $subLink], $mainValues['config_details_message']);
+        
+        $enable = $enable == true? $buttonValues['active']:$buttonValues['deactive'];
+        $msg = str_replace(['STATE', 'NAME','CONNECT-LINK', 'SUB-LINK'], [$enable, $remark, $configLinks, $subLink], $mainValues['config_details_message']);
     
         $keyboard[] = [['text' => $buttonValues['back_button'], 'callback_data' => "managePanel"]];
         return ["keyboard"=>json_encode([
@@ -1617,6 +1668,7 @@ function getOrderDetailKeys($from_id, $id){
                     $total = $row->total;
                     $up = $row->up;
                     $down = $row->down; 
+                    $enable = $row->enable;
                     $netType = json_decode($row->streamSettings)->network;
                     $security = json_decode($row->streamSettings)->security;
                     break;
@@ -1633,6 +1685,7 @@ function getOrderDetailKeys($from_id, $id){
                             $total = $client->total;
                             $up = $client->up;
                             $down = $client->down; 
+                            $enable = $client->enable;
                             break;
                         }
                     }
@@ -1643,7 +1696,7 @@ function getOrderDetailKeys($from_id, $id){
         $leftgb = round( ($total - $up - $down) / 1073741824, 2) . " GB";
         $configLinks = "";
         foreach($acc_link as $acc_link){
-            $configLinks .= "\n <code>$acc_link</code>";
+            $configLinks .= ($botState['configLinkState'] == "on"?"\n <code>$acc_link</code>":"");
         }
         $keyboard = array();
         if($inbound_id == 0){
@@ -1670,7 +1723,7 @@ function getOrderDetailKeys($from_id, $id){
                             ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
                         ],
                         [
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
+                            // ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
                             ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
                         ],
                     ];
@@ -1703,7 +1756,7 @@ function getOrderDetailKeys($from_id, $id){
                             ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
                         ],
                         [
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
+                            // ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
                             ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vmess":"changeProtocolIsDisable")],
                             ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
                         ],
@@ -1775,7 +1828,7 @@ function getOrderDetailKeys($from_id, $id){
                             ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
                         ],
                         [
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
+                            // ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
                             ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
                         ]
                     ];
@@ -1815,7 +1868,7 @@ function getOrderDetailKeys($from_id, $id){
                             ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
                         ]:
                             [
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
+                            // ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
                             ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vmess":"changeProtocolIsDisable")],
                             ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
                         ])
@@ -1874,8 +1927,10 @@ function getOrderDetailKeys($from_id, $id){
         
         $subLink = $botState['subLinkState']=="on"?"<code>" . $botUrl . "settings/subLink.php?token=" . $token . "</code>":"";
 
-        $msg = str_replace(['NAME','CONNECT-LINK', 'SUB-LINK'], [$remark, $configLinks, $subLink], $mainValues['config_details_message']);
-    
+        $enable = $enable == true? $buttonValues['active']:$buttonValues['deactive'];
+        $msg = str_replace(['STATE', 'NAME','CONNECT-LINK', 'SUB-LINK'], [$enable, $remark, $configLinks, $subLink], $mainValues['config_details_message']);
+        
+        
         $extrakey = [];
         if($botState['increaseVolumeState']=="on" && ($price != 0 || $agentBought == true)) $extrakey[] = ['text' => $buttonValues['increase_config_volume'], 'callback_data' => "increaseAVolume{$id}"];
         if($botState['increaseTimeState']=="on" && ($price != 0 || $agentBought == true)) $extrakey[] = ['text' => $buttonValues['increase_config_days'], 'callback_data' => "increaseADay{$id}"];
@@ -1885,7 +1940,12 @@ function getOrderDetailKeys($from_id, $id){
         if($botState['renewConfigLinkState'] == "on" && $botState['updateConfigLinkState'] == "on") $keyboard[] = [['text'=>$buttonValues['renew_connection_link'],'callback_data'=>'changAccountConnectionLink' . $id],['text'=>$buttonValues['update_config_connection'],'callback_data'=>'updateConfigConnectionLink' . $id]];
         elseif($botState['renewConfigLinkState'] == "on") $keyboard[] = [['text'=>$buttonValues['renew_connection_link'],'callback_data'=>'changAccountConnectionLink' . $id]];
         elseif($botState['updateConfigLinkState'] == "on") $keyboard[] = [['text'=>$buttonValues['update_config_connection'],'callback_data'=>'updateConfigConnectionLink' . $id]];
-
+        
+        $temp = [];
+        if($botState['qrConfigState'] == "on") $temp[] = ['text'=>$buttonValues['qr_config'],'callback_data'=>"showQrConfig" . $id];
+        if($botState['qrSubState'] == "on") $temp[] = ['text'=>$buttonValues['qr_sub'],'callback_data'=>"showQrSub" . $id];
+        array_push($keyboard, $temp);
+        
         $keyboard[] = [['text' => $buttonValues['delete_config'], 'callback_data' => "deleteMyConfig" . $id]];
         $keyboard[] = [['text' => $buttonValues['back_button'], 'callback_data' => ($agentBought == true?"agentConfigsList":"mySubscriptions")]];
         return ["keyboard"=>json_encode([
@@ -3720,6 +3780,14 @@ function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $secu
         
                 $streamSettings = ($netType == 'tcp') ? $tcpSettings : $wsSettings;
 		if($netType == 'grpc'){
+		    $keyFileInfo = json_decode($tlsSettings,true);
+		    $certificateFile = "/root/cert.crt";
+		    $keyFile = '/root/private.key';
+		    
+		    if(isset($keyFileInfo['certificates'])){
+		        $certificateFile = $keyFileInfo['certificates'][0]['certificateFile'];
+		        $keyFile = $keyFileInfo['certificates'][0]['keyFile'];
+		    }
 			if($security == 'tls') {
 				$streamSettings = '{
   "network": "grpc",
@@ -3728,8 +3796,8 @@ function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $secu
     "serverName": "' . parse_url($panel_url, PHP_URL_HOST) . '",
     "certificates": [
       {
-        "certificateFile": "/root/cert.crt",
-        "keyFile": "/root/private.key"
+        "certificateFile": "' . $certificateFile . '",
+        "keyFile": "' . $keyFile . '"
       }
     ],
     "alpn": []'
@@ -4054,6 +4122,15 @@ function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', 
         
                 $streamSettings = ($netType == 'tcp') ? $tcpSettings : $wsSettings;
 		if($netType == 'grpc'){
+		    $keyFileInfo = json_decode($tlsSettings,true);
+		    $certificateFile = "/root/cert.crt";
+		    $keyFile = '/root/private.key';
+		    
+		    if(isset($keyFileInfo['certificates'])){
+		        $certificateFile = $keyFileInfo['certificates'][0]['certificateFile'];
+		        $keyFile = $keyFileInfo['certificates'][0]['keyFile'];
+		    }
+
 			if($security == 'tls') {
 				$streamSettings = '{
   "network": "grpc",
@@ -4062,8 +4139,8 @@ function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', 
     "serverName": "' . parse_url($panel_url, PHP_URL_HOST) . '",
     "certificates": [
       {
-        "certificateFile": "/root/cert.crt",
-        "keyFile": "/root/private.key"
+        "certificateFile": "' . $certificateFile . '",
+        "keyFile": "' . $keyFile . '"
       }
     ],
     "alpn": []'
@@ -4622,6 +4699,15 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
 
         $streamSettings = ($netType == 'tcp') ? $tcpSettings : $wsSettings;
 		if($netType == 'grpc'){
+		    $keyFileInfo = json_decode($tlsSettings,true);
+		    $certificateFile = "/root/cert.crt";
+		    $keyFile = '/root/private.key';
+		    
+		    if(isset($keyFileInfo['certificates'])){
+		        $certificateFile = $keyFileInfo['certificates'][0]['certificateFile'];
+		        $keyFile = $keyFileInfo['certificates'][0]['keyFile'];
+		    }
+
 			if($security == 'tls') {
 				$streamSettings = '{
   "network": "grpc",
@@ -4630,8 +4716,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
     "serverName": "' . parse_url($panel_url, PHP_URL_HOST) . '",
     "certificates": [
       {
-        "certificateFile": "/root/cert.crt",
-        "keyFile": "/root/private.key"
+        "certificateFile": "' . $certificateFile . '",
+        "keyFile": "' . $keyFile . '"
       }
     ],
     "alpn": []'
@@ -4960,6 +5046,15 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
 
         $streamSettings = ($netType == 'tcp') ? $tcpSettings : $wsSettings;
 		if($netType == 'grpc' && $reality != "true"){
+		    $keyFileInfo = json_decode($tlsSettings,true);
+		    $certificateFile = "/root/cert.crt";
+		    $keyFile = '/root/private.key';
+		    
+		    if(isset($keyFileInfo['certificates'])){
+		        $certificateFile = $keyFileInfo['certificates'][0]['certificateFile'];
+		        $keyFile = $keyFileInfo['certificates'][0]['keyFile'];
+		    }
+
 			if($security == 'tls') {
 				$streamSettings = '{
   "network": "grpc",
@@ -4968,8 +5063,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
     "serverName": "' . parse_url($panel_url, PHP_URL_HOST) . '",
     "certificates": [
       {
-        "certificateFile": "/root/cert.crt",
-        "keyFile": "/root/private.key"
+        "certificateFile": "' . $certificateFile . '",
+        "keyFile": "' . $keyFile . '"
       }
     ],
     "alpn": []
