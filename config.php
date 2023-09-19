@@ -827,7 +827,7 @@ function getBotSettingKeys(){
     $increaseTime = $botState['increaseTimeState']=="on"?$buttonValues['on']:$buttonValues['off'];
     $increaseVolume = $botState['increaseVolumeState']=="on"?$buttonValues['on']:$buttonValues['off'];
     $subLink = $botState['subLinkState']=="on"?$buttonValues['on']:$buttonValues['off'];
-    $configLink = $botState['configLinkState']=="on"?$buttonValues['on']:$buttonValues['off'];
+    $configLink = $botState['configLinkState']=="off"?$buttonValues['off']:$buttonValues['on'];
     $renewConfigLink = $botState['renewConfigLinkState']=="on"?$buttonValues['on']:$buttonValues['off'];
     $updateConfigLink = $botState['updateConfigLinkState']=="on"?$buttonValues['on']:$buttonValues['off'];
     $individualExistence = $botState['individualExistence']=="on"?$buttonValues['on']:$buttonValues['off'];
@@ -1335,7 +1335,7 @@ function getUserOrderDetailKeys($id){
         $leftgb = round( ($total - $up - $down) / 1073741824, 2) . " GB";
         $configLinks = "";
         foreach($acc_link as $acc_link){
-            $configLinks .= $botState['configLinkState'] == "on"?"\n <code>$acc_link</code>":"";
+            $configLinks .= $botState['configLinkState'] != "off"?"\n <code>$acc_link</code>":"";
         }
         $keyboard = array();
         if($inbound_id == 0){
@@ -1696,7 +1696,7 @@ function getOrderDetailKeys($from_id, $id){
         $leftgb = round( ($total - $up - $down) / 1073741824, 2) . " GB";
         $configLinks = "";
         foreach($acc_link as $acc_link){
-            $configLinks .= ($botState['configLinkState'] == "on"?"\n <code>$acc_link</code>":"");
+            $configLinks .= ($botState['configLinkState'] != "off"?"\n <code>$acc_link</code>":"");
         }
         $keyboard = array();
         if($inbound_id == 0){
