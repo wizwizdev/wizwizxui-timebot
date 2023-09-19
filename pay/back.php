@@ -170,7 +170,7 @@ exit();
 }
 
 function doAction($payRowId, $gateType){
-global $connection, $admin, $botUrl, $mainKeys;
+global $connection, $admin, $botUrl, $mainKeys, $botState;
 $time = time();
 $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `id` = ? AND `state` = 'pending'");
 $stmt->bind_param("i", $payRowId);
