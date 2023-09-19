@@ -923,7 +923,7 @@ if (($data == "agentOneBuy" || $data=='buySubscription' || $data == "agentMuchBu
         $flag = $cat['flag'];
         $keyboard[] = ['text' => "$flag $name", 'callback_data' => "selectServer$id"];
     }
-    $keyboard = array_chunk($keyboard,2);
+    $keyboard = array_chunk($keyboard,1);
     $keyboard[] = [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]];
     editText($message_id, $mainValues['buy_sub_select_location'], json_encode(['inline_keyboard'=>$keyboard]));
 }
@@ -1168,7 +1168,7 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
         foreach($vraylink as $vray_link){
             $acc_text = "
     
-        🔮 $remark \n " . ($botState['configLinkState'] == "on"?"<code>$vray_link</code>":"");
+        🔮 $remark \n " . ($botState['configLinkState'] != "off"?"<code>$vray_link</code>":"");
             if($botState['subLinkState'] == "on") $acc_text .= 
             " \n🌐 subscription : <code>$subLink</code>";
         
@@ -1448,7 +1448,7 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز⁮⁮ ⁮⁮
-" . ($botState['configLinkState'] == "on"?"
+" . ($botState['configLinkState'] != "off"?"
 💝 config : <code>$vray_link</code>":"");
 
 "🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>";
@@ -2519,7 +2519,7 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز⁮⁮ ⁮⁮
-" . ($botState['configLinkState'] == "on"?"
+" . ($botState['configLinkState'] != "off"?"
 💝 config : <code>$vray_link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
@@ -2856,7 +2856,7 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز⁮⁮ ⁮⁮
-" . ($botState['configLinkState'] == "on"?"
+" . ($botState['configLinkState'] != "off"?"
 💝 config : <code>$vray_link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
@@ -3123,7 +3123,7 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز⁮⁮ ⁮⁮
-" . ($botState['configLinkState'] == "on"?"
+" . ($botState['configLinkState'] != "off"?"
 💝 config : <code>$vray_link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
@@ -3600,7 +3600,7 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز
-" . ($botState['configLinkState'] == "on"?"
+" . ($botState['configLinkState'] != "off"?"
 💝 config : <code>$vray_link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
@@ -5018,7 +5018,7 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز
-" . ($botState['configLinkState'] == "on"?"
+" . ($botState['configLinkState'] != "off"?"
 💝 config : <code>$vray_link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
@@ -5512,7 +5512,7 @@ if(preg_match('/sConfigUpdate(\d+)/', $data,$match)){
     if($vraylink == null){delMessage(); exit();}
     include 'phpqrcode/qrlib.php';  
     foreach($vraylink as $vray_link){
-        $acc_text = $botState['configLinkState'] == "on"?"<code>$vray_link</code>":".";
+        $acc_text = $botState['configLinkState'] != "off"?"<code>$vray_link</code>":".";
     
         $ecc = 'L';
         $pixel_Size = 10;
@@ -5967,7 +5967,7 @@ if(preg_match('/^wizwizplanacclist(\d+)/',$data,$match) and ($from_id == $admin 
         $orderLink = json_decode($order['link'],true);
         $txt = "$sold \n  ☑️ $remark ";
         foreach($orderLink as $link){
-            $txt .= $botState['configLinkState'] == "on"?"<code>".$link."</code> \n":"";
+            $txt .= $botState['configLinkState'] != "off"?"<code>".$link."</code> \n":"";
         }
         $txt .= "\n ❗ $channelLock \n";
         sendMessage($txt, null, "HTML");
