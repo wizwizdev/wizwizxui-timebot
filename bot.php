@@ -1451,10 +1451,10 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
 " . ($botState['configLinkState'] != "off"?"
 💝 config : <code>$vray_link</code>":"");
 
-"🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>";
-
-
 if($botState['subLinkState'] == "on") $acc_text .= "
+
+🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
+
 
 🌐 subscription : <code>$subLink</code>
         
@@ -1999,6 +1999,11 @@ if(preg_match('/selectCustomPlanGB(\d+)_(\d+)/',$userInfo['step'], $match) && ($
         sendMessage(" عدد اعشاری مجاز نیست");
         exit();
     }
+    elseif(substr($text, 0, 1) == '0'){
+        sendMessage("❌عدد وارد شده نمیتواند با 0 شروع شود!");
+        exit();
+    }
+    
     $id = $match[1];
     $price = $botState['dayPrice'];
 	if($userInfo['temp'] == "agentBuy" && $userInfo['is_agent'] == true) $price -= ($price * $userInfo['discount_percent'] / 100);
@@ -2019,6 +2024,11 @@ if((preg_match('/selectCustomPlanDay(\d+)_(\d+)_(\d+)/',$userInfo['step'], $matc
         sendMessage("عدد اعشاری مجاز نیست");
         exit();
     }
+    elseif(substr($text, 0, 1) == '0'){
+        sendMessage("❌عدد وارد شده نمیتواند با 0 شروع شود!");
+        exit();
+    }
+
 	sendMessage($mainValues['customer_custome_plan_name']);
 	setUser("enterCustomPlanName" . $match[1] . "_" . $match[2] . "_" . $match[3] . "_" . $text);
 }
