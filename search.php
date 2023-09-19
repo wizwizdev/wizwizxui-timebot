@@ -3,7 +3,7 @@ if(!file_exists("baseInfo.php") || !file_exists("config.php")){
     form("فایل های مورد نیاز یافت نشد");
     exit();
 }
-ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_reporting(E_ALL);
+// ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_reporting(E_ALL);
 
 require "baseInfo.php";
 require "config.php";
@@ -253,13 +253,19 @@ function showForm($type){
                         <?php echo (is_numeric($total) ? $total . "GB": $total);?></div>
                     </div>
     
+                    <!--<div style="margin-right:50px;">-->
+                    <!--    <svg style="margin-left: 6px" id="Layer_1" height="20" viewBox="0 0 24 24" width="20" xmlns="http://www.w3.org/2000/svg" data-name="Layer 1"><path d="m23 13a11.01 11.01 0 0 0 -10-10.949v-2.051h-2v2.051a10.977 10.977 0 0 0 -7.062 18.408l-1.928 2.118 1.48 1.346 1.934-2.123a10.916 10.916 0 0 0 13.152 0l1.934 2.126 1.48-1.346-1.928-2.118a10.948 10.948 0 0 0 2.938-7.462zm-11 9a9 9 0 1 1 9-9 9.011 9.011 0 0 1 -9 9z"/><path d="m5.523 1.745-1.067-1.689a15.17 15.17 0 0 0 -4.439 3.955l1.663 1.109a13.144 13.144 0 0 1 3.843-3.375z"/><path d="m22.32 5.12 1.663-1.109a15.17 15.17 0 0 0 -4.439-3.955l-1.067 1.689a13.144 13.144 0 0 1 3.843 3.375z"/><path d="m11 7v5.414l3.293 3.293 1.414-1.414-2.707-2.707v-4.586z"/></svg>-->
+                    <!--    <p style="font-size:16px">تعداد روز باقیمانده</p>-->
+                    <!--    <div class="progress-bar" style="display:flex; background: radial-gradient(closest-side, #F9F9F9 79%, transparent 80% 100%),conic-gradient(#a06cd5 100%, #13293d 0);">-->
+                    <!--    <?php echo $expiryDay . " روز";?></div>-->
+                    <!--</div>-->
                 </div>
         <div class="container">
                     <p class="tarikh" style="font-size:14px;margin-top:10px">
-                       expiryTime: <span><?php echo $expiryTime;?></span>
+                       expireTime: <span><?php echo $expiryTime;?></span>
                     </p>
                 </div>
-                <p style="font-size:10px">Made with 🖤 in <a target="_blank" href="https://github.com/wizwizdev/okhtapos">okhtapos</a></p>
+                <p style="font-size:10px">Made with 🖤 in <a target="_blank" href="https://github.com/wizwizdev/wizwizxui-timebot">wizwiz</a></p>
             </form>
         </div>
 
@@ -275,7 +281,7 @@ function showForm($type){
                 <fieldset>
                     <button class="search" type="submit">جستجو</button>
                 </fieldset>
-                <p style="font-size:13px">Made with 🖤 in <a target="_blank" href="https://github.com/wizwizdev/okhtapos">okhtapos - wizwiz</a></p>
+                <p style="font-size:13px">Made with 🖤 in <a target="_blank" href="https://github.com/wizwizdev/wizwizxui-timebot">wizwiz</a></p>
             </form>
         </div>
         <br>
