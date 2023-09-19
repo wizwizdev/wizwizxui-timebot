@@ -919,7 +919,7 @@ function getBotSettingKeys(){
         ],
         [
             ['text'=>$subLink,'callback_data'=>"changeBotsubLinkState"],
-            ['text'=>"لینک ساب",'callback_data'=>"wizwizch"]
+            ['text'=>"لینک ساب و مشخصات وب",'callback_data'=>"wizwizch"]
         ],
         [
             ['text'=>$configLink,'callback_data'=>"changeBotconfigLinkState"],
