@@ -371,7 +371,7 @@ if($payType == "BUY_SUB"){
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز
 ".
-($botState['configLinkState'] == "on"?
+($botState['configLinkState'] != "off"?
 "
 💝 config : <code>$vray_link</code>":"").
 ($botState['subLinkState']=="on"?
