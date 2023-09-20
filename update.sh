@@ -77,7 +77,7 @@ do
 			rm /var/www/html/wizwizxui-timebot/updateShareConfig.php
 			clear
 			
-			echo -e "\n\e[92mThe script was successfully updated!\033[0m\n"
+			echo -e "\n\e[92mThe script was successfully updated! \n ${bot_url} \n \033[0m\n"
 			
 # 			fi
 
