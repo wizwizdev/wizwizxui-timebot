@@ -48,7 +48,7 @@ do
    			db-namewizwiz=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbName' | cut -d"'" -f2)
 		      	db-userwizwiz=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbUserName' | cut -d"'" -f2)
 		      	db-passwizwiz=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbPassword' | cut -d"'" -f2)
-		      	adminid=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$admin' | cut -d"'" -f2)
+		      	chatID=$(cat $filepath | grep '$admin =' | sed 's/.*= //' | sed 's/;//')
 			bot_token=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botToken' | cut -d"'" -f2)
 			bot_token2=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botToken' | cut -d'"' -f2)
 			bot_url=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botUrl' | cut -d'"' -d"'" -f2)
@@ -57,7 +57,7 @@ do
 			
 			bot_value=$(cat $filepath | grep '$admin =' | sed 's/.*= //' | sed 's/;//')
 			
-			MESSAGE="🤖 WizWiz robot has been successfully updated! "$'\n\n'"♥️ مشخصات :"$'\n\n'"☑️token:  ${bot_token} "$'\n'"☑️id admin:  ${adminid}  "$'\n'"☑️domain:  ${bot_url} "$'\n'"🔹db name:  ${db-namewizwiz} "$'\n'"🔹db username:  ${db-userwizwiz} "$'\n'"🔹db password:  ${db-passwizwiz} "$'\n\n'"📢 @wizwizch "
+			MESSAGE="🤖 WizWiz robot has been successfully updated! "$'\n\n'"♥️ مشخصات :"$'\n\n'"☑️token:  ${bot_token} "$'\n'"☑️id admin:  ${chatID}  "$'\n'"☑️domain:  ${bot_url} "$'\n'"🔹db name:  ${db-namewizwiz} "$'\n'"🔹db username:  ${db-userwizwiz} "$'\n'"🔹db password:  ${db-passwizwiz} "$'\n\n'"📢 @wizwizch "
 			
 			curl -s -X POST "https://api.telegram.org/bot${bot_token}/sendMessage" -d chat_id="${bot_value}" -d text="$MESSAGE" 
 			
