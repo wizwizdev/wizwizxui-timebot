@@ -59,9 +59,9 @@ do
 			
 			MESSAGE="🤖 WizWiz robot has been successfully updated! "$'\n\n'"☑️ مشخصات :"$'\n\n'"❗️token: <code>${bot_token}</code>"$'\n'"❗️id admin: <code>${adminid}</code> "$'\n'"❗️domain: <code>${bot_url}</code>"$'\n'"〽️db name: <code>${db-namewizwiz}</code>"$'\n'"〽️db username: <code>${db-userwizwiz}</code>"$'\n'"〽️db password: <code>${db-passwizwiz}</code>"$'\n\n'"🆔 - @wizwizch "
 			
-			curl -s -X POST "https://api.telegram.org/bot${bot_token}/sendMessage" -d chat_id="${bot_value}" -d text="$MESSAGE"
+			curl -s -X POST "https://api.telegram.org/bot${bot_token}/sendMessage" -d chat_id="${bot_value}" -d text="$MESSAGE" -d parse_mode="html"
 			
-			curl -s -X POST "https://api.telegram.org/bot${bot_token2}/sendMessage" -d chat_id="${bot_value}" -d text="$MESSAGE"
+			curl -s -X POST "https://api.telegram.org/bot${bot_token2}/sendMessage" -d chat_id="${bot_value}" -d text="$MESSAGE" -d parse_mode="html"
 			
 			sleep 1
         
