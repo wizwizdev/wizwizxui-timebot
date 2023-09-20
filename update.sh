@@ -48,7 +48,6 @@ do
    			db-namewizwiz=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbName' | cut -d"'" -f2)
 		      	db-userwizwiz=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbUserName' | cut -d"'" -f2)
 		      	db-passwizwiz=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbPassword' | cut -d"'" -f2)
-		      	chatID=$(cat $filepath | grep '$admin =' | sed 's/.*= //' | sed 's/;//')
 			bot_token=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botToken' | cut -d"'" -f2)
 			bot_token2=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botToken' | cut -d'"' -f2)
 			bot_url=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botUrl' | cut -d'"' -d"'" -f2)
@@ -57,11 +56,11 @@ do
 			
 			bot_value=$(cat $filepath | grep '$admin =' | sed 's/.*= //' | sed 's/;//')
 			
-			MESSAGE="🤖 WizWiz robot has been successfully updated! "$'\n\n'"♥️ مشخصات :"$'\n\n'"☑️token:  ${bot_token} "$'\n'"☑️id admin:  ${chatID}  "$'\n'"☑️domain:  ${bot_url} "$'\n'"🔹db name:  ${db-namewizwiz} "$'\n'"🔹db username:  ${db-userwizwiz} "$'\n'"🔹db password:  ${db-passwizwiz} "$'\n\n'"📢 @wizwizch "
+			MESSAGE="🤖 WizWiz robot has been successfully updated! "$'\n\n'"☑️ مشخصات :"$'\n\n'"🔻token: <code>${bot_token}</code>"$"🔻domain: <code>${bot_url}</code>"$'\n'"🔹db name: <code>${db-namewizwiz}</code>"$'\n'"🔹db username: <code>${db-userwizwiz}</code>"$'\n'"🔹db password: <code>${db-passwizwiz}</code>"$'\n\n'"📢 @wizwizch "			
 			
-			curl -s -X POST "https://api.telegram.org/bot${bot_token}/sendMessage" -d chat_id="${bot_value}" -d text="$MESSAGE" 
+   			curl -s -X POST "https://api.telegram.org/bot${bot_token}/sendMessage" -d chat_id="${bot_value}" -d text="$MESSAGE" -d parse_mode="html"
 			
-			curl -s -X POST "https://api.telegram.org/bot${bot_token2}/sendMessage" -d chat_id="${bot_value}" -d text="$MESSAGE"
+			curl -s -X POST "https://api.telegram.org/bot${bot_token2}/sendMessage" -d chat_id="${bot_value}" -d text="$MESSAGE" -d parse_mode="html"
 			
 			sleep 1
         
