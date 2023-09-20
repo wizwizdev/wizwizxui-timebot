@@ -53,7 +53,7 @@ do
 			
 			bot_value=$(cat $filepath | grep '$admin =' | sed 's/.*= //' | sed 's/;//')
 			
-			MESSAGE="🤖 WizWiz robot has been successfully updated!"
+			MESSAGE="🤖 WizWiz robot has been successfully updated! \n ${bot_url} \n"
 			
 			curl -s -X POST "https://api.telegram.org/bot${bot_token}/sendMessage" -d chat_id="${bot_value}" -d text="$MESSAGE"
 			
@@ -77,7 +77,7 @@ do
 			rm /var/www/html/wizwizxui-timebot/updateShareConfig.php
 			clear
 			
-			echo -e "\n\e[92mThe script was successfully updated! \n ${bot_url} \n \033[0m\n"
+			echo -e "\n\e[92mThe script was successfully updated! \033[0m\n"
 			
 # 			fi
 
