@@ -10,7 +10,6 @@ if(!is_null($paymentKeys)) $paymentKeys = json_decode($paymentKeys,true);
 else $paymentKeys = array();
 $stmt->close();
 
-
 if(isset($_GET['nowpayment'])){
 if(isset($_GET['NP_id'])){
     $hash_id = $_GET['NP_id'];
@@ -237,7 +236,10 @@ if($payType == "BUY_SUB"){
     $inbound_id = $file_detail['inbound_id'];
     $limitip = $file_detail['limitip'];
     $rahgozar = $file_detail['rahgozar'];
-    
+    $customPath = $file_detail['custom_path'];
+    $customPort = $file_detail['custom_port'];
+    $customSni = $file_detail['custom_sni'];
+
     $accountCount = $payParam['agent_count'] != 0?$payParam['agent_count']:1;
     $eachPrice = $amount / $accountCount;
 
@@ -297,6 +299,7 @@ if($payType == "BUY_SUB"){
         
         if($portType == "auto"){
             $port++;
+            file_put_contents('../settings/temp.txt',$port.'-'.$last_num);
         }else{
             $port = rand(1111,65000);
         }
@@ -309,17 +312,16 @@ if($payType == "BUY_SUB"){
             $remark = "{$srv_remark}-{$user_id}-{$rnd}";
         }
         if(!empty($description)) $remark = $description;
-        file_put_contents('../settings/temp.txt',$port.'-'.$last_num);
         
         if($inbound_id == 0){    
-            $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar); 
+            $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
             if(! $response->success){
-                $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar);
+                $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
             } 
         }else {
-            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip); 
+            $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
             if(! $response->success){
-                $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip);
+                $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
             } 
         }
         
@@ -359,7 +361,7 @@ if($payType == "BUY_SUB"){
             exit;
         }
     
-        $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar);
+        $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
         $token = RandomString(30);
         $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
 
@@ -398,9 +400,9 @@ if($payType == "BUY_SUB"){
         $date = time();
         
     	$stmt = $connection->prepare("INSERT INTO `orders_list` 
-    	    (`userid`, `token`, `transid`, `fileid`, `server_id`, `inbound_id`, `remark`, `protocol`, `expire_date`, `link`, `amount`, `status`, `date`, `notif`, `rahgozar`, `agent_bought`)
-    	    VALUES (?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?,1, ?, 0, ?, ?);");
-        $stmt->bind_param("ssiiissisiiii", $user_id, $token, $fid, $server_id, $inbound_id, $remark, $protocol, $expire_date, $vray_link, $eachPrice, $date, $rahgozar, $agentBought);        
+    	    (`userid`, `token`, `transid`, `fileid`, `server_id`, `inbound_id`, `remark`, `uuid`, `protocol`, `expire_date`, `link`, `amount`, `status`, `date`, `notif`, `rahgozar`, `agent_bought`)
+    	    VALUES (?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?,1, ?, 0, ?, ?);");
+        $stmt->bind_param("ssiiisssisiiii", $user_id, $token, $fid, $server_id, $inbound_id, $remark, $uniqid, $protocol, $expire_date, $vray_link, $eachPrice, $date, $rahgozar, $agentBought);        
         $stmt->execute();
         $order = $stmt->get_result(); 
         $stmt->close();
@@ -483,6 +485,7 @@ elseif($payType == "RENEW_ACCOUNT"){
     $stmt->close();
     $fid = $order['fileid'];
     $remark = $order['remark'];
+    $uuid = $order['uuid']??"0";
     $server_id = $order['server_id'];
     $inbound_id = $order['inbound_id'];
     $expire_date = $order['expire_date'];
@@ -498,9 +501,9 @@ elseif($payType == "RENEW_ACCOUNT"){
     $volume = $respd['volume'];
 
     if($inbound_id > 0)
-        $response = editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, "renew");
+        $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
     else
-        $response = editInboundTraffic($server_id, $remark, $volume, $days, "renew");
+        $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
 
 	if(is_null($response)){
 		showForm('پرداخت شما با موفقیت انجام شد ولی مشکل فنی در اتصال به سرور. لطفا به مدیریت اطلاع بدید، مبلغ ' . number_format($amount) . " تومان به کیف پول شما اضافه شد",$payDescription);
@@ -559,7 +562,7 @@ elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType,$match)){
     $server_id = $orderInfo['server_id'];
     $inbound_id = $orderInfo['inbound_id'];
     $remark = $orderInfo['remark'];
-    
+    $uuid = $orderInfo['uuid']??"0";
     $planid = $match[2];
 
     
@@ -571,14 +574,14 @@ elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType,$match)){
     $volume = $res['volume'];
 
     if($inbound_id > 0)
-        $response = editClientTraffic($server_id, $inbound_id, $remark, 0, $volume);
+        $response = editClientTraffic($server_id, $inbound_id, $uuid, 0, $volume);
     else
-        $response = editInboundTraffic($server_id, $remark, 0, $volume);
+        $response = editInboundTraffic($server_id, $uuid, 0, $volume);
         
     if($response->success){
-        $stmt = $connection->prepare("UPDATE `orders_list` SET `expire_date` = `expire_date` + ?, `notif` = 0 WHERE `remark` = ?");
+        $stmt = $connection->prepare("UPDATE `orders_list` SET `expire_date` = `expire_date` + ?, `notif` = 0 WHERE `uuid` = ?");
         $newVolume = $volume * 86400;
-        $stmt->bind_param("is", $newVolume, $remark);
+        $stmt->bind_param("is", $newVolume, $uuid);
         $stmt->execute();
         $stmt->close();
         
@@ -633,7 +636,7 @@ elseif(preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)/',$payType, $match)){
     $server_id = $orderInfo['server_id'];
     $inbound_id = $orderInfo['inbound_id'];
     $remark = $orderInfo['remark'];
-    
+    $uuid = $orderInfo['uuid']??"0";
     $planid = $match[2];
 
     $stmt = $connection->prepare("SELECT * FROM `increase_plan` WHERE `id` = ?");
@@ -647,12 +650,12 @@ elseif(preg_match('/^INCREASE_VOLUME_(\d+)_(\d+)/',$payType, $match)){
 
     
     if($inbound_id > 0)
-        $response = editClientTraffic($server_id, $inbound_id, $remark, $volume, 0);
+        $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, 0);
     else
-        $response = editInboundTraffic($server_id, $remark, $volume, 0);
+        $response = editInboundTraffic($server_id, $uuid, $volume, 0);
     if($response->success){
-        $stmt = $connection->prepare("UPDATE `orders_list` SET `notif` = 0 WHERE `remark` = ?");
-        $stmt->bind_param("s", $remark);
+        $stmt = $connection->prepare("UPDATE `orders_list` SET `notif` = 0 WHERE `uuid` = ?");
+        $stmt->bind_param("s", $uuid);
         $stmt->execute();
         $stmt->close();
         showForm("پرداخت شما با موفقیت انجام شد. $volume گیگ به حجم سرویس شما اضافه شد",$payDescription, true);
@@ -711,13 +714,13 @@ elseif($payType == "RENEW_SCONFIG"){
     $volume = $file_detail['volume'];
     $server_id = $file_detail['server_id'];
     
-    $remark = $payParam['description'];
+    $uuid = $payParam['description'];
     $inbound_id = $payParam['volume']; 
     
     if($inbound_id > 0)
-        $response = editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, "renew");
+        $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
     else
-        $response = editInboundTraffic($server_id, $remark, $volume, $days, "renew");
+        $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
     
 	if(is_null($response)){
 		alert('🔻مشکل فنی در اتصال به سرور. لطفا به مدیریت اطلاع بدید',true);
