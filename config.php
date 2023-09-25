@@ -984,27 +984,27 @@ function getBotReportKeys(){
     $allPlans = $stmt->get_result()->num_rows;
     $stmt->close();
     
-    $stmt = $connection->prepare("SELECT SUM(price) as total FROM `pays`");
+    $stmt = $connection->prepare("SELECT SUM(price) as total FROM `pays` WHERE `state` = 'paid' OR `state` = 'approved'");
     $stmt->execute();
     $totalRewards = number_format($stmt->get_result()->fetch_assoc()['total']) . " تومان";
     $stmt->close();
     
     $dayTime = strtotime(date("Y-m-01"));
-    $stmt = $connection->prepare("SELECT SUM(price) as total FROM `pays` WHERE `request_date` > ?");
+    $stmt = $connection->prepare("SELECT SUM(price) as total FROM `pays` WHERE `request_date` > ? AND (`state` = 'paid' OR `state` = 'approved')");
     $stmt->bind_param("i", $dayTime);
     $stmt->execute();
     $monthReward = number_format($stmt->get_result()->fetch_assoc()['total']) . " تومان";
     $stmt->close();
     
     $dayTime = strtotime("-" . (date("w")+1) . " days");
-    $stmt = $connection->prepare("SELECT SUM(price) as total FROM `pays` WHERE `request_date` > ?");
+    $stmt = $connection->prepare("SELECT SUM(price) as total FROM `pays` WHERE `request_date` > ?  AND (`state` = 'paid' OR `state` = 'approved')");
     $stmt->bind_param("i", $dayTime);
     $stmt->execute();
     $weekReward = number_format($stmt->get_result()->fetch_assoc()['total']) . " تومان";
     $stmt->close();
     
     $dayTime = strtotime("today");
-    $stmt = $connection->prepare("SELECT SUM(price) as total FROM `pays` WHERE `request_date` > ?");
+    $stmt = $connection->prepare("SELECT SUM(price) as total FROM `pays` WHERE `request_date` > ? AND (`state` = 'paid' OR `state` = 'approved')");
     $stmt->bind_param("i", $dayTime);
     $stmt->execute();
     $dayReward = number_format($stmt->get_result()->fetch_assoc()['total']) . " تومان";
@@ -1292,6 +1292,7 @@ function getUserOrderDetailKeys($id){
         $date = jdate("Y-m-d H:i",$order['date']);
         $expire_date = jdate("Y-m-d H:i",$order['expire_date']);
         $remark = $order['remark'];
+        $uuid = $order['uuid']??"0";
         $acc_link = json_decode($order['link']);
         $protocol = $order['protocol'];
         $token = $order['token'];
@@ -1303,7 +1304,8 @@ function getUserOrderDetailKeys($id){
         $response = getJson($server_id)->obj;
         if($inbound_id == 0) {
             foreach($response as $row){
-                if($row->remark == $remark) {
+                $clients = json_decode($row->settings)->clients;
+                if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
                     $total = $row->total;
                     $up = $row->up;
                     $enable = $row->enable;
@@ -1318,17 +1320,21 @@ function getUserOrderDetailKeys($id){
                 if($row->id == $inbound_id) {
                     $netType = json_decode($row->streamSettings)->network;
                     $security = json_decode($row->streamSettings)->security;
-                    $clients = $row->clientStats;
-                    foreach($clients as $client) {
-                        if($client->email == $remark) {
-                            $total = $client->total;
-                            $up = $client->up;
-                            $enable = $client->enable;
-                            $down = $client->down; 
+                    $clientsStates = $row->clientStats;
+                    $clients = json_decode($row->settings)->clients;
+                    foreach($clients as $key => $client){
+                        if($client->id == $uuid || $client->password == $uuid){
+                            $email = $client->email;
+                            $emails = array_column($clientsStates,'email');
+                            $emailKey = array_search($email,$emails);
+                            
+                            $total = $clientsStates[$emailKey]->total;
+                            $up = $clientsStates[$emailKey]->up;
+                            $enable = $clientsStates[$emailKey]->enable;
+                            $down = $clientsStates[$emailKey]->down; 
                             break;
                         }
                     }
-                    break;
                 }
             }
         }
@@ -1653,6 +1659,7 @@ function getOrderDetailKeys($from_id, $id){
         $date = jdate("Y-m-d H:i",$order['date']);
         $expire_date = jdate("Y-m-d H:i",$order['expire_date']);
         $remark = $order['remark'];
+        $uuid = $order['uuid']??"0";
         $acc_link = json_decode($order['link']);
         $protocol = $order['protocol'];
         $token = $order['token'];
@@ -1664,7 +1671,8 @@ function getOrderDetailKeys($from_id, $id){
         $response = getJson($server_id)->obj;
         if($inbound_id == 0) {
             foreach($response as $row){
-                if($row->remark == $remark) {
+                $clients = json_decode($row->settings)->clients;
+                if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
                     $total = $row->total;
                     $up = $row->up;
                     $down = $row->down; 
@@ -1679,17 +1687,22 @@ function getOrderDetailKeys($from_id, $id){
                 if($row->id == $inbound_id) {
                     $netType = json_decode($row->streamSettings)->network;
                     $security = json_decode($row->streamSettings)->security;
-                    $clients = $row->clientStats;
-                    foreach($clients as $client) {
-                        if($client->email == $remark) {
-                            $total = $client->total;
-                            $up = $client->up;
-                            $down = $client->down; 
-                            $enable = $client->enable;
+                    
+                    $clientsStates = $row->clientStats;
+                    $clients = json_decode($row->settings)->clients;
+                    foreach($clients as $key => $client){
+                        if($client->id == $uuid || $client->password == $uuid){
+                            $email = $client->email;
+                            $emails = array_column($clientsStates,'email');
+                            $emailKey = array_search($email,$emails);
+                            
+                            $total = $clientsStates[$emailKey]->total;
+                            $up = $clientsStates[$emailKey]->up;
+                            $enable = $clientsStates[$emailKey]->enable;
+                            $down = $clientsStates[$emailKey]->down; 
                             break;
                         }
                     }
-                    break;
                 }
             }
         }
@@ -2063,7 +2076,7 @@ function sumerize2($amount){
     // }
 
 }
-function deleteClient($server_id, $inbound_id, $remark, $delete = 0){
+function deleteClient($server_id, $inbound_id, $uuid, $delete = 0){
     global $connection;
     $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
     $stmt->bind_param("i", $server_id);
@@ -2078,30 +2091,27 @@ function deleteClient($server_id, $inbound_id, $remark, $delete = 0){
     if(!$response) return null;
     $response = $response->obj;
     $old_data = []; $oldclientstat = [];
-    $uuid = "";
     foreach($response as $row){
         if($row->id == $inbound_id) {
             $settings = json_decode($row->settings);
             $clients = $settings->clients;
-            foreach($clients as $key => $client) {
-                if($client->email == $remark) {
-                    $old_data = $client;
-                    $uuid = $client->id;
-                    unset($clients[$key]);
-                    break;
-                }
-            }
 
-            $clientStats = $row->clientStats;
-            foreach($clientStats as $key => $clientStat) {
-                if($clientStat->email == $remark) {
-                    $total = $clientStat->total;
-                    $up = $clientStat->up;
-                    $down = $clientStat->down;
+            $clientsStates = $row->clientStats;
+            foreach($clients as $key => $client){
+                if($client->id == $uuid || $client->password == $uuid){
+                    $old_data = $client;
+                    unset($clients[$key]);
+                    $email = $client->email;
+                    $emails = array_column($clientsStates,'email');
+                    $emailKey = array_search($email,$emails);
+                    
+                    $total = $clientsStates[$emailKey]->total;
+                    $up = $clientsStates[$emailKey]->up;
+                    $enable = $clientsStates[$emailKey]->enable;
+                    $down = $clientsStates[$emailKey]->down; 
                     break;
                 }
             }
-            break;
         }
     }
     $settings->clients = $clients;
@@ -2184,7 +2194,7 @@ function deleteClient($server_id, $inbound_id, $remark, $delete = 0){
     return ['id' => $old_data->id,'expiryTime' => $old_data->expiryTime, 'limitIp' => $old_data->limitIp, 'flow' => $old_data->flow, 'total' => $total, 'up' => $up, 'down' => $down,];
 
 }
-function editInboundRemark($server_id, $remark, $newRemark){
+function editInboundRemark($server_id, $uuid, $newRemark){
     global $connection;
     $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
     $stmt->bind_param("i", $server_id);
@@ -2200,7 +2210,8 @@ function editInboundRemark($server_id, $remark, $newRemark){
     if(!$response) return null;
     $response = $response->obj;
     foreach($response as $row){
-        if($row->remark == $remark) {
+        $clients = json_decode($row->settings)->clients;
+        if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
             $inbound_id = $row->id;
             $total = $row->total;
             $up = $row->up;
@@ -2266,7 +2277,7 @@ function editInboundRemark($server_id, $remark, $newRemark){
     unlink("tempCookie.txt");
     return $response = json_decode($response);
 }
-function editInboundTraffic($server_id, $remark, $volume, $days, $editType = null){
+function editInboundTraffic($server_id, $uuid, $volume, $days, $editType = null){
     global $connection;
     $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
     $stmt->bind_param("i", $server_id);
@@ -2282,7 +2293,8 @@ function editInboundTraffic($server_id, $remark, $volume, $days, $editType = nul
     if(!$response) return null;
     $response = $response->obj;
     foreach($response as $row){
-        if($row->remark == $remark) {
+        $clients = json_decode($row->settings)->clients;
+        if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
             $inbound_id = $row->id;
             $total = $row->total;
             $up = $row->up;
@@ -2291,8 +2303,6 @@ function editInboundTraffic($server_id, $remark, $volume, $days, $editType = nul
             $port = $row->port;
             $netType = json_decode($row->streamSettings)->network;
             
-            $settings = json_decode($row->settings);
-            $clients = $settings->clients;
             $email = $clients[0]->email;
 
             break;
@@ -2376,7 +2386,7 @@ function editInboundTraffic($server_id, $remark, $volume, $days, $editType = nul
     return $response = json_decode($response);
 
 }
-function renewInboundUuid($server_id, $remark){
+function renewInboundUuid($server_id, $uuid){
     global $connection;
     $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
     $stmt->bind_param("i", $server_id);
@@ -2392,27 +2402,30 @@ function renewInboundUuid($server_id, $remark){
     if(!$response) return null;
     $response = $response->obj;
     foreach($response as $row){
-        if($row->remark == $remark) {
-            $settings = json_decode($row->settings, true);
+        $settings = json_decode($row->settings, true);
+        $clients = $settings['clients'];
+        if($clients[0]['id'] == $uuid || $clients[0]['password'] == $uuid) {
             $inbound_id = $row->id;
             $total = $row->total;
             $up = $row->up;
             $down = $row->down;
             $expiryTime = $row->expiryTime;
             $port = $row->port;
+            $protocol = $row->protocol;
             $netType = json_decode($row->streamSettings)->network;
             break;
         }
     }
-
-    $newUuid = generateUID();
-    $settings['clients'][0]['id'] = $newUuid;
+    
+    $newUuid = generateRandomString(42,$protocol); 
+    if($protocol == "trojan") $settings['clients'][0]['password'] = $newUuid;
+    else $settings['clients'][0]['id'] = $newUuid;
     if(!isset($settings['clients'][0]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][0]['subId'] = RandomString(16);
     if(!isset($settings['clients'][0]['enable']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][0]['enable'] = true;
 
     $editedClient = $settings['clients'][$client_key];
     $settings['clients'] = array_values($settings['clients']);
-    $settings = json_encode($settings);
+    $settings = json_encode($settings,488);
 
 
     $dataArr = array('up' => $row->up,'down' => $row->down,'total' => $row->total,'remark' => $row->remark,'enable' => 'true',
@@ -2473,7 +2486,7 @@ function renewInboundUuid($server_id, $remark){
     return $response;
 
 }
-function renewClientUuid($server_id, $inbound_id, $remark){
+function renewClientUuid($server_id, $inbound_id, $uuid){
     global $connection;
     $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
     $stmt->bind_param("i", $server_id);
@@ -2487,31 +2500,32 @@ function renewClientUuid($server_id, $inbound_id, $remark){
     $response = getJson($server_id);
     if(!$response) return null;
     $response = $response->obj;
-    $client_key = 0;
-    $uuid = "";
+    $client_key = -1;
     foreach($response as $row){
         if($row->id == $inbound_id) {
             $settings = json_decode($row->settings, true);
             $clients = $settings['clients'];
-            foreach($clients as $key => $client) {
-                if($client['email'] == $remark) {
+            
+            foreach($clients as $key => $client){
+                if($client['id'] == $uuid || $client['password'] == $uuid){
+                    $protocol = $row->protocol;
                     $client_key = $key;
-                    $uuid = $client['id'];
                     break;
                 }
             }
-            break;
         }
     }
+    if($client_key == -1) return null;
     
-    $newUuid = generateUID();
-    $settings['clients'][$client_key]['id'] = $newUuid;
+    $newUuid = generateRandomString(42,$protocol); 
+    if($protocol == "trojan") $settings['clients'][$client_key]['password'] = $newUuid;
+    else $settings['clients'][$client_key]['id'] = $newUuid;
     if(!isset($settings['clients'][$client_key]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['subId'] = RandomString(16);
     if(!isset($settings['clients'][$client_key]['enable']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['enable'] = true;
 
     $editedClient = $settings['clients'][$client_key];
     $settings['clients'] = array_values($settings['clients']);
-    $settings = json_encode($settings);
+    $settings = json_encode($settings,488);
     $dataArr = array('up' => $row->up,'down' => $row->down,'total' => $row->total,'remark' => $row->remark,'enable' => 'true',
         'expiryTime' => $row->expiryTime, 'listen' => '','port' => $row->port,'protocol' => $row->protocol,'settings' => $settings,
         'streamSettings' => $row->streamSettings, 'sniffing' => $row->sniffing);
@@ -2596,7 +2610,7 @@ function renewClientUuid($server_id, $inbound_id, $remark){
     return $response;
 
 }
-function editClientRemark($server_id, $inbound_id, $remark, $newRemark){
+function editClientRemark($server_id, $inbound_id, $uuid, $newRemark){
     global $connection;
     $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
     $stmt->bind_param("i", $server_id);
@@ -2611,29 +2625,26 @@ function editClientRemark($server_id, $inbound_id, $remark, $newRemark){
     if(!$response) return null;
     $response = $response->obj;
     $client_key = 0;
-    $uuid = "";
     foreach($response as $row){
         if($row->id == $inbound_id) {
             $settings = json_decode($row->settings, true);
             $clients = $settings['clients'];
-            foreach($clients as $key => $client) {
-                if($client['email'] == $remark) {
+            
+            $clientsStates = $row->clientStats;
+            foreach($clients as $key => $client){
+                if($client['id'] == $uuid || $client['password'] == $uuid){
                     $client_key = $key;
-                    $uuid = $client['id'];
+                    $email = $client['email'];
+                    $emails = array_column($clientsStates,'email');
+                    $emailKey = array_search($email,$emails);
+                    
+                    $total = $clientsStates[$emailKey]->total;
+                    $up = $clientsStates[$emailKey]->up;
+                    $enable = $clientsStates[$emailKey]->enable;
+                    $down = $clientsStates[$emailKey]->down; 
                     break;
                 }
             }
-
-            $clientStats = $row->clientStats;
-            foreach($clientStats as $key => $clientStat) {
-                if($clientStat->email == $remark) {
-                    $total = $clientStat->total;
-                    $up = $clientStat->up;
-                    $down = $clientStat->down;
-                    break;
-                }
-            }
-            break;
         }
     }
     $settings['clients'][$client_key]['email'] = $newRemark;
@@ -2725,7 +2736,7 @@ function editClientRemark($server_id, $inbound_id, $remark, $newRemark){
     return $response = json_decode($response);
 
 }
-function editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, $editType = null){
+function editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, $editType = null){
     global $connection;
     $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
     $stmt->bind_param("i", $server_id);
@@ -2740,29 +2751,26 @@ function editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, $ed
     if(!$response) return null;
     $response = $response->obj;
     $client_key = 0;
-    $uuid = "";
     foreach($response as $row){
         if($row->id == $inbound_id) {
             $settings = json_decode($row->settings, true);
             $clients = $settings['clients'];
-            foreach($clients as $key => $client) {
-                if($client['email'] == $remark) {
+            
+            $clientsStates = $row->clientStats;
+            foreach($clients as $key => $client){
+                if($client['id'] == $uuid || $client['password'] == $uuid){
                     $client_key = $key;
-                    $uuid = $client['id'];
+                    $email = $client['email'];
+                    $emails = array_column($clientsStates,'email');
+                    $emailKey = array_search($email,$emails);
+                    
+                    $total = $clientsStates[$emailKey]->total;
+                    $up = $clientsStates[$emailKey]->up;
+                    $enable = $clientsStates[$emailKey]->enable;
+                    $down = $clientsStates[$emailKey]->down; 
                     break;
                 }
             }
-
-            $clientStats = $row->clientStats;
-            foreach($clientStats as $key => $clientStat) {
-                if($clientStat->email == $remark) {
-                    $total = $clientStat->total;
-                    $up = $clientStat->up;
-                    $down = $clientStat->down;
-                    break;
-                }
-            }
-            break;
         }
     }
     if($volume != 0){
@@ -2771,8 +2779,8 @@ function editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, $ed
         $volume = ($client_total > 0) ? $client_total + $extend_volume : $extend_volume;
         if($editType == "renew"){
             $volume = $extend_volume;
-            if($serverType == "sanaei" || $serverType == "alireza") resetClientTraffic($server_id, $remark, $inbound_id);
-            else resetClientTraffic($server_id, $remark);
+            if($serverType == "sanaei" || $serverType == "alireza") resetClientTraffic($server_id, $email, $inbound_id);
+            else resetClientTraffic($server_id, $email);
         }
         $settings['clients'][$client_key]['totalGB'] = $volume;
         if(!isset($settings['clients'][$client_key]['subId']) && ($serverType == "sanaei" || $serverType == "alireza")) $settings['clients'][$client_key]['subId'] = RandomString(16);
@@ -2872,12 +2880,12 @@ function editClientTraffic($server_id, $inbound_id, $remark, $volume, $days, $ed
 
     curl_close($curl);
     
-    resetIpLog($server_id, $remark);
+    resetIpLog($server_id, $email);
 
     return $response = json_decode($response);
 
 }
-function deleteInbound($server_id, $remark, $delete = 0){
+function deleteInbound($server_id, $uuid, $delete = 0){
     global $connection;
     $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
     $stmt->bind_param("i", $server_id);
@@ -2892,7 +2900,8 @@ function deleteInbound($server_id, $remark, $delete = 0){
     if(!$response) return null;
     $response = $response->obj;
     foreach($response as $row){
-        if($row->remark == $remark) {
+        $clients = json_decode($row->settings)->clients;
+        if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
             $inbound_id = $row->id;
             $protocol = $row->protocol;
             $uniqid = ($protocol == 'trojan') ? json_decode($row->settings)->clients[0]->password : json_decode($row->settings)->clients[0]->id;
@@ -3324,7 +3333,8 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
     $response = getJson($server_id)->obj;
     foreach($response as $row){
         if($inbound_id == 0){
-            if($row->remark == $remark) {
+            $clients = json_decode($row->settings)->clients;
+            if($clients[0]->id == $uniqid || $clients[0]->password == $uniqid) {
                 if($serverType == "sanaei" || $serverType == "alireza"){
                     $settings = json_decode($row->settings,true);
                     $email = $settings['clients'][0]['email'];
@@ -3397,8 +3407,8 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                 if($serverType == "sanaei" || $serverType == "alireza"){
                     $settings = json_decode($row->settings);
                     $clients = $settings->clients;
-                    foreach($clients as $key => $client) {
-                        if($client->email == $remark) {
+                    foreach($clients as $key => $client){
+                        if($client->id == $uniqid || $client->password == $uniqid){
                             $flow = $client->flow;
                             break;
                         }
@@ -3955,7 +3965,7 @@ function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $secu
     curl_close($curl);
     return $response = json_decode($response);
 }
-function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', $security = 'none', $rahgozar = false){
+function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $security = 'none', $rahgozar = false){
     global $connection;
     $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
     $stmt->bind_param("i", $server_id);
@@ -3978,13 +3988,15 @@ function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', 
         $tlsSettings['settings']['serverName'] = $sni;
         $tlsSettings = json_encode($tlsSettings);
     }
-    
+
     $response = getJson($server_id);
     if(!$response) return null;
     $response = $response->obj;
     foreach($response as $row){
-        if($row->remark == $remark) {
+        $clients = json_decode($row->settings)->clients;
+        if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
             $iid = $row->id;
+            $remark = $row->remark;
             $streamSettings = $row->streamSettings;
             $settings = $row->settings;
             break;
@@ -3993,6 +4005,7 @@ function editInbound($server_id, $uniqid, $remark, $protocol, $netType = 'tcp', 
     if(!intval($iid)) return;
 
     $headers = getNewHeaders($netType, $request_header, $response_header, $header_type);
+    $headers = empty($headers)?"{}":$headers;
 
     if($protocol == 'trojan'){
         if($security == 'none'){
