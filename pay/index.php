@@ -62,7 +62,20 @@ if(mysqli_num_rows($payInfo)==0){
     }
     
     if($payType == "BUY_SUB") $type = "خرید اکانت";
-    elseif($payType == "RENEW_ACCOUNT") $type = "تمدید اکانت";
+    elseif($payType == "RENEW_ACCOUNT"){
+        $type = "تمدید اکانت";
+        $oid = $payParam['plan_id'];
+        $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+        $stmt->bind_param("i", $oid);
+        $stmt->execute();
+        $order = $stmt->get_result();
+        $stmt->close();
+        if($order->num_rows == 0){
+            showForm($mainValues['config_not_found']);
+            exit();
+        }
+
+    }
     elseif($payType == "RENEW_SCONFIG") $type = "تمدید اکانت";
     elseif($payType == "INCREASE_WALLET") $type ="شارژ کیف پول";
     elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType)) $type = "افزایش زمان اکانت";
