@@ -107,6 +107,7 @@ $connection->query("CREATE TABLE `orders_list` (
   `server_id` int(11) NOT NULL,
   `inbound_id` int(11) NOT NULL DEFAULT 0,
   `remark` varchar(100) NOT NULL,
+  `uuid` varchar(100) NOT NULL,
   `protocol` varchar(20) NOT NULL,
   `expire_date` int(11) NOT NULL,
   `link` text NOT NULL,
