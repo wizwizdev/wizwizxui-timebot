@@ -16,6 +16,7 @@ $token = $_GET['token'];
         $stmt->close();
         
         $remark = $info['remark'];
+        $uuid = $info['uuid']??"0";
         $server_id = $info['server_id'];
         $inbound_id = $info['inbound_id'];
         $protocol = $info['protocol'];
@@ -35,7 +36,8 @@ $token = $_GET['token'];
         $response = getJson($server_id)->obj;
         if($inbound_id == 0) {
             foreach($response as $row){
-                if($row->remark == $remark) {
+                $clients = json_decode($row->settings)->clients;
+                if($clients[0]->id == $uuid) {
                     $total = $row->total;
                     $port = $row->port;
                     $up = $row->up;
@@ -51,16 +53,22 @@ $token = $_GET['token'];
                     $port = $row->port;
                     $netType = json_decode($row->streamSettings)->network;
                     $security = json_decode($row->streamSettings)->security;
-                    $clients = $row->clientStats;
-                    foreach($clients as $client) {
-                        if($client->email == $remark) {
-                            $total = $client->total;
-                            $up = $client->up;
-                            $down = $client->down; 
+                    
+                    $clientsStates = $row->clientStats;
+                    $clients = json_decode($row->settings)->clients;
+                    foreach($clients as $key => $client){
+                        if($client->id == $uuid){
+                            $email = $client->email;
+                            $emails = array_column($clientsStates,'email');
+                            $emailKey = array_search($email,$emails);
+                            
+                            $total = $clientsStates[$emailKey]->total;
+                            $up = $clientsStates[$emailKey]->up;
+                            $enable = $clientsStates[$emailKey]->enable;
+                            $down = $clientsStates[$emailKey]->down; 
                             break;
                         }
                     }
-                    break;
                 }
             }
         }
@@ -84,8 +92,8 @@ $token = $_GET['token'];
 
         
         $newRemark = preg_replace("/\(📊.+-.+\|📆.+\)/","", $remark) . "(📊" . $totalUsed . " - " . $total . "|📆" .  $daysLeft . ")";
-        if($inbound_id == 0) $res = editInboundRemark($server_id, $remark, $newRemark);
-        else $res = editClientRemark($server_id, $inbound_id, $remark, $newRemark);
+        if($inbound_id == 0) $res = editInboundRemark($server_id, $uuid, $newRemark);
+        else $res = editClientRemark($server_id, $inbound_id, $uuid, $newRemark);
 
         if($res->success){
             $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $newRemark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
