@@ -95,7 +95,8 @@ $arrays = [
     "ALTER TABLE `pays` ADD `agent_count` INT(255) NOT NULL DEFAULT '0' AFTER `agent_bought`;",
     "ALTER TABLE `users` ADD `spam_info` VARCHAR(500) NULL AFTER `agent_date`;",
     "ALTER TABLE `server_info` CHANGE `title` `title` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;",
-    "UPDATE `orders_list` SET `status` = 1"
+    "UPDATE `orders_list` SET `status` = 1",
+    "ALTER TABLE `orders_list` ADD `uuid` VARCHAR(100) NULL AFTER `remark`;"
     ];
 
 
@@ -110,30 +111,50 @@ function updateBot(){
         }
     }
     
-    $usersInfo = json_decode(file_get_contents("../userInfo.json"),true);
-    foreach($usersInfo as $user => $value){
-        $query = "UPDATE `users` SET `step` = '" . $value['step'] . "'";
-        if(isset($value['first_start'])) $query .= ", `first_start` = '" . $value['first_start'] . "'";
-        if(isset($value['isAdmin'])) $query .= ", `isAdmin` = '" . $value['isAdmin'] . "'";
-        if(isset($value['freetrial'])) $query .= ", `freetrial` = '" . $value['freetrial'] . "'";
-        $query .= " WHERE `userid` = " . $user;
-        $connection->query($query);
+    if(file_exists("../userInfo.json")){
+        $usersInfo = json_decode(file_get_contents("../userInfo.json"),true);
+        foreach($usersInfo as $user => $value){
+            $query = "UPDATE `users` SET `step` = '" . $value['step'] . "'";
+            if(isset($value['first_start'])) $query .= ", `first_start` = '" . $value['first_start'] . "'";
+            if(isset($value['isAdmin'])) $query .= ", `isAdmin` = '" . $value['isAdmin'] . "'";
+            if(isset($value['freetrial'])) $query .= ", `freetrial` = '" . $value['freetrial'] . "'";
+            $query .= " WHERE `userid` = " . $user;
+            $connection->query($query);
+        }
+        
+        $newData = file_get_contents("../settings/botstate.json");
+        $checkExist = $connection->query("SELECT * FROM `setting` WHERE `type` = 'BOT_STATES'");
+        if(mysqli_num_rows($checkExist) == 0) $connection->query("INSERT INTO `setting` (`type`, `value`) VALUES ('BOT_STATES', '$newData')");
     }
-    
-    $newData = file_get_contents("../settings/botstate.json");
-    $checkExist = $connection->query("SELECT * FROM `setting` WHERE `type` = 'BOT_STATES'");
-    if(mysqli_num_rows($checkExist) == 0) $connection->query("INSERT INTO `setting` (`type`, `value`) VALUES ('BOT_STATES', '$newData')");
-
-
-    $paymentKeys = array();
-    $paymentKeys['bankAccount'] = $walletwizwiz;
-    $paymentKeys['holderName'] = "";
-    $paymentKeys['nowpayment'] = $nowPaymentKey;
-    $paymentKeys['zarinpal'] = $zarinpalId;
-    $paymentKeys['nextpay'] = "";
-    
-    $paymentKeys = json_encode($paymentKeys);
-    $checkExist = $connection->query("SELECT * FROM `setting` WHERE `type` = 'PAYMENT_KEYS'");
-    if(mysqli_num_rows($checkExist) == 0) $connection->query("INSERT INTO `setting` (`type`, `value`) VALUES ('PAYMENT_KEYS', '$paymentKeys')");    
+    if(isset($nowPaymentKey) && isset($zarinpalId)){
+        $paymentKeys = array();
+        $paymentKeys['bankAccount'] = $walletwizwiz;
+        $paymentKeys['holderName'] = "";
+        $paymentKeys['nowpayment'] = $nowPaymentKey;
+        $paymentKeys['zarinpal'] = $zarinpalId;
+        $paymentKeys['nextpay'] = "";
+        
+        $paymentKeys = json_encode($paymentKeys);
+        $checkExist = $connection->query("SELECT * FROM `setting` WHERE `type` = 'PAYMENT_KEYS'");
+        if(mysqli_num_rows($checkExist) == 0) $connection->query("INSERT INTO `setting` (`type`, `value`) VALUES ('PAYMENT_KEYS', '$paymentKeys')");    
+    }
+    $list = $connection->query("SELECT * FROM `orders_list` WHERE `uuid` IS NULL");
+    if(mysqli_num_rows($list) > 0){
+        while($row = $list->fetch_assoc()){
+            $id = $row['id'];
+            $link = json_decode($row['link'],true)[0];
+            if(!empty($link)){
+                if(preg_match('/^vmess:\/\/(.*)/',$link,$match)){
+                    $jsonDecode = json_decode(base64_decode($match[1]),true);
+                    $uuid = $jsonDecode['id'];
+                }elseif(preg_match('/^vless:\/\/(.*?)\@/',$link,$match)){
+                    $uuid = $match[1];
+                }elseif(preg_match('/^trojan:\/\/(.*?)\@/',$link,$match)){
+                    $uuid = $match[1];
+                }
+                if(isset($uuid)) $connection->query("UPDATE `orders_list` SET `uuid` = '$uuid' WHERE `id` = '$id'");
+            }
+        }
+    }
 }
 ?>
