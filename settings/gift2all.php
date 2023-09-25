@@ -37,28 +37,29 @@ if($giftList->num_rows>0){
         $remark = $row->remark;
         $inbound_id = $row->id;
         
+        $settings = json_decode($row->settings, true); 
+        $clients = $settings['clients'];
         if(isset($row->clientStats)){
-            $settings = json_decode($row->settings, true); 
-            $clients = $settings['clients'];
             foreach($clients as $key => $client) {
                 if($rowCount < $offset) continue;
                 $found = true;
                 $clientRemark = $client['email'];
+                $uuid = $client['id'];
                 $clientTotal = $client['totalGB'];
                 $clientUp = $client['up'];
                 $clientDown = $client['down'];
                 $clientExpiry = $client['expiryTime'];
                 
                 
-                if(count($clients) > 1 && $total == 0 && $clientTotal != 0){
-                    $response = editClientTraffic($server_id, $inbound_id, $clientRemark, ($volume / 1024), $day);
-                    $orderExistStmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `server_id` = ? AND `inbound_id` = ? AND `remark` = ?");
-                    $orderExistStmt->bind_param("iis", $server_id, $inbound_id, $clientRemark);
+                if(count($clients) > 1){
+                    $response = editClientTraffic($server_id, $inbound_id, $uuid, ($volume / 1024), $day);
+                    $orderExistStmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `server_id` = ? AND `inbound_id` = ? AND `uuid` = ?");
+                    $orderExistStmt->bind_param("iis", $server_id, $inbound_id, $uuid);
                 }
                 else{
-                    $response = editInboundTraffic($server_id, $remark, ($volume/1024), $day);
-                    $orderExistStmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `server_id` = ? AND `inbound_id` = 0 AND `remark` = ?");
-                    $orderExistStmt->bind_param("is", $server_id, $clientRemark);
+                    $response = editInboundTraffic($server_id, $uuid, ($volume/1024), $day);
+                    $orderExistStmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `server_id` = ? AND `inbound_id` = 0 AND `uuid` = ?");
+                    $orderExistStmt->bind_param("is", $server_id, $uuid);
                 }
                 
                 if(!is_null($response)){
@@ -101,16 +102,16 @@ if($giftList->num_rows>0){
         }else{
             if($rowCount < $offset) continue;
             $found = true;
-            
-            $response = editInboundTraffic($server_id, $remark, ($volume/1024), $day);
+            $uuid = $clients[0]['id'];
+            $response = editInboundTraffic($server_id, $uuid, ($volume/1024), $day);
             if(!is_null($response)){
                 $stmt = $connection->prepare("UPDATE `gift_list` SET `offset` = `offset` + 1 WHERE `id` = ?");
                 $stmt->bind_param("i", $rowId);
                 $stmt->execute();
                 $stmt->close();
                 
-                $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `server_id` = ? AND `inbound_id` = ? AND `remark` = ?");
-                $stmt->bind_param("iis", $server_id, $inbound_id, $remark);
+                $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `server_id` = ? AND `inbound_id` = ? AND `uuid` = ?");
+                $stmt->bind_param("iis", $server_id, $inbound_id, $uuid);
                 $stmt->execute();
                 $orderExist = $stmt->get_result();
                 $stmt->close();
