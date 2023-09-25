@@ -20,6 +20,7 @@ if($orders){
     	    $from_id = $order['userid'];
     	    $token = $order['token'];
             $remark = $order['remark'];
+            $uuid = $order['uuid']??"0";
             $server_id = $order['server_id'];
             $inbound_id = $order['inbound_id'];
             $links_list = $order['link']; 
@@ -29,7 +30,8 @@ if($orders){
             $found = false;
             foreach($response as $row){
                 if($inbound_id == 0) { 
-                    if($row->remark == $remark) { 
+                    $clients = json_decode($row->settings)->clients;
+                    if($clients[0]->id == $uuid) {
                         $found = true;
                         $total = $row->total;
                         $up = $row->up;
@@ -41,24 +43,23 @@ if($orders){
                     if($row->id == $inbound_id) {
                         $settings = json_decode($row->settings, true); 
                         $clients = $settings['clients'];
-                        foreach($clients as $key => $client) {
-                            if($client['email'] == $remark) {
-                                $found = true;
-                                $total = $client['totalGB'];
-                                break;
-                            }
-                        }
                         
-                        $clientStats = $row->clientStats; 
-                        foreach($clientStats as $key => $clientStat) {
-                            if($clientStat->email == $remark) {
-                                $up = $clientStat->up;
-                                $down = $clientStat->down;
-                                $expiryTime = $clientStat->expiryTime;
+                        $clientsStates = $row->clientStats;
+                        foreach($clients as $key => $client){
+                            if($client->id == $uuid){
+                                $found = true;
+                                $email = $client->email;
+                                $emails = array_column($clientsStates,'email');
+                                $emailKey = array_search($email,$emails);
+                                
+                                $total = $client->totalGB;
+                                $up = $clientsStates[$emailKey]->up;
+                                $enable = $clientsStates[$emailKey]->enable;
+                                $down = $clientsStates[$emailKey]->down; 
+                                $expiryTime = $clientsStates[$emailKey]->expiryTime;
                                 break;
                             }
                         }
-                        break;
                     }
                 }
             }
@@ -74,8 +75,8 @@ if($orders){
         از سرویس اشتراک $remark تنها (۱ $send) باقی مانده است. میتواند از قسمت خرید های من سرویس فعلی خود را تمدید کنید یا سرویس جدید خریداری کنید.";
                     sendMessage( $msg, null, null, $from_id);
                     $newTIme = $time + 86400 * 2;
-                    $stmt = $connection->prepare("UPDATE `orders_list` SET `notif`= ? WHERE `remark`=?");
-                    $stmt->bind_param("is", $newTIme, $remark);
+                    $stmt = $connection->prepare("UPDATE `orders_list` SET `notif`= ? WHERE `uuid`=?");
+                    $stmt->bind_param("is", $newTIme, $uuid);
                     $stmt->execute();
                     $stmt->close();
                 }
@@ -99,6 +100,7 @@ if($orders){
     	    $from_id = $order['userid'];
     	    $token = $order['token'];
             $remark = $order['remark'];
+            $uuid = $order['uuid']??"0";
             $server_id = $order['server_id'];
             $inbound_id = $order['inbound_id'];
             $links_list = $order['link']; 
@@ -106,8 +108,9 @@ if($orders){
             
             $response = getJson($server_id)->obj;  
             foreach($response as $row){
-                if($inbound_id == 0) { 
-                    if($row->remark == $remark) { 
+                if($inbound_id == 0) {
+                    $clients = json_decode($row->settings)->clients;
+                    if($clients[0]->id == $uuid) {
                         $total = $row->total;
                         $up = $row->up;
                         $down = $row->down;
@@ -118,23 +121,23 @@ if($orders){
                     if($row->id == $inbound_id) {
                         $settings = json_decode($row->settings, true); 
                         $clients = $settings['clients'];
-                        foreach($clients as $key => $client) {
-                            if($client['email'] == $remark) {
-                                $total = $client['totalGB'];
-                                break;
-                            }
-                        }
                         
-                        $clientStats = $row->clientStats; 
-                        foreach($clientStats as $key => $clientStat) {
-                            if($clientStat->email == $remark) {
-                                $up = $clientStat->up;
-                                $down = $clientStat->down;
-                                $expiryTime = $clientStat->expiryTime;
+                        
+                        $clientsStates = $row->clientStats;
+                        foreach($clients as $key => $client){
+                            if($client->id == $uuid){
+                                $email = $client->email;
+                                $emails = array_column($clientsStates,'email');
+                                $emailKey = array_search($email,$emails);
+                                
+                                $total = $client->totalGB;
+                                $up = $clientsStates[$emailKey]->up;
+                                $enable = $clientsStates[$emailKey]->enable;
+                                $down = $clientsStates[$emailKey]->down; 
+                                $expiryTime = $clientsStates[$emailKey]->expiryTime;
                                 break;
                             }
                         }
-                        break;
                     }
                 }
             } 
@@ -142,21 +145,21 @@ if($orders){
             $now_microdate = floor(microtime(true) * 1000);
             if($expiryTime <= $now_microdate) $send = true; elseif($leftgb <= 0) $send = true;
             if($send){  
-                if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $remark); else $res = deleteInbound($server_id, $remark); 
+                if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $uuid); else $res = deleteInbound($server_id, $uuid); 
         		if(!is_null($res)){
                     $msg = "💡 کاربر گرامی،
     اشتراک سرویس $remark منقضی شد و از لیست سفارش ها حذف گردید. لطفا از فروشگاه, سرویس جدید خریداری کنید.";
                     sendMessage( $msg, null, null, $from_id);
-                    $stmt = $connection->prepare("DELETE FROM `orders_list` WHERE `remark`=?");
-                    $stmt->bind_param("s", $remark);
+                    $stmt = $connection->prepare("DELETE FROM `orders_list` WHERE `uuid`=?");
+                    $stmt->bind_param("s", $uuid);
                     $stmt->execute();
                     $stmt->close();
                     continue;
         		}
             }                
             else{
-                $stmt = $connection->prepare("UPDATE `orders_list` SET `notif`= 0 WHERE `remark`=?");
-                $stmt->bind_param("s", $remark);
+                $stmt = $connection->prepare("UPDATE `orders_list` SET `notif`= 0 WHERE `uuid`=?");
+                $stmt->bind_param("s", $uuid);
                 $stmt->execute();
                 $stmt->close();
             }
