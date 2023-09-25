@@ -66,8 +66,13 @@ do
         
 			url="${bot_url}install/install.php?updateBot"
 			curl $url
-			
-			sleep 1
+
+   			url3="${bot_url}install/install.php?updateBot"
+			curl $url3
+
+   			echo -e "\n\e[92mUpdating ...\033[0m\n"
+      
+			sleep 2
 
            		url2="${bot_url}updateShareConfig.php"
   			curl $url2
