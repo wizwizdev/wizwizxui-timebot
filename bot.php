@@ -12,7 +12,6 @@ if(is_numeric($checkSpam)){
     sendMessage("اکانت شما به دلیل اسپم مسدود شده است\nزمان آزادسازی اکانت شما: \n$time");
     exit();
 }
-
 if(preg_match("/^haveJoined(.*)/",$data,$match)){
     if ($joniedState== "kicked" || $joniedState== "left"){
         alert($mainValues['not_joine_yet']);
