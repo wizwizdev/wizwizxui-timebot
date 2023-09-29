@@ -989,7 +989,11 @@ function getBotReportKeys(){
     $totalRewards = number_format($stmt->get_result()->fetch_assoc()['total']) . " تومان";
     $stmt->close();
     
-    $dayTime = strtotime(date("Y-m-01"));
+    
+    $persian = explode("-",jdate("Y-n-1", time()));
+    $gregorian = jalali_to_gregorian($persian[0], $persian[1], $persian[2]);
+    $date =  $gregorian[0] . "-" . $gregorian[1] . "-" . $gregorian[2];
+    $dayTime = strtotime($date);
     $stmt = $connection->prepare("SELECT SUM(price) as total FROM `pays` WHERE `request_date` > ? AND (`state` = 'paid' OR `state` = 'approved')");
     $stmt->bind_param("i", $dayTime);
     $stmt->execute();
@@ -3345,7 +3349,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                 $xtlsSetting = json_decode($row->streamSettings)->xtlsSettings;
                 $netType = json_decode($row->streamSettings)->network;
                 if($netType == 'tcp') {
-                    $headerType = json_decode($row->streamSettings)->tcpSettings->header->type;
+                    $header_type = json_decode($row->streamSettings)->tcpSettings->header->type;
                     $path = json_decode($row->streamSettings)->tcpSettings->header->request->path[0];
                     $host = json_decode($row->streamSettings)->tcpSettings->header->request->headers->Host[0];
                     
@@ -3360,7 +3364,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                     }
                 }
                 if($netType == 'ws') {
-                    $headerType = json_decode($row->streamSettings)->wsSettings->header->type;
+                    $header_type = json_decode($row->streamSettings)->wsSettings->header->type;
                     $path = json_decode($row->streamSettings)->wsSettings->path;
                     $host = json_decode($row->streamSettings)->wsSettings->headers->Host;
                 }
@@ -3422,7 +3426,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                 $xtlsSetting = json_decode($row->streamSettings)->xtlsSettings;
                 $netType = json_decode($row->streamSettings)->network;
                 if($netType == 'tcp') {
-                    $headerType = json_decode($row->streamSettings)->tcpSettings->header->type;
+                    $header_type = json_decode($row->streamSettings)->tcpSettings->header->type;
                     $path = json_decode($row->streamSettings)->tcpSettings->header->request->path[0];
                     $host = json_decode($row->streamSettings)->tcpSettings->header->request->headers->Host[0];
                     
@@ -3435,7 +3439,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                         $sid = $realitySettings->shortIds[0];
                     }
                 }elseif($netType == 'ws') {
-                    $headerType = json_decode($row->streamSettings)->wsSettings->header->type;
+                    $header_type = json_decode($row->streamSettings)->wsSettings->header->type;
                     $path = json_decode($row->streamSettings)->wsSettings->path;
                     $host = json_decode($row->streamSettings)->wsSettings->headers->Host;
                 }elseif($netType == 'grpc') {
@@ -3496,7 +3500,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                     }
                 }
                 $psting = '';
-                if($header_type == 'http' && $rahgozar != true && $netType != "grpc") $psting .= "&path=/&host=$host"; else $psting .= '';
+                if(($header_type == 'http' && $rahgozar != true && $netType != "grpc") || ($netType == "ws" && !empty($host))) $psting .= "&path=/&host=$host";;
                 if($netType == 'tcp' and $header_type == 'http') $psting .= '&headerType=http';
                 if(strlen($sni) > 1 && $tlsStatus != "reality") $psting .= "&sni=$sni";
                 if(strlen($serverName)>1 && $tlsStatus=="xtls") $server_ip = $serverName;
@@ -3645,7 +3649,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                     "id"=> $uniqid,
                     "aid"=> 0,
                     "net"=> $netType,
-                    "type"=> ($headerType) ? $headerType : ($kcpType ? $kcpType : "none"),
+                    "type"=> ($header_type) ? $header_type : ($kcpType ? $kcpType : "none"),
                     "host"=> ($rahgozar == true && empty($host))?$server_ip:(is_null($host) ? '' : $host),
                     "path"=> ($rahgozar == true)?($path . ($customPath == true?"?ed=2048":"")) :((is_null($path) and $path != '') ? '/' : (is_null($path) ? '' : $path)),
                     "tls"=> $rahgozar == true?"tls":((is_null($tlsStatus)) ? 'none' : $tlsStatus)
