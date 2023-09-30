@@ -646,7 +646,7 @@ if($userInfo['step'] == "increaseMyWallet" && $text != $buttonValues['cancel']){
     }
     sendMessage("🪄 لطفا صبور باشید ...",$removeKeyboard);
     $hash_id = RandomString();
-    $stmt = $connection->prepare("DELETE FROM `pays` WHERE `user_id` = ? AND `type` = 'INCREASE_WALLET' AND `state` = 'pending'");
+    $stmt = $connection->prepare("DELETE FROM `pays` WHERE `user_id` = ? AND `type` = 'INCREASE_WALLET' AND (`state` = 'pending' OR `state` = 'sent')");
     $stmt->bind_param("i", $from_id);
     $stmt->execute();
     $stmt->close();
@@ -661,7 +661,7 @@ if($userInfo['step'] == "increaseMyWallet" && $text != $buttonValues['cancel']){
     
     $keyboard = array();
     if($botState['cartToCartState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "increaseWalletWithCartToCart" . $text]];
+	    $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "increaseWalletWithCartToCart" . $hash_id]];
     }
     if($botState['nowPaymentWallet'] == "on"){
 	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
@@ -698,24 +698,36 @@ if(preg_match('/increaseWalletWithCartToCart/',$data)) {
     sendMessage(str_replace(["ACCOUNT-NUMBER", "HOLDER-NAME"],[$paymentKeys['bankAccount'],$paymentKeys['holderName']], $mainValues['increase_wallet_cart_to_cart']),$cancelKey, "HTML");
     exit;
 }
-if(preg_match('/increaseWalletWithCartToCart(\d+)/',$userInfo['step'], $match) and $text != $buttonValues['cancel']){
+if(preg_match('/increaseWalletWithCartToCart(.*)/',$userInfo['step'], $match) and $text != $buttonValues['cancel']){
     if(isset($update->message->photo)){
-        $fid = $match[1];
         setUser();
         $uid = $userInfo['userid'];
         $name = $userInfo['name'];
         $username = $userInfo['username'];
     
+        $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'sent' WHERE `hash_id` = ?");
+        $stmt->bind_param("s", $match[1]);
+        $stmt->execute();
+        $stmt->close();
+        
+        $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ?");
+        $stmt->bind_param("s", $match[1]);
+        $stmt->execute();
+        $payInfo = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        $price = number_format($payInfo['price']);
+
+    
+
         sendMessage($mainValues['order_increase_sent'],$removeKeyboard);
         sendMessage($mainValues['reached_main_menu'],getMainKeys());
-        $price = number_format($match[1]);
         $msg = str_replace(['PRICE', 'USERNAME', 'NAME', 'USER-ID'],[$price, $username, $name, $from_id], $mainValues['increase_wallet_request_message']);
         
         $keyboard = json_encode([
             'inline_keyboard' => [
                 [
-                    ['text' => $buttonValues['approve'], 'callback_data' => "approvePayment{$uid}_{$match[1]}"],
-                    ['text' => $buttonValues['decline'], 'callback_data' => "decPayment{$uid}_{$match[1]}"]
+                    ['text' => $buttonValues['approve'], 'callback_data' => "approvePayment{$match[1]}"],
+                    ['text' => $buttonValues['decline'], 'callback_data' => "decPayment{$match[1]}"]
                 ]
             ]
         ]);
@@ -724,13 +736,28 @@ if(preg_match('/increaseWalletWithCartToCart(\d+)/',$userInfo['step'], $match) a
         sendMessage($mainValues['please_send_only_image']);
     }
 }
-if(preg_match('/^approvePayment(\d+)_(\d+)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+if(preg_match('/^approvePayment(.*)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ?");
+    $stmt->bind_param("s", $match[1]);
+    $stmt->execute();
+    $payInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $price = $payInfo['price'];
+    $userId = $payInfo['user_id'];
+    
+    
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+    $stmt->bind_param("s", $match[1]);
+    $stmt->execute();
+    $stmt->close();
+    
+
     $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` + ? WHERE `userid` = ?");
-    $stmt->bind_param("ii", $match[2], $match[1]);
+    $stmt->bind_param("ii", $price, $userId);
     $stmt->execute();
     $stmt->close();
 
-    sendMessage("افزایش حساب شما با موفقیت تأیید شد\n✅ مبلغ " . number_format($match[2]). " تومان به حساب شما اضافه شد",null,null,$match[1]);
+    sendMessage("افزایش حساب شما با موفقیت تأیید شد\n✅ مبلغ " . number_format($price). " تومان به حساب شما اضافه شد",null,null,$userId);
     
     unset($markup[count($markup)-1]);
     $markup[] = [['text' => '✅', 'callback_data' => "dontsendanymore"]];
@@ -738,18 +765,33 @@ if(preg_match('/^approvePayment(\d+)_(\d+)/',$data,$match) && ($from_id == $admi
 
     editKeys($keys);
 }
-if(preg_match('/^decPayment(\d+)_(\d+)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+if(preg_match('/^decPayment(.*)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
     unset($markup[count($markup)-1]);
     $markup[] = [['text' => '❌', 'callback_data' => "dontsendanymore"]];
     $keys = json_encode(['inline_keyboard'=>array_values($markup)],488);
     file_put_contents("temp" . $from_id . ".txt", $keys);
     sendMessage("لطفا دلیل عدم تأیید افزایش موجودی را وارد کنید",$cancelKey);
-    setUser($data . "_" . $message_id);
+    setUser("decPayment" . $message_id . "_" . $match[1]);
 }
-if(preg_match('/^decPayment(\d+)_(\d+)_(\d+)/',$userInfo['step'],$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
-    sendMessage("💔 افزایش موجودی شما به مبلغ "  . number_format($match[2]) . " به دلیل زیر رد شد\n\n$text",null,null,$match[1]);
+if(preg_match('/^decPayment(\d+)_(.*)/',$userInfo['step'],$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ?");
+    $stmt->bind_param("s", $match[2]);
+    $stmt->execute();
+    $payInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
     
-    editKeys(file_get_contents("temp" . $from_id . ".txt"), $match[3]);
+    $price = $payInfo['price'];
+    $userId = $payInfo['user_id'];
+    
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'declined' WHERE `hash_id` = ?");
+    $stmt->bind_param("s", $match[2]);
+    $stmt->execute();
+    $stmt->close();
+    
+    sendMessage("💔 افزایش موجودی شما به مبلغ "  . number_format($price) . " به دلیل زیر رد شد\n\n$text",null,null,$userId);
+
+
+    editKeys(file_get_contents("temp" . $from_id . ".txt"), $match[1]);
     setUser();
     sendMessage('پیامت رو براش ارسال کردم ... 🤝',$removeKeyboard);
     unlink("temp" . $from_id . ".txt");
@@ -1427,12 +1469,12 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
         
         if($inbound_id == 0){    
             $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
-            if(! $response->success){
+            if(!$response->success){
                 $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
             } 
         }else {
             $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
-            if(! $response->success){
+            if(!$response->success){
                 $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
             } 
         }
@@ -1732,6 +1774,10 @@ elseif($payType == "RENEW_SCONFIG"){
     
     $price = $payInfo['price'];   
     $server_id = $file_detail['server_id'];
+    $configInfo = json_decode($payInfo['description'],true);
+    $remark = $configInfo['remark'];
+    $uuid = $configInfo['uuid'];
+    
     $remark = $payInfo['description'];
     $inbound_id = $payInfo['volume']; 
     
@@ -1748,6 +1794,19 @@ elseif($payType == "RENEW_SCONFIG"){
 	$stmt->bind_param("iiisii", $uid, $server_id, $inbound_id, $remark, $price, $time);
 	$stmt->execute();
 	$stmt->close();
+
+    sendMessage("
+    🔋|💰 تمدید مشخصات کانفیگ با ( کیف پول )
+    
+    ▫️آیدی کاربر: $from_id
+    👨‍💼اسم کاربر: $first_name
+    ⚡️ نام کاربری: $username
+    🎈 نام سرویس: $remark
+    ⏰ مدت کانفیگ: $volume گیگ
+    حجم کانفیگ:  $days روز
+    💰قیمت: $price تومان
+    ⁮⁮ ⁮⁮
+    ",$keys,"html", $admin);
 
 }
     
@@ -2415,7 +2474,7 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
     $payInfo = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     
-    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'paid_with_wallet' WHERE `hash_id` = ?");
     $stmt->bind_param("s", $match[1]);
     $stmt->execute();
     $stmt->close();
@@ -2506,12 +2565,12 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
     
     if($inbound_id == 0){    
         $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
-        if(! $response->success){
+        if(!$response->success){
             $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
         } 
     }else {
         $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
-        if(! $response->success){
+        if(!$response->success){
             $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
         } 
     }
@@ -2587,7 +2646,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
 	$stmt = $connection->prepare("INSERT INTO `orders_list` 
 	    (`userid`, `token`, `transid`, `fileid`, `server_id`, `inbound_id`, `remark`, `uuid`, `protocol`, `expire_date`, `link`, `amount`, `status`, `date`, `notif`, `rahgozar`)
 	    VALUES (?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?,1, ?, 0, ?);");
-    $stmt->bind_param("ssiiissisiii", $uid, $token, $fid, $server_id, $inbound_id, $remark, $uniqid, $protocol, $expire_date, $vray_link, $price, $date, $rahgozar);
+    $stmt->bind_param("ssiiisssisiii", $uid, $token, $fid, $server_id, $inbound_id, $remark, $uniqid, $protocol, $expire_date, $vray_link, $price, $date, $rahgozar);
     $stmt->execute();
     $order = $stmt->get_result(); 
     $stmt->close();
@@ -2738,7 +2797,8 @@ if(preg_match('/payCustomWithCartToCart(.*)/',$userInfo['step'], $match) and $te
         $stmt->close();
         $filename = $catname." ".$res['title']; 
         $fileprice = $payInfo['price'];
-    
+        $remark = $payInfo['description'];
+        
         sendMessage($mainValues['order_buy_sent'],$removeKeyboard);
         sendMessage($mainValues['reached_main_menu'],getMainKeys());
     
@@ -2847,12 +2907,12 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
     
     if($inbound_id == 0){    
         $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
-        if(! $response->success){
+        if(!$response->success){
             $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
         } 
     }else {
         $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
-        if(! $response->success){
+        if(!$response->success){
             $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
         } 
     }
@@ -3011,7 +3071,7 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         exit();
     }
 
-    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'paid_with_wallet' WHERE `hash_id` = ?");
     $stmt->bind_param("s", $match[1]);
     $stmt->execute();
     $stmt->close();
@@ -3026,7 +3086,10 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
 
 
     if($payInfo['type'] == "RENEW_SCONFIG"){
-        $uuid = $payInfo['description'];
+        $configInfo = json_decode($payInfo['description'],true);
+        $uuid = $configInfo['uuid'];
+        $remark = $configInfo['remark'];
+        
         $inbound_id = $payInfo['volume']; 
         
         if($inbound_id > 0)
@@ -3115,12 +3178,12 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         
             if($inbound_id == 0){    
                 $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
-                if(! $response->success){
+                if(!$response->success){
                     $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
                 } 
             }else {
                 $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
-                if(! $response->success){
+                if(!$response->success){
                     $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
                 } 
             }
@@ -3290,7 +3353,7 @@ if(preg_match('/payWithCartToCart(.*)/',$userInfo['step'], $match) and $text != 
         $payInfo = $stmt->get_result()->fetch_assoc();
         $stmt->close();
         
-        $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+        $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'sent' WHERE `hash_id` = ?");
         $stmt->bind_param("s", $match[1]);
         $stmt->execute();
         $stmt->close();
@@ -3318,7 +3381,8 @@ if(preg_match('/payWithCartToCart(.*)/',$userInfo['step'], $match) and $text != 
         $serverTitle = $serverInfo['title'];
     
         if($payInfo['type'] == "RENEW_SCONFIG"){
-            $filename = $payInfo['description'];
+            $configInfo = json_decode($payInfo['description'],true);
+            $filename = $configInfo['remark'];
         }else{
             $stmt = $connection->prepare("SELECT * FROM `server_categories` WHERE `id`=?");
             $stmt->bind_param("i", $res['catid']);
@@ -3514,7 +3578,10 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
 
     
     if($payInfo['type'] == "RENEW_SCONFIG"){
-        $uuid = $payInfo['description'];
+        $configInfo = json_decode($payInfo['description'],true);
+        $uuid = $configInfo['uuid'];
+        $remark = $configInfo['remark'];
+        
         $inbound_id = $payInfo['volume']; 
         
         if($inbound_id > 0)
@@ -3594,12 +3661,12 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
         
             if($inbound_id == 0){    
                 $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
-                if(! $response->success){
+                if(!$response->success){
                     $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
                 } 
             }else {
                 $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
-                if(! $response->success){
+                if(!$response->success){
                     $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
                 } 
             }
@@ -5011,12 +5078,12 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
     }
     if($inbound_id == 0){    
         $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $id); 
-        if(! $response->success){
+        if(!$response->success){
             $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $id);
         } 
     }else {
         $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $id); 
-        if(! $response->success){
+        if(!$response->success){
             $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $id);
         }
     }
@@ -5055,7 +5122,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
 \n🌐 subscription : <code>$subLink</code>";
     
         $file = RandomString().".png";
-        $ecc = 'L';
+        $ecc = 'L'; 
         $pixel_Size = 10;
         $frame_Size = 10;
         QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_size);
@@ -5063,12 +5130,10 @@ if($botState['subLinkState'] == "on") $acc_text .= "
         sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML");
         unlink($file);
     }
-    
     $vray_link = json_encode($vraylink);
 	$stmt = $connection->prepare("INSERT INTO `orders_list` 
 	    (`userid`, `token`, `transid`, `fileid`, `server_id`, `inbound_id`, `remark`, `uuid`, `protocol`, `expire_date`, `link`, `amount`, `status`, `date`, `notif`, `rahgozar`, `agent_bought`)
-	    VALUES (?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?,1, ?, 0, ?, ?);");
-
+	    VALUES (?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?,1, ?, 0, ?, ?)");
 	$stmt->bind_param("isiiisssisiiii", $from_id, $token, $id, $server_id, $inbound_id, $remark, $uniqid, $protocol, $expire_date, $vray_link, $price, $date, $rahgozar, $agentBought);
     $stmt->execute();
     $order = $stmt->get_result();
@@ -5156,7 +5221,7 @@ if($userInfo['step'] == "showAccount" and $text != $buttonValues['cancel']){
                 if(!isset($list[0]->clientStats)){
                     foreach($list as $keys=>$packageInfo){
                     	if(strpos($packageInfo->settings, $text)!=false){
-                    	    $configLocation = $text;
+                    	    $configLocation = ["remark"=> $packageInfo->remark, "uuid" =>$text];
                     	    $remark = $packageInfo->remark;
                             $upload = sumerize($packageInfo->up);
                             $download = sumerize($packageInfo->down);
@@ -5200,7 +5265,7 @@ if($userInfo['step'] == "showAccount" and $text != $buttonValues['cancel']){
                     
                     if(!isset($clientsSettings[$settingKey]['email'])){
                         $packageInfo = $list[$keys];
-                	    $configLocation = $text;
+                	    $configLocation = ["remark" => $packageInfo->remark ,"uuid" =>$text];
                 	    $remark = $packageInfo->remark;
                         $upload = sumerize($packageInfo->up);
                         $download = sumerize($packageInfo->down);
@@ -5234,7 +5299,7 @@ if($userInfo['step'] == "showAccount" and $text != $buttonValues['cancel']){
              
                         // if($clientState[$emailKey]->total != 0 || $clientState[$emailKey]->up != 0  ||  $clientState[$emailKey]->down != 0 || $clientState[$emailKey]->expiryTime != 0){
                         if(count($clientState) > 1){
-                    	    $configLocation = $list[$keys]->id . "_remark_" . $text;
+                    	    $configLocation = ["id" => $list[$keys]->id, "remark"=>$email, "uuid"=>$text];
                             $upload = sumerize($clientState[$emailKey]->up);
                             $download = sumerize($clientState[$emailKey]->down);
                             $total = $clientState[$emailKey]->total==0 && $list[$keys]->total !=0?$list[$keys]->total:$clientState[$emailKey]->total;
@@ -5264,7 +5329,7 @@ if($userInfo['step'] == "showAccount" and $text != $buttonValues['cancel']){
                         else{
                             $upload = sumerize($list[$keys]->up);
                             $download = sumerize($list[$keys]->down);
-                            $configLocation = $text;
+                            $configLocation = ["uuid" => $text, "remark"=>$list[$keys]->remark];
                             $leftMb = $list[$keys]->total!=0?($list[$keys]->total - $list[$keys]->up - $list[$keys]->down):"نامحدود";
                             if(is_numeric($leftMb)){
                                 if($leftMb<0){
@@ -5341,7 +5406,7 @@ if($userInfo['step'] == "showAccount" and $text != $buttonValues['cancel']){
                         ),
                 [['text'=>"صفحه اصلی",'callback_data'=>"mainMenu"]]
                 ]]);
-                setUser($configLocation, "temp");
+                setUser(json_encode($configLocation,488), "temp");
                 sendMessage("🔰مشخصات حسابت:",$keys,"MarkDown");
                 break;
                 
@@ -5361,15 +5426,11 @@ if(preg_match('/sConfigRenew(\d+)/', $data,$match)){
     $server_id = $match[1];
     if(empty($userInfo['temp'])){delMessage(); exit();}
     
-    if(strpos($userInfo['temp'], "_remark_") !== FALSE){
-        $param = explode("_remark_", $userInfo['temp']);
-        $inboundId = $param[0];
-        $uuid = $param[1];
-    }else{
-        $inboundId = 0;
-        $uuid = $userInfo['temp'];
-    }
-    setUser($uuid, "temp");
+    $configInfo = json_decode($userInfo['temp'],true);
+    $inboundId = $configInfo['id']??0;
+    $uuid = $configInfo['uuid'];
+    $remark = $configInfo['remark'];
+
     $response = getJson($server_id)->obj;
     if($response == null){delMessage(); exit();}
     if($inboundId == 0){
@@ -5427,6 +5488,13 @@ if(preg_match('/sConfigRenewPlan(\d+)_(\d+)/',$data, $match) && ($botState['sell
     $id = $match[1];
 	$inbound_id = $match[2];
 
+
+    if(empty($userInfo['temp'])){delMessage(); exit();}
+    
+    $configInfo = json_decode($userInfo['temp'],true);
+    $uuid = $configInfo['uuid'];
+    $remark = $configInfo['remark'];
+
     alert($mainValues['receving_information']);
     delMessage();
     $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `id`=? and `active`=1");
@@ -5453,13 +5521,13 @@ if(preg_match('/sConfigRenewPlan(\d+)_(\d+)/',$data, $match) && ($botState['sell
     $stmt->bind_param("i", $from_id);
     $stmt->execute();
     $stmt->close();
-    $uuid = $userInfo['temp'];
+
     setUser('', 'temp');
-    
+    $description = json_encode(["uuid"=>$uuid, "remark"=>$remark],488);
     $time = time();
     $stmt = $connection->prepare("INSERT INTO `pays` (`hash_id`, `description`, `user_id`, `type`, `plan_id`, `volume`, `day`, `price`, `request_date`, `state`)
                                 VALUES (?, ?, ?, 'RENEW_SCONFIG', ?, ?, '0', ?, ?, 'pending')");
-    $stmt->bind_param("ssiiiii", $hash_id, $uuid, $from_id, $id, $inbound_id, $price, $time);
+    $stmt->bind_param("ssiiiii", $hash_id, $description, $from_id, $id, $inbound_id, $price, $time);
     $stmt->execute();
     $rowId = $stmt->insert_id;
     $stmt->close();
@@ -5492,15 +5560,11 @@ if(preg_match('/sConfigUpdate(\d+)/', $data,$match)){
     $server_id = $match[1];
     if(empty($userInfo['temp'])){delMessage(); exit();}
     
-    if(strpos($userInfo['temp'], "_remark_") !== FALSE){
-        $param = explode("_remark_", $userInfo['temp']);
-        $inboundId = $param[0];
-        $uuid = $param[1];
-    }else{
-        $inboundId = 0;
-        $uuid = $userInfo['temp'];
-    }
-    
+    $configInfo = json_decode($userInfo['temp'],true);
+    $inboundId = $configInfo['id']??0;
+    $uuid = $configInfo['uuid'];
+    $remark = $configInfo['remark'];
+
     $response = getJson($server_id)->obj;
     if($response == null){delMessage(); exit();}
     
@@ -6825,6 +6889,13 @@ if(preg_match('/payRenewWithCartToCart(.*)/',$userInfo['step'],$match) and $text
         $hash_id = $payInfo['hash_id'];
         $stmt->close();
         
+        $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'sent' WHERE `hash_id` = ?");
+        $stmt->bind_param("s", $match[1]);
+        $stmt->execute();
+        $stmt->close();
+    
+
+        
         $oid = $payInfo['plan_id'];
         
         $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
@@ -6988,7 +7059,7 @@ if(preg_match('/payRenewWithWallet(.*)/', $data,$match)){
     $hash_id = $payInfo['hash_id'];
     $stmt->close();
     
-    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'paid_with_wallet' WHERE `hash_id` = ?");
     $stmt->bind_param("s", $match[1]);
     $stmt->execute();
     $stmt->close();
@@ -7538,7 +7609,7 @@ if(preg_match('/payIncreaseDayWithCartToCart(.*)/',$data,$match)) {
 }
 if(preg_match('/payIncreaseDayWithCartToCart(.*)/',$userInfo['step'], $match) and $text != $buttonValues['cancel']){
     if(isset($update->message->photo)){
-        $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND `state` = 'pending'");
+        $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND (`state` = 'pending' OR `state` = 'sent')");
         $stmt->bind_param("s", $match[1]);
         $stmt->execute();
         $payInfo = $stmt->get_result();
@@ -7563,7 +7634,12 @@ if(preg_match('/payIncreaseDayWithCartToCart(.*)/',$userInfo['step'], $match) an
         
         $planid = $increaseInfo[2];
 
-        
+        $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'sent' WHERE `hash_id` = ?");
+        $stmt->bind_param("s", $match[1]);
+        $stmt->execute();
+        $stmt->close();
+    
+
         
         $stmt = $connection->prepare("SELECT * FROM `increase_day` WHERE `id` = ?");
         $stmt->bind_param("i", $planid);
@@ -7597,7 +7673,7 @@ if(preg_match('/payIncreaseDayWithCartToCart(.*)/',$userInfo['step'], $match) an
 
 }
 if(preg_match('/approveIncreaseDay(.*)/',$data,$match)){
-    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND `state` = 'pending'");
+    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND (`state` = 'pending' OR `state` = 'sent')");
     $stmt->bind_param("s", $match[1]);
     $stmt->execute();
     $payInfo = $stmt->get_result();
@@ -7643,16 +7719,11 @@ if(preg_match('/approveIncreaseDay(.*)/',$data,$match)){
     
     
     unset($markup[count($markup)-1]);
-    $markup[] = [['text' => '✅', 'callback_data' => "dontsendanymore"]];
-    $keys = json_encode(['inline_keyboard'=>array_values($markup)],488);
-
-    editKeys($keys);
 
     
-    if($inbound_id > 0)
-        $response = editClientTraffic($server_id, $inbound_id, $uuid, 0, $volume);
-    else
-        $response = editInboundTraffic($server_id, $uuid, 0, $volume);
+    if($inbound_id > 0) $response = editClientTraffic($server_id, $inbound_id, $uuid, 0, $volume);
+    else $response = editInboundTraffic($server_id, $uuid, 0, $volume);
+    
     if($response->success){
         $stmt = $connection->prepare("UPDATE `orders_list` SET `expire_date` = `expire_date` + ?, `notif` = 0 WHERE `uuid` = ?");
         $newVolume = $volume * 86400;
@@ -7665,6 +7736,10 @@ if(preg_match('/approveIncreaseDay(.*)/',$data,$match)){
         $stmt->bind_param("iiisii", $uid, $server_id, $inbound_id, $remark, $price, $time);
         $stmt->execute();
         $stmt->close();
+        $markup[] = [['text' => '✅', 'callback_data' => "dontsendanymore"]];
+        $keys = json_encode(['inline_keyboard'=>array_values($markup)],488);
+    
+        editKeys($keys);
         sendMessage("✅$volume روز به مدت زمان سرویس شما اضافه شد",null,null,$uid);
     }else {
         alert("مشکل فنی در ارتباط با سرور. لطفا سلامت سرور را بررسی کنید",true);
@@ -7672,7 +7747,7 @@ if(preg_match('/approveIncreaseDay(.*)/',$data,$match)){
     }
 }
 if(preg_match('/payIncraseDayWithWallet(.*)/', $data,$match)){
-    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND `state` = 'pending'");
+    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND (`state` = 'pending' OR `state` = 'sent')");
     $stmt->bind_param("s", $match[1]);
     $stmt->execute();
     $payInfo = $stmt->get_result();
@@ -7681,7 +7756,7 @@ if(preg_match('/payIncraseDayWithWallet(.*)/', $data,$match)){
     $payParam = $payInfo->fetch_assoc();
     $payType = $payParam['type'];
 
-    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'paid_with_wallet' WHERE `hash_id` = ?");
     $stmt->bind_param("s", $match[1]);
     $stmt->execute();
     $stmt->close();
@@ -7873,7 +7948,7 @@ if(preg_match('/payIncreaseWithCartToCart(.*)/',$data)) {
 }
 if(preg_match('/payIncreaseWithCartToCart(.*)/',$userInfo['step'],$match) and $text != $buttonValues['cancel']){
     if(isset($update->message->photo)){
-        $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND `state` = 'pending'");
+        $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND (`state` = 'pending' OR `state` = 'sent')");
         $stmt->bind_param("s", $match[1]);
         $stmt->execute();
         $payInfo = $stmt->get_result();
@@ -7898,6 +7973,10 @@ if(preg_match('/payIncreaseWithCartToCart(.*)/',$userInfo['step'],$match) and $t
         
         $planid = $increaseInfo[2];
     
+        $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'sent' WHERE `hash_id` = ?");
+        $stmt->bind_param("s", $match[1]);
+        $stmt->execute();
+        $stmt->close();
     
         $stmt = $connection->prepare("SELECT * FROM `increase_plan` WHERE `id` = ?");
         $stmt->bind_param("i", $planid);
@@ -7930,7 +8009,7 @@ if(preg_match('/payIncreaseWithCartToCart(.*)/',$userInfo['step'],$match) and $t
     }
 }
 if(preg_match('/approveIncreaseVolume(.*)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
-    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND `state` = 'pending'");
+    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND (`state` = 'pending' OR `state` = 'sent')");
     $stmt->bind_param("s", $match[1]);
     $stmt->execute();
     $payInfo = $stmt->get_result();
@@ -7971,22 +8050,20 @@ if(preg_match('/approveIncreaseVolume(.*)/',$data,$match) && ($from_id == $admin
 
     $acctxt = '';
     
-    unset($markup[count($markup)-1]);
-    $markup[] = [['text' => '✅', 'callback_data' => "dontsendanymore"]];
-    $keys = json_encode(['inline_keyboard'=>array_values($markup)],488);
-
-    editKeys($keys);
-
     
-    if($inbound_id > 0)
-        $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, 0);
-    else
-        $response = editInboundTraffic($server_id, $uuid, $volume, 0);
+    if($inbound_id > 0) $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, 0);
+    else $response = editInboundTraffic($server_id, $uuid, $volume, 0);
+    
     if($response->success){
         $stmt = $connection->prepare("UPDATE `orders_list` SET `notif` = 0 WHERE `uuid` = ?");
         $stmt->bind_param("s", $uuid);
         $stmt->execute();
         $stmt->close();
+        unset($markup[count($markup)-1]);
+        $markup[] = [['text' => '✅', 'callback_data' => "dontsendanymore"]];
+        $keys = json_encode(['inline_keyboard'=>array_values($markup)],488);
+    
+        editKeys($keys);
         sendMessage("✅$volume گیگ به حجم سرویس شما اضافه شد",null,null,$uid);
     }else {
         alert("مشکل فنی در ارتباط با سرور. لطفا سلامت سرور را بررسی کنید",true);
@@ -7994,7 +8071,7 @@ if(preg_match('/approveIncreaseVolume(.*)/',$data,$match) && ($from_id == $admin
     }
 }
 if(preg_match('/decIncreaseVolume(.*)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
-    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND `state` = 'pending'");
+    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND (`state` = 'pending' OR `state` = 'sent')");
     $stmt->bind_param("s", $match[1]);
     $stmt->execute();
     $payInfo = $stmt->get_result();
@@ -8037,7 +8114,7 @@ if(preg_match('/decIncreaseVolume(.*)/',$data,$match) && ($from_id == $admin || 
     sendMessage("افزایش حجم $volume گیگ اشتراک $remark لغو شد",null,null,$uid);
 }
 if(preg_match('/decIncreaseDay(.*)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
-    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND `state` = 'pending'");
+    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND (`state` = 'pending' OR `state` = 'sent')");
     $stmt->bind_param("s", $match[1]);
     $stmt->execute();
     $payInfo = $stmt->get_result();
@@ -8080,7 +8157,7 @@ if(preg_match('/decIncreaseDay(.*)/',$data,$match) && ($from_id == $admin || $us
     sendMessage("افزایش زمان $volume روز اشتراک $remark لغو شد",null,null,$uid);
 }
 if(preg_match('/payIncraseWithWallet(.*)/', $data,$match)){
-    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND `state` = 'pending'");
+    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND (`state` = 'pending' OR `state` = 'sent')");
     $stmt->bind_param("s", $match[1]);
     $stmt->execute();
     $payInfo = $stmt->get_result();
@@ -8089,7 +8166,7 @@ if(preg_match('/payIncraseWithWallet(.*)/', $data,$match)){
     $payParam = $payInfo->fetch_assoc();
     $payType = $payParam['type'];
 
-    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'approved' WHERE `hash_id` = ?");
+    $stmt = $connection->prepare("UPDATE `pays` SET `state` = 'paid_with_wallet' WHERE `hash_id` = ?");
     $stmt->bind_param("s", $match[1]);
     $stmt->execute();
     $stmt->close();
