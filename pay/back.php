@@ -25,7 +25,7 @@ if(isset($_GET['NP_id'])){
     $res = json_decode(curl_exec($ch));
     $hash_id = $res->invoice_id;
 
-    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `payid` = ? AND `state` = 'pending'");
+    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `payid` = ? AND (`state` = 'pending' OR `state` = 'send')");
     $stmt->bind_param("i", $hash_id);
     $stmt->execute();
     $payInfo = $stmt->get_result();
@@ -78,7 +78,7 @@ else{
 }
 elseif(isset($_GET['zarinpal'])){
 $hash_id = $_GET['hash_id'];
-$stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND `state` = 'pending'");
+$stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ? AND (`state` = 'pending' OR `state` = 'send')");
 $stmt->bind_param("s", $hash_id);
 $stmt->execute();
 $payInfo = $stmt->get_result();
@@ -117,7 +117,7 @@ if(mysqli_num_rows($payInfo)==0){
 }
 elseif(isset($_GET['nextpay'])){
 $hash_id = $_GET['trans_id'];
-$stmt = $connection->prepare("SELECT * FROM `pays` WHERE `payid` = ? AND `state` = 'pending'");
+$stmt = $connection->prepare("SELECT * FROM `pays` WHERE `payid` = ? AND (`state` = 'pending' OR `state` = 'send')");
 $stmt->bind_param("s", $hash_id);
 $stmt->execute();
 $payInfo = $stmt->get_result();
@@ -171,7 +171,7 @@ exit();
 function doAction($payRowId, $gateType){
 global $connection, $admin, $botUrl, $mainKeys, $botState;
 $time = time();
-$stmt = $connection->prepare("SELECT * FROM `pays` WHERE `id` = ? AND `state` = 'pending'");
+$stmt = $connection->prepare("SELECT * FROM `pays` WHERE `id` = ? AND (`state` = 'pending' OR `state` = 'send')");
 $stmt->bind_param("i", $payRowId);
 $stmt->execute();
 $payInfo = $stmt->get_result();
@@ -714,6 +714,10 @@ elseif($payType == "RENEW_SCONFIG"){
     $volume = $file_detail['volume'];
     $server_id = $file_detail['server_id'];
     
+    $configInfo = json_decode($payParam['description'],true);
+    $uuid = $configInfo['uuid'];
+    $remark = $configInfo['remark'];
+
     $uuid = $payParam['description'];
     $inbound_id = $payParam['volume']; 
     
