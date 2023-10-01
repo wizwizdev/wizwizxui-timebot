@@ -37,7 +37,7 @@ $token = $_GET['token'];
         if($inbound_id == 0) {
             foreach($response as $row){
                 $clients = json_decode($row->settings)->clients;
-                if($clients[0]->id == $uuid) {
+                if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
                     $total = $row->total;
                     $port = $row->port;
                     $up = $row->up;
@@ -57,7 +57,7 @@ $token = $_GET['token'];
                     $clientsStates = $row->clientStats;
                     $clients = json_decode($row->settings)->clients;
                     foreach($clients as $key => $client){
-                        if($client->id == $uuid){
+                        if($client->id == $uuid || $client->password == $uuid){
                             $email = $client->email;
                             $emails = array_column($clientsStates,'email');
                             $emailKey = array_search($email,$emails);
