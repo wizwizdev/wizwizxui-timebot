@@ -31,7 +31,7 @@ if($orders){
             foreach($response as $row){
                 if($inbound_id == 0) { 
                     $clients = json_decode($row->settings)->clients;
-                    if($clients[0]->id == $uuid) {
+                    if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
                         $found = true;
                         $total = $row->total;
                         $up = $row->up;
@@ -46,13 +46,13 @@ if($orders){
                         
                         $clientsStates = $row->clientStats;
                         foreach($clients as $key => $client){
-                            if($client->id == $uuid){
+                            if($client['id'] == $uuid || $client['password'] == $uuid){
                                 $found = true;
-                                $email = $client->email;
+                                $email = $client['email'];
                                 $emails = array_column($clientsStates,'email');
                                 $emailKey = array_search($email,$emails);
                                 
-                                $total = $client->totalGB;
+                                $total = $client['totalGB'];
                                 $up = $clientsStates[$emailKey]->up;
                                 $enable = $clientsStates[$emailKey]->enable;
                                 $down = $clientsStates[$emailKey]->down; 
@@ -110,7 +110,7 @@ if($orders){
             foreach($response as $row){
                 if($inbound_id == 0) {
                     $clients = json_decode($row->settings)->clients;
-                    if($clients[0]->id == $uuid) {
+                    if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
                         $total = $row->total;
                         $up = $row->up;
                         $down = $row->down;
@@ -125,12 +125,12 @@ if($orders){
                         
                         $clientsStates = $row->clientStats;
                         foreach($clients as $key => $client){
-                            if($client->id == $uuid){
-                                $email = $client->email;
+                            if($client['id'] == $uuid || $client['password'] == $uuid){
+                                $email = $client['email'];
                                 $emails = array_column($clientsStates,'email');
                                 $emailKey = array_search($email,$emails);
                                 
-                                $total = $client->totalGB;
+                                $total = $client['totalGB'];
                                 $up = $clientsStates[$emailKey]->up;
                                 $enable = $clientsStates[$emailKey]->enable;
                                 $down = $clientsStates[$emailKey]->down; 
@@ -145,7 +145,7 @@ if($orders){
             $now_microdate = floor(microtime(true) * 1000);
             if($expiryTime <= $now_microdate) $send = true; elseif($leftgb <= 0) $send = true;
             if($send){  
-                if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $uuid); else $res = deleteInbound($server_id, $uuid); 
+                if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $uuid, 1); else $res = deleteInbound($server_id, $uuid, 1); 
         		if(!is_null($res)){
                     $msg = "💡 کاربر گرامی،
     اشتراک سرویس $remark منقضی شد و از لیست سفارش ها حذف گردید. لطفا از فروشگاه, سرویس جدید خریداری کنید.";
