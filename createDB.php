@@ -42,7 +42,7 @@ $connection->query("CREATE TABLE `discounts` (
 )");
 
 $connection->query("CREATE TABLE `gift_list` (
-  `id` int(255) NOT NULL,
+  `id` int(255) NOT NULL AUTO_INCREMENT,
   `server_id` int(255) NOT NULL,
   `volume` int(255) NOT NULL,
   `day` int(255) NOT NULL,
