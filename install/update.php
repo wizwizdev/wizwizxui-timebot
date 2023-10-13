@@ -96,7 +96,8 @@ $arrays = [
     "ALTER TABLE `users` ADD `spam_info` VARCHAR(500) NULL AFTER `agent_date`;",
     "ALTER TABLE `server_info` CHANGE `title` `title` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;",
     "UPDATE `orders_list` SET `status` = 1",
-    "ALTER TABLE `orders_list` ADD `uuid` VARCHAR(100) NULL AFTER `remark`;"
+    "ALTER TABLE `orders_list` ADD `uuid` VARCHAR(100) NULL AFTER `remark`;",
+    "ALTER TABLE `gift_list` CHANGE `id` `id` INT(255) NOT NULL AUTO_INCREMENT;"
     ];
 
 
