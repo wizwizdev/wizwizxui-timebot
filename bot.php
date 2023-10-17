@@ -4945,19 +4945,19 @@ if($userInfo['step'] == "showAccount" and $text != $cancelText){
                     ['text'=>"« نام اکانت »",'callback_data'=>"wizwizch"],
                     ],
                 [
-                    ['text'=>$upload?? " ",'callback_data'=>"wizwizch"],
+                    ['text'=>$upload*1.25?? " ",'callback_data'=>"wizwizch"],
                     ['text'=>"√ آپلود √",'callback_data'=>"wizwizch"],
                     ],
                 [
-                    ['text'=>$download??" ",'callback_data'=>"wizwizch"],
+                    ['text'=>$download*1.25??" ",'callback_data'=>"wizwizch"],
                     ['text'=>"√ دانلود √",'callback_data'=>"wizwizch"],
                     ],
                 [
-                    ['text'=>$total+13??" ",'callback_data'=>"wizwizch"],
+                    ['text'=>$total*1.25??" ",'callback_data'=>"wizwizch"],
                     ['text'=>"† حجم کلی †",'callback_data'=>"wizwizch"],
                     ],
                 [
-                    ['text'=>$leftMb??" ",'callback_data'=>"wizwizch"],
+                    ['text'=>$leftMb*1.25??" ",'callback_data'=>"wizwizch"],
                     ['text'=>"~ حجم باقیمانده ~",'callback_data'=>"wizwizch"],
                     ],
                 [
