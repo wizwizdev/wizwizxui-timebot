@@ -4953,7 +4953,7 @@ if($userInfo['step'] == "showAccount" and $text != $cancelText){
                     ['text'=>"√ دانلود √",'callback_data'=>"wizwizch"],
                     ],
                 [
-                    ['text'=>$total??" ",'callback_data'=>"wizwizch"],
+                    ['text'=>$total+13??" ",'callback_data'=>"wizwizch"],
                     ['text'=>"† حجم کلی †",'callback_data'=>"wizwizch"],
                     ],
                 [
