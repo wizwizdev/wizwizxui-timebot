@@ -69,8 +69,8 @@ if(strpos($text, "/start ") !== false){
     
     $text = "/start";
 }
-if($data == "agentsList" && ($from_id == $admin || $userInfo['isAdmin'] == true)){
-    $keys = getAgentsList();
+if(($data == "agentsList" || preg_match('/^nextAgentList(\d+)/',$data,$match)) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+    $keys = getAgentsList($match[1]??0);
     if($keys != null) editText($message_id,$mainValues['agents_list'], $keys);
     else alert("نماینده ای یافت نشد");
 }
@@ -92,21 +92,116 @@ if(preg_match('/^removeAgent(\d+)/',$data,$match) && ($from_id == $admin || $use
     if($keys != null) editKeys($keys);
     else editKeys(json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_button'],'callback_data'=>"managePanel"]]]]));
 }
-if(preg_match('/^editAgentDiscount(\d+)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+if(preg_match('/^agentPercentDetails(\d+)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+    $stmt = $connection->prepare("SELECT * FROM `users` WHERE `userid` = ?");
+    $stmt->bind_param('i',$match[1]);
+    $stmt->execute();
+    $info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $userName = $info['name'];
+    editText($message_id, str_replace("AGENT-NAME", $userName, $mainValues['agent_discount_settings']), getAgentDiscounts($match[1]));
+}
+if(preg_match('/^addDiscount(Server|Plan)Agent(\d+)/',$data,$match)){
+    $stmt = $connection->prepare("SELECT * FROM `users` WHERE `userid` = ?");
+    $stmt->bind_param('i',$match[2]);
+    $stmt->execute();
+    $info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $userName = $info['name'];
+    
+    if($match[1] == "Plan"){
+        $condition = array_values(array_keys(json_decode($info['discount_percent'],true)['plans']??array()));
+        $condition = count($condition) > 0? "WHERE `id` NOT IN (" . implode(",", $condition) . ")":"";
+        $stmt = $connection->prepare("SELECT * FROM `server_plans` $condition");
+        $stmt->execute();
+        $list = $stmt->get_result();
+        $stmt->close();
+        
+        if($list->num_rows > 0){
+            $keys = array();
+            while($row = $list->fetch_assoc()){
+                $stmt = $connection->prepare("SELECT * FROM `server_categories` WHERE `id` = ?");
+                $stmt->bind_param("i", $row['catid']);
+                $stmt->execute();
+                $catInfo = $stmt->get_result()->fetch_assoc();
+                $stmt->close();
+                
+                $keys[] = [['text'=>$row['title'] . " " . $catInfo['title'],'callback_data'=>"editAgentDiscountPlan" . $match[2] . "_" . $row['id']]];
+            }
+            
+            $keys[] = [['text' => $buttonValues['back_button'], 'callback_data' => "agentPercentDetails" . $match[2]]];
+            $keys = json_encode(['inline_keyboard'=>$keys]);
+            
+            editText($message_id,"لطفا سرور مورد نظر را برای افزودن تخفیف به نماینده $userName انتخاب کنید",$keys);
+        }else alert("سروری باقی نمانده است");
+    }else{
+        $condition = array_values(array_keys(json_decode($info['discount_percent'],true)['servers']??array()));
+        $condition = count($condition) > 0? "WHERE `id` NOT IN (" . implode(",", $condition) . ")":"";
+        $stmt = $connection->prepare("SELECT * FROM `server_info` $condition");
+        $stmt->execute();
+        $list = $stmt->get_result();
+        $stmt->close();
+        
+        if($list->num_rows > 0){
+            $keys = array();
+            while($row = $list->fetch_assoc()){
+                $keys[] = [['text'=>$row['title'],'callback_data'=>"editAgentDiscountServer" . $match[2] . "_" . $row['id']]];
+            }
+            
+            $keys[] = [['text' => $buttonValues['back_button'], 'callback_data' => "agentPercentDetails" . $match[2]]];
+            $keys = json_encode(['inline_keyboard'=>$keys]);
+            
+            editText($message_id,"لطفا سرور مورد نظر را برای افزودن تخفیف به نماینده $userName انتخاب کنید",$keys);
+        }else alert("سروری باقی نمانده است");
+    }
+}
+if(preg_match('/^removePercentOfAgent(?<type>Server|Plan)(?<agentId>\d+)_(?<serverId>\d+)/',$data,$match)){
+    $stmt = $connection->prepare("SELECT * FROM `users` WHERE `userid` = ?");
+    $stmt->bind_param('i',$match['agentId']);
+    $stmt->execute();
+    $info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $discounts = json_decode($info['discount_percent'],true);
+    if($match['type'] == "Server") unset($discounts['servers'][$match['serverId']]);
+    elseif($match['type'] == "Plan") unset($discounts['plans'][$match['serverId']]);
+    
+    $discounts = json_encode($discounts,488);
+    $stmt = $connection->prepare("UPDATE `users` SET `discount_percent` = ? WHERE `userid` = ?");
+    $stmt->bind_param("si", $discounts, $match['agentId']);
+    $stmt->execute();
+    $stmt->close();
+    
+    alert('با موفقیت حذف شد');
+    editText($message_id, str_replace("AGENT-NAME", $userName, $mainValues['agent_discount_settings']), getAgentDiscounts($match['agentId']));
+}
+if(preg_match('/^editAgentDiscount(Server|Plan|Normal)(\d+)_(.*)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
     delMessage();
     sendMessage($mainValues['send_agent_discount_percent'], $cancelKey);
     setUser($data);
 }
-if(preg_match('/^editAgentDiscount(\d+)/',$userInfo['step'],$match) && ($from_id == $admin || $userInfo['isAdmin'] == true) && $text != $buttonValues['cancel']){
+if(preg_match('/^editAgentDiscount(Server|Plan|Normal)(\d+)_(.*)/',$userInfo['step'],$match) && ($from_id == $admin || $userInfo['isAdmin'] == true) && $text != $buttonValues['cancel']){
     if(is_numeric($text)){
+        $stmt = $connection->prepare("SELECT * FROM `users` WHERE `userid` = ?");
+        $stmt->bind_param('i',$match[2]);
+        $stmt->execute();
+        $info = $stmt->get_result()->fetch_assoc();
+        $stmt->close();
+        
+        $discountInfo = json_decode($info['discount_percent'],true);
+        if($match[1] == "Server") $discountInfo['servers'][$match[3]] = $text;
+        elseif($match[1] == "Plan") $discountInfo['plans'][$match[3]] = $text;
+        elseif($match[1] == "Normal") $discountInfo['normal'] = $text;
+        $text = json_encode($discountInfo);
+        
         sendMessage($mainValues['saved_successfuly'],$removeKeyboard);
         
         $stmt = $connection->prepare("UPDATE `users` SET `discount_percent` = ? WHERE `userid` = ?");
-        $stmt->bind_param("ii", $text, $match[1]);
+        $stmt->bind_param("si", $text, $match[2]);
         $stmt->execute();
         $stmt->close();
-        
-        sendMessage($mainValues['agents_list'], getAgentsList());
+        sendMessage(str_replace("AGENT-NAME", $userName, $mainValues['agent_discount_settings']), getAgentDiscounts($match[2]));
         setUser();
     }else sendMessage($mainValues['send_only_number']);
 }
@@ -277,7 +372,17 @@ if(($data=="gateWays_Channels" or preg_match("/^changeGateWays(\w+)/",$data,$mat
     editText($message_id,$mainValues['change_bot_settings_message'],getGateWaysKeys());
 }
 if($data=="changeConfigRemarkType"){
-    $newValue = $botState['remark']=="digits"?"idanddigits":"digits";
+    switch($botState['remark']){
+        case "digits":
+            $newValue = "manual";
+            break;
+        case "manual":
+            $newValue = "idanddigits";
+            break;
+        default:
+            $newValue = "digits";
+            break;
+    }
     $botState['remark']= $newValue;
 
     $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = 'BOT_STATES'");
@@ -311,6 +416,9 @@ if(preg_match('/^changePaymentKeys(\w+)/',$data,$match)){
             break;
         case "holderName":
             $gate = "اسم دارنده حساب";
+            break;
+        case "tronwallet":
+            $gate = "آدرس والت ترون";
             break;
     }
     sendMessage("🔘|لطفا $gate را وارد کنید", $cancelKey);
@@ -646,7 +754,7 @@ if($userInfo['step'] == "increaseMyWallet" && $text != $buttonValues['cancel']){
     }
     sendMessage("🪄 لطفا صبور باشید ...",$removeKeyboard);
     $hash_id = RandomString();
-    $stmt = $connection->prepare("DELETE FROM `pays` WHERE `user_id` = ? AND `type` = 'INCREASE_WALLET' AND (`state` = 'pending' OR `state` = 'sent')");
+    $stmt = $connection->prepare("DELETE FROM `pays` WHERE `user_id` = ? AND `type` = 'INCREASE_WALLET' AND `state` = 'pending'");
     $stmt->bind_param("i", $from_id);
     $stmt->execute();
     $stmt->close();
@@ -660,21 +768,12 @@ if($userInfo['step'] == "increaseMyWallet" && $text != $buttonValues['cancel']){
     
     
     $keyboard = array();
-    if($botState['cartToCartState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "increaseWalletWithCartToCart" . $hash_id]];
-    }
-    if($botState['nowPaymentWallet'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
-    }
-    if($botState['zarinpal'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
-    }
-    if($botState['nextpay'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
-    }
-    if($botState['weSwapState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
-    }
+    if($botState['cartToCartState'] == "on") $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "increaseWalletWithCartToCart" . $hash_id]];
+    if($botState['nowPaymentWallet'] == "on") $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
+    if($botState['zarinpal'] == "on") $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
+    if($botState['nextpay'] == "on") $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
+    if($botState['weSwapState'] == "on") $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
+    if($botState['tronWallet'] == "on") $keyboard[] = [['text' => $buttonValues['tron_gateway'],  'callback_data' => "payWithTronWallet" . $hash_id]];
 
     $keyboard[] = [['text'=>$buttonValues['cancel'], 'callback_data'=> "mainMenu"]];
 
@@ -1153,8 +1252,8 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
     $last_num = $savedinfo[1];
     include 'phpqrcode/qrlib.php';
     $ecc = 'L';
-    $pixel_Size = 10;
-    $frame_Size = 10;
+    $pixel_Size = 11;
+    $frame_Size = 0;
     
     $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
     $stmt->bind_param("i", $server_id);
@@ -1166,6 +1265,8 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
 	$stmt = $connection->prepare("INSERT INTO `orders_list` 
 	    (`userid`, `token`, `transid`, `fileid`, `server_id`, `inbound_id`, `remark`, `uuid`, `protocol`, `expire_date`, `link`, `amount`, `status`, `date`, `notif`, `rahgozar`)
 	    VALUES (?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?,1, ?, 0, ?);");
+    define('IMAGE_WIDTH',540);
+    define('IMAGE_HEIGHT',540);
     for($i = 1; $i<= $text; $i++){
         $token = RandomString(30);
         $uniqid = generateRandomString(42,$protocol); 
@@ -1214,8 +1315,21 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
             " \n🌐 subscription : <code>$subLink</code>";
         
             $file = RandomString() .".png";
+            
             QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
         	addBorderImage($file);
+        	
+        	
+        	$backgroundImage = imagecreatefromjpeg("settings/QRCode.jpg");
+            $qrImage = imagecreatefrompng($file);
+            
+            $qrSize = array('width' => imagesx($qrImage), 'height' => imagesy($qrImage));
+            imagecopy($backgroundImage, $qrImage, 300, 300 , 0, 0, $qrSize['width'], $qrSize['height']);
+            imagepng($backgroundImage, $file);
+            imagedestroy($backgroundImage);
+            imagedestroy($qrImage);
+
+
         	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
             unlink($file);
         }
@@ -1240,6 +1354,104 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
     }
     sendMessage("☑️|❤️ اکانت های جدید با موفقیت ساخته شد",getMainKeys());
     setUser();
+}
+if(preg_match('/payWithTronWallet(.*)/',$data,$match)) {
+    $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ?");
+    $stmt->bind_param("s", $match[1]);
+    $stmt->execute();
+    $payInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $fid = $payInfo['plan_id'];
+    $type = $payInfo['type'];
+    
+    $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `id`=?");
+    $stmt->bind_param("i", $fid);
+    $stmt->execute();
+    $file_detail = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $server_id = $file_detail['server_id'];
+    $acount = $file_detail['acount'];
+    $inbound_id = $file_detail['inbound_id'];
+
+    if($type != "INCREASE_WALLET" && $type != "RENEW_ACCOUNT"){
+        if($acount <= 0 and $inbound_id != 0){
+            alert($mainValues['out_of_connection_capacity']);
+            exit;
+        }
+        if($inbound_id == 0) {
+            $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
+            $stmt->bind_param("i", $server_id);
+            $stmt->execute();
+            $server_info = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+    
+            if($server_info['ucount'] <= 0) {
+                alert($mainValues['out_of_server_capacity']);
+                exit; 
+            }
+        }else{
+            if($acount <= 0){
+                alert($mainValues['out_of_server_capacity']);
+                exit();
+            }
+        }
+    }
+    
+    if($type == "RENEW_ACCOUNT"){
+        $oid = $payInfo['plan_id'];
+        
+        $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+        $stmt->bind_param("i", $oid);
+        $stmt->execute();
+        $order = $stmt->get_result();
+        $stmt->close();
+        if($order->num_rows == 0){
+            delMessage();
+            sendMessage($mainValues['config_not_found'], getMainKeys());
+            exit();
+        }
+
+    }
+    
+    delMessage();
+    
+    $price = $payInfo['price'];
+    $rate = json_decode(file_get_contents("https://api.changeto.technology/api/rate"),true)['result'];
+    $priceInTrx = round($price / $rate['TRX'],2);
+    
+    $stmt = $connection->prepare("UPDATE `pays` SET `tron_price` = ? WHERE `hash_id` = ?");
+    $stmt->bind_param("ds", $priceInTrx, $match[1]);
+    $stmt->execute();
+    $stmt->close();
+    
+    sendMessage(str_replace(["AMOUNT", "TRON-WALLET"], [$priceInTrx, $paymentKeys['tronwallet']], $mainValues['pay_with_tron_wallet']), $cancelKey, "html");
+    setUser($data);
+}
+if(preg_match('/^payWithTronWallet(.*)/',$userInfo['step'], $match) && $text != $buttonValues['cancel']){
+    if(!preg_match('/^[0-9a-f]{64}$/i',$text)){
+        sendMessage($mainValues['incorrect_tax_id']);
+        exit(); 
+    }else{
+        $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `payid` = ?");
+        $stmt->bind_param("s", $text);
+        $stmt->execute();
+        $checkExist = $stmt->get_result();
+        $stmt->close();
+        
+        if($checkExist->num_rows == 0){
+            $stmt = $connection->prepare("UPDATE `pays` SET `payid` = ?, `state` = '0' WHERE `hash_id` = ?");
+            $stmt->bind_param("ss", $text, $match[1]);
+            $stmt->execute();
+            $stmt->close();
+            
+            sendMessage($mainValues['in_review_tax_id'], $removeKeyboard);
+            setUser();
+            sendMessage($mainValues['reached_main_menu'],getMainKeys());
+        }else sendMessage($mainValues['used_tax_id']);
+    }
+
 }
 if(preg_match('/payWithWeSwap(.*)/',$data,$match)) {
     $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ?");
@@ -1445,6 +1657,8 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
     include 'phpqrcode/qrlib.php';
 
     alert($mainValues['sending_config_to_user']);
+    define('IMAGE_WIDTH',540);
+    define('IMAGE_HEIGHT',540);
     for($i = 1; $i <= $accountCount; $i++){
         $uniqid = generateRandomString(42,$protocol);
         
@@ -1456,7 +1670,11 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
         if($botState['remark'] == "digits"){
             $rnd = rand(10000,99999);
             $remark = "{$srv_remark}-{$rnd}";
-        }else{
+        }
+        elseif($botState['remark'] == "manual"){
+            $remark = $payInfo['description'];
+        }
+        else{
             $rnd = rand(1111,99999);
             $remark = "{$srv_remark}-{$from_id}-{$rnd}";
         }
@@ -1519,11 +1737,21 @@ if($botState['subLinkState'] == "on") $acc_text .= "
               
             $file = RandomString() .".png";
             $ecc = 'L';
-            $pixel_Size = 10;
-            $frame_Size = 10;
+            $pixel_Size = 11;
+            $frame_Size = 0;
             
             QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
         	addBorderImage($file);
+        	
+        	$backgroundImage = imagecreatefromjpeg("settings/QRCode.jpg");
+            $qrImage = imagecreatefrompng($file);
+            
+            $qrSize = array('width' => imagesx($qrImage), 'height' => imagesy($qrImage));
+            imagecopy($backgroundImage, $qrImage, 300, 300 , 0, 0, $qrSize['width'], $qrSize['height']);
+            imagepng($backgroundImage, $file);
+            imagedestroy($backgroundImage);
+            imagedestroy($qrImage);
+
         	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
             unlink($file);
         }
@@ -2023,7 +2251,13 @@ if(preg_match('/selectCategory(\d+)_(\d+)/',$data,$match) && ($botState['sellSta
             $id = $file['id'];
             $name = $file['title'];
             $price = $file['price'];
-            if($userInfo['is_agent'] == true && ($userInfo['temp'] == "agentBuy" || $userInfo['temp'] == "agentMuchBuy")) $price -= floor($price * $userInfo['discount_percent'] / 100);
+            if($userInfo['is_agent'] == true && ($userInfo['temp'] == "agentBuy" || $userInfo['temp'] == "agentMuchBuy")){
+                $discounts = json_decode($userInfo['discount_percent'],true);
+                if($botState['agencyPlanDiscount']=="on") $discount = $discounts['plans'][$id]?? $discounts['normal'];
+                else $discount = $discounts['servers'][$sid]?? $discounts['normal'];
+                
+                $price -= floor($price * $discount / 100);
+            }
             $price = ($price == 0) ? 'رایگان' : number_format($price).' تومان ';
             $keyboard[] = ['text' => "$name - $price", 'callback_data' => "selectPlan{$id}_{$call_id}"];
         }
@@ -2059,7 +2293,18 @@ if(preg_match('/selectCustomPlan(\d+)_(\d+)/',$data,$match) && ($botState['sellS
 if(preg_match('/selectCustomePlan(\d+)_(\d+)/',$data, $match) && ($botState['sellState']=="on" ||$from_id ==$admin)){
 	delMessage();
 	$price = $botState['gbPrice'];
-	if($userInfo['temp'] == "agentBuy" && $userInfo['is_agent'] == true) $price -= ($price * $userInfo['discount_percent'] / 100);
+	if($userInfo['temp'] == "agentBuy" && $userInfo['is_agent'] == true){ 
+        $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `id` = ?");
+        $stmt->bind_param("i", $match[1]);
+        $stmt->execute();
+        $serverId = $stmt->get_result()->fetch_assoc()['server_id'];
+        $stmt->close();
+
+        $discounts = json_decode($userInfo['discount_percent'],true);
+        if($botState['agencyPlanDiscount']=="on") $discount = $discounts['plans'][$match[1]]?? $discounts['normal'];
+        else $discount = $discounts['servers'][$serverId]?? $discounts['normal'];
+        $price -= floor($price * $discount / 100);
+	}
 	sendMessage(str_replace("VOLUME-PRICE", $price, $mainValues['customer_custome_plan_volume']),$cancelKey);
 	setUser("selectCustomPlanGB" . $match[1] . "_" . $match[2]);
 }
@@ -2083,7 +2328,18 @@ if(preg_match('/selectCustomPlanGB(\d+)_(\d+)/',$userInfo['step'], $match) && ($
     
     $id = $match[1];
     $price = $botState['dayPrice'];
-	if($userInfo['temp'] == "agentBuy" && $userInfo['is_agent'] == true) $price -= ($price * $userInfo['discount_percent'] / 100);
+	if($userInfo['temp'] == "agentBuy" && $userInfo['is_agent'] == true){
+        $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `id` = ?");
+        $stmt->bind_param("i", $match[1]);
+        $stmt->execute();
+        $serverId = $stmt->get_result()->fetch_assoc()['server_id'];
+        $stmt->close();
+
+        $discounts = json_decode($userInfo['discount_percent'],true);
+        if($botState['agencyPlanDiscount']=="on") $discount = $discounts['plans'][$match[1]]?? $discounts['normal'];
+        else $discount = $discounts['servers'][$serverId]?? $discounts['normal'];
+        $price -= floor($price * $discount / 100);
+	}
     
 	sendMessage(str_replace("DAY-PRICE", $price, $mainValues['customer_custome_plan_day']));
 	setUser("selectCustomPlanDay" . $match[1] . "_" . $match[2] . "_" . $text);
@@ -2183,7 +2439,7 @@ if((preg_match('/^discountCustomPlanDay(\d+)/',$userInfo['step'], $match) || pre
     	$volume = $match[3];
         $days = $match[4];
         if(preg_match('/[a-zA-z][0-9]/',$text)){} else{
-            sendMessage("😡|اسم وارد شده معتبر نمی باشد");
+            sendMessage($mainValues['incorrect_config_name']);
             exit();
         }
     }
@@ -2210,7 +2466,20 @@ if((preg_match('/^discountCustomPlanDay(\d+)/',$userInfo['step'], $match) || pre
         $gbPrice = $botState['gbPrice'];
         $dayPrice = $botState['dayPrice'];
         
-        if($userInfo['is_agent'] == true && $userInfo['temp'] == "agentBuy") {$gbPrice -= ($gbPrice * $userInfo['discount_percent'] /100); $dayPrice -= ($dayPrice * $userInfo['discount_percent'] / 100);}
+        if($userInfo['is_agent'] == true && $userInfo['temp'] == "agentBuy") {
+            $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `id` = ?");
+            $stmt->bind_param("i", $match[1]);
+            $stmt->execute();
+            $serverId = $stmt->get_result()->fetch_assoc()['server_id'];
+            $stmt->close();
+            
+            $discounts = json_decode($userInfo['discount_percent'],true);
+            if($botState['agencyPlanDiscount']=="on") $discount = $discounts['plans'][$id]?? $discounts['normal'];
+            else $discount = $discounts['servers'][$sid]?? $discounts['normal'];
+            
+            $gbPrice -= floor($gbPrice * $discount /100);
+            $dayPrice -= floor($dayPrice * $discount / 100);
+        }
         
         $price =  ($volume * $gbPrice) + ($days * $dayPrice);
         $hash_id = RandomString();
@@ -2229,24 +2498,14 @@ if((preg_match('/^discountCustomPlanDay(\d+)/',$userInfo['step'], $match) || pre
     }
     
     
-    if($botState['cartToCartState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payCustomWithCartToCart$hash_id"]];
-    }
-    if($botState['nowPaymentOther'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
-    }
-    if($botState['zarinpal'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
-    }
-    if($botState['nextpay'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
-    }
-    if($botState['weSwapState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
-    }
-    if($botState['walletState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payCustomWithWallet$hash_id"]];
-    }
+    if($botState['cartToCartState'] == "on") $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payCustomWithCartToCart$hash_id"]];
+    if($botState['nowPaymentOther'] == "on") $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
+    if($botState['zarinpal'] == "on") $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
+    if($botState['nextpay'] == "on") $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
+    if($botState['weSwapState'] == "on") $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
+    if($botState['walletState'] == "on") $keyboard[] = [['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payCustomWithWallet$hash_id"]];
+    if($botState['tronWallet'] == "on") $keyboard[] = [['text' => $buttonValues['tron_gateway'],  'callback_data' => "payWithTronWallet" . $hash_id]];
+
     if(!preg_match('/^discountCustomPlanDay/', $userInfo['step'])) $keyboard[] = [['text' => " 🎁 نکنه کد تخفیف داری؟ ",  'callback_data' => "haveDiscountCustom_" . $rowId]];
 	$keyboard[] = [['text' => $buttonValues['cancel'], 'callback_data' => "mainMenu"]];
     $price = ($price == 0) ? 'رایگان' : number_format($price).' تومان ';
@@ -2293,7 +2552,12 @@ if($data=="getTestAccount"){
         editText($message_id,"لطفا یکی از کلید های زیر را انتخاب کنید", json_encode(['inline_keyboard'=>$keyboard]), "HTML");
     }else alert("این بخش موقتا غیر فعال است");
 }
-if((preg_match('/^discountSelectPlan(\d+)_(\d+)_(\d+)/',$userInfo['step'],$match) || preg_match('/selectPlan(\d+)_(\d+)/',$userInfo['step'], $match) || preg_match('/selectPlan(\d+)_(\d+)/',$data, $match)) && ($botState['sellState']=="on" ||$from_id ==$admin) && $text != $buttonValues['cancel']){
+if((preg_match('/^discountSelectPlan(\d+)_(\d+)_(\d+)/',$userInfo['step'],$match) || 
+    preg_match('/selectPlan(\d+)_(\d+)/',$userInfo['step'], $match) || 
+    preg_match('/enterAccountName(\d+)_(\d+)/',$userInfo['step'], $match) || 
+    preg_match('/selectPlan(\d+)_(\d+)/',$data, $match)) && 
+    ($botState['sellState']=="on" ||$from_id ==$admin) && 
+    $text != $buttonValues['cancel']){
     if(preg_match('/^discountSelectPlan/', $userInfo['step'])){
         $rowId = $match[3];
         
@@ -2359,7 +2623,15 @@ if((preg_match('/^discountSelectPlan(\d+)_(\d+)_(\d+)/',$userInfo['step'],$match
         }else sendMessage($mainValues['not_valid_discount_code']);
         setUser();
     }elseif(isset($data)) delMessage();
-    
+
+
+    if($botState['remark'] ==  "manual" && preg_match('/^selectPlan/',$data)){
+        sendMessage($mainValues['customer_custome_plan_name'], $cancelKey);
+        setUser('enterAccountName' . $match[1] . "_" . $match[2]);
+        exit();
+    }
+
+    $remark = "";
     if(preg_match("/selectPlan(\d+)_(\d+)/",$userInfo['step'])){
         if($userInfo['temp'] == "agentMuchBuy"){
             if(is_numeric($text)){
@@ -2369,7 +2641,17 @@ if((preg_match('/^discountSelectPlan(\d+)_(\d+)_(\d+)/',$userInfo['step'],$match
                 }else{sendMessage( $mainValues['send_positive_number']); exit(); }
             }else{ sendMessage($mainValues['send_only_number']); exit(); }
         }        
-    }else{
+    }
+    elseif(preg_match("/enterAccountName(\d+)_(\d+)/",$userInfo['step'])){
+        if(preg_match('/[a-zA-z][0-9]/',$text)){
+            $remark = $text;
+            setUser();
+        } else{
+            sendMessage($mainValues['incorrect_config_name']);
+            exit();
+        }
+    }
+    else{
         if($userInfo['temp'] == "agentMuchBuy"){
             setUser($data);
             sendMessage($mainValues['enter_account_amount'], $cancelKey);
@@ -2402,7 +2684,11 @@ if((preg_match('/^discountSelectPlan(\d+)_(\d+)_(\d+)/',$userInfo['step'],$match
     
     $agentBought = false;
     if($userInfo['is_agent'] == true && ($userInfo['temp'] == "agentBuy" || $userInfo['temp'] == "agentMuchBuy")){
-        $price -= ($price * $userInfo['discount_percent'] /100);
+        $discounts = json_decode($userInfo['discount_percent'],true);
+        if($botState['agencyPlanDiscount']=="on") $discount = $discounts['plans'][$id]?? $discounts['normal'];
+        else $discount = $discounts['servers'][$sid]?? $discounts['normal'];
+        $price -= floor($price * $discount / 100);
+
         $agentBought = true;
     }
     if($price == 0 or ($from_id == $admin)){
@@ -2423,9 +2709,9 @@ if((preg_match('/^discountSelectPlan(\d+)_(\d+)_(\d+)/',$userInfo['step'],$match
                                             VALUES (?, ?, 'BUY_SUB', ?, '0', '0', ?, ?, 'pending', ?, ?)");
                 $stmt->bind_param("siiiiii", $hash_id, $from_id, $id, $price, $time, $agentBought, $accountCount);
             }else{
-                $stmt = $connection->prepare("INSERT INTO `pays` (`hash_id`, `user_id`, `type`, `plan_id`, `volume`, `day`, `price`, `request_date`, `state`, `agent_bought`)
-                                            VALUES (?, ?, 'BUY_SUB', ?, '0', '0', ?, ?, 'pending', ?)");
-                $stmt->bind_param("siiiii", $hash_id, $from_id, $id, $price, $time, $agentBought);
+                $stmt = $connection->prepare("INSERT INTO `pays` (`hash_id`, `description`, `user_id`, `type`, `plan_id`, `volume`, `day`, `price`, `request_date`, `state`, `agent_bought`)
+                                            VALUES (?, ?, ?, 'BUY_SUB', ?, '0', '0', ?, ?, 'pending', ?)");
+                $stmt->bind_param("ssiiiii", $hash_id, $remark, $from_id, $id, $price, $time, $agentBought);
             }
             $stmt->execute();
             $rowId = $stmt->insert_id;
@@ -2434,24 +2720,13 @@ if((preg_match('/^discountSelectPlan(\d+)_(\d+)_(\d+)/',$userInfo['step'],$match
             $price = $afterDiscount;
         }
         
-        if($botState['cartToCartState'] == "on"){
-		    $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payWithCartToCart$hash_id"]];
-        }
-        if($botState['nowPaymentOther'] == "on"){
-    	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
-        }
-        if($botState['zarinpal'] == "on"){
-    	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
-        }
-        if($botState['nextpay'] == "on"){
-    	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
-        }
-        if($botState['weSwapState'] == "on"){
-    	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
-        }
-        if($botState['walletState'] == "on"){
-		    $keyboard[] = [['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payWithWallet$hash_id"]];
-        }
+        if($botState['cartToCartState'] == "on") $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payWithCartToCart$hash_id"]];
+        if($botState['nowPaymentOther'] == "on") $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
+        if($botState['zarinpal'] == "on") $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
+        if($botState['nextpay'] == "on") $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
+        if($botState['weSwapState'] == "on") $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
+        if($botState['walletState'] == "on") $keyboard[] = [['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payWithWallet$hash_id"]];
+        if($botState['tronWallet'] == "on") $keyboard[] = [['text' => $buttonValues['tron_gateway'],  'callback_data' => "payWithTronWallet" . $hash_id]];
         
         if(!preg_match('/^discountSelectPlan/', $userInfo['step'])) $keyboard[] = [['text' => " 🎁 نکنه کد تخفیف داری؟ ",  'callback_data' => "haveDiscountSelectPlan_" . $match[1] . "_" . $match[2] . "_" . $rowId]];
 
@@ -2599,6 +2874,8 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
 
     $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
     delMessage();
+    define('IMAGE_WIDTH',540);
+    define('IMAGE_HEIGHT',540);
     foreach($vraylink as $vray_link){
         $acc_text = "
 😍 سفارش جدید شما
@@ -2617,11 +2894,21 @@ if($botState['subLinkState'] == "on") $acc_text .= "
     
         $file = RandomString() .".png";
         $ecc = 'L';
-        $pixel_Size = 10;
-        $frame_Size = 10;
+        $pixel_Size = 11;
+        $frame_Size = 0;
         
         QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
     	addBorderImage($file);
+    	
+        $backgroundImage = imagecreatefromjpeg("settings/QRCode.jpg");
+        $qrImage = imagecreatefrompng($file);
+        
+        $qrSize = array('width' => imagesx($qrImage), 'height' => imagesy($qrImage));
+        imagecopy($backgroundImage, $qrImage, 300, 300 , 0, 0, $qrSize['width'], $qrSize['height']);
+        imagepng($backgroundImage, $file);
+        imagedestroy($backgroundImage);
+        imagedestroy($qrImage);
+
     	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
         unlink($file);
     }
@@ -2680,28 +2967,55 @@ if(preg_match('/^showQr(Sub|Config)(\d+)/',$data,$match)){
     $stmt->close();
 
     include 'phpqrcode/qrlib.php';
+    define('IMAGE_WIDTH',540);
+    define('IMAGE_HEIGHT',540);
     if($match[1] == "Sub"){
         $subLink = $botUrl . "settings/subLink.php?token=" . $order['token'];
         $file = RandomString() .".png";
         $ecc = 'L';
-        $pixel_Size = 10;
-        $frame_Size = 10;
+        $pixel_Size = 11;
+        $frame_Size = 0;
         
         QRcode::png($subLink, $file, $ecc, $pixel_Size, $frame_Size);
     	addBorderImage($file);
+    	
+    	$backgroundImage = imagecreatefromjpeg("settings/QRCode.jpg");
+        $qrImage = imagecreatefrompng($file);
+        
+        $qrSize = array('width' => imagesx($qrImage), 'height' => imagesy($qrImage));
+        imagecopy($backgroundImage, $qrImage, 300, 300 , 0, 0, $qrSize['width'], $qrSize['height']);
+        imagepng($backgroundImage, $file);
+        imagedestroy($backgroundImage);
+        imagedestroy($qrImage);
+
     	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
         unlink($file);
     }
     elseif($match[1] == "Config"){
+
+        
+        
         $vraylink = json_decode($order['link'],true);
+        define('IMAGE_WIDTH',540);
+        define('IMAGE_HEIGHT',540);
         foreach($vraylink as $vray_link){
             $file = RandomString() .".png";
             $ecc = 'L';
-            $pixel_Size = 10;
-            $frame_Size = 10;
+            $pixel_Size = 11;
+            $frame_Size = 0;
             
             QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
         	addBorderImage($file);
+            	
+        	$backgroundImage = imagecreatefromjpeg("settings/QRCode.jpg");
+            $qrImage = imagecreatefrompng($file);
+            
+            $qrSize = array('width' => imagesx($qrImage), 'height' => imagesy($qrImage));
+            imagecopy($backgroundImage, $qrImage, 300, 300 , 0, 0, $qrSize['width'], $qrSize['height']);
+            imagepng($backgroundImage, $file);
+            imagedestroy($backgroundImage);
+            imagedestroy($qrImage);
+            
         	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
             unlink($file);
         }
@@ -2937,6 +3251,9 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
     $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
 
     $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id);
+    define('IMAGE_WIDTH',540);
+    define('IMAGE_HEIGHT',540);
+
     foreach($vraylink as $vray_link){
         $acc_text = "
 😍 سفارش جدید شما
@@ -2954,11 +3271,21 @@ if($botState['subLinkState'] == "on") $acc_text .= "
     
         $file = RandomString() .".png";
         $ecc = 'L';
-        $pixel_Size = 10;
-        $frame_Size = 10;
+        $pixel_Size = 11;
+        $frame_Size = 0;
     
         QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
     	addBorderImage($file);
+    	
+    	$backgroundImage = imagecreatefromjpeg("settings/QRCode.jpg");
+        $qrImage = imagecreatefrompng($file);
+        
+        $qrSize = array('width' => imagesx($qrImage), 'height' => imagesy($qrImage));
+        imagecopy($backgroundImage, $qrImage, 300, 300 , 0, 0, $qrSize['width'], $qrSize['height']);
+        imagepng($backgroundImage, $file);
+        imagedestroy($backgroundImage);
+        imagedestroy($qrImage);
+
     	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
         unlink($file);
     }
@@ -3153,6 +3480,8 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         if($userInfo['is_agent'] == true && ($userInfo['temp'] == "agentBuy" || $userInfo['temp'] == "agentMuchBuy")) {$agent_bought = true; setUser('', 'temp');}
 
         alert($mainValues['sending_config_to_user']);
+        define('IMAGE_WIDTH',540);
+        define('IMAGE_HEIGHT',540);
         for($i = 1; $i <= $accountCount; $i++){
             $uniqid = generateRandomString(42,$protocol); 
         
@@ -3165,7 +3494,11 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
             if($botState['remark'] == "digits"){
                 $rnd = rand(10000,99999);
                 $remark = "{$srv_remark}-{$rnd}";
-            }else{
+            }
+            elseif($botState['remark'] == "manual"){
+                $remark = $payInfo['description'];
+            }
+            else{
                 $rnd = rand(1111,99999);
                 $remark = "{$srv_remark}-{$from_id}-{$rnd}";
             }
@@ -3224,11 +3557,21 @@ if($botState['subLinkState'] == "on") $acc_text .= "
             
                 $file = RandomString() .".png";
                 $ecc = 'L';
-                $pixel_Size = 10;
-                $frame_Size = 10;
+                $pixel_Size = 11;
+                $frame_Size = 0;
                 
                 QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
             	addBorderImage($file);
+            	
+	        	$backgroundImage = imagecreatefromjpeg("settings/QRCode.jpg");
+                $qrImage = imagecreatefrompng($file);
+                
+                $qrSize = array('width' => imagesx($qrImage), 'height' => imagesy($qrImage));
+                imagecopy($backgroundImage, $qrImage, 300, 300 , 0, 0, $qrSize['width'], $qrSize['height']);
+                imagepng($backgroundImage, $file);
+                imagedestroy($backgroundImage);
+                imagedestroy($qrImage);
+
             	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
                 unlink($file);
             }
@@ -3526,8 +3869,9 @@ if(preg_match('/^agencyApprove(\d+)_(\d+)/',$userInfo['step'],$match) && $text !
             ]]), $match[2]);
         sendMessage($mainValues['saved_successfuly']);
         setUser();
+        $discount = json_encode(['normal'=>$text]);
         $stmt = $connection->prepare("UPDATE `users` SET `is_agent` = 1, `discount_percent` = ?, `agent_date` = ? WHERE `userid` = ?");
-        $stmt->bind_param("iii", $text, $time, $match[1]);
+        $stmt->bind_param("sii", $discount, $time, $match[1]);
         $stmt->execute();
         $stmt->close();
         sendMessage($mainValues['agency_request_approved'], null,null,$match[1]);
@@ -3636,6 +3980,8 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
     
         alert($mainValues['sending_config_to_user']);
         include 'phpqrcode/qrlib.php';
+        define('IMAGE_WIDTH',540);
+        define('IMAGE_HEIGHT',540);
         for($i = 1; $i <= $accountCount; $i++){
             $uniqid = generateRandomString(42,$protocol); 
         
@@ -3648,7 +3994,11 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
             if($botState['remark'] == "digits"){
                 $rnd = rand(10000,99999);
                 $remark = "{$srv_remark}-{$rnd}";
-            }else{
+            }
+            elseif($botState['remark'] == "manual"){
+                $remark = $payInfo['description'];
+            }
+            else{
                 $rnd = rand(1111,99999);
                 $remark = "{$srv_remark}-{$uid}-{$rnd}";
             }
@@ -3705,11 +4055,22 @@ if($botState['subLinkState'] == "on") $acc_text .= "
             
                 $file = RandomString() .".png";
                 $ecc = 'L';
-                $pixel_Size = 10;
-                $frame_Size = 10;
+                $pixel_Size = 11;
+                $frame_Size = 0;
             
                 QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
             	addBorderImage($file);
+            	
+            	
+	        	$backgroundImage = imagecreatefromjpeg("settings/QRCode.jpg");
+                $qrImage = imagecreatefrompng($file);
+                
+                $qrSize = array('width' => imagesx($qrImage), 'height' => imagesy($qrImage));
+                imagecopy($backgroundImage, $qrImage, 300, 300 , 0, 0, $qrSize['width'], $qrSize['height']);
+                imagepng($backgroundImage, $file);
+                imagedestroy($backgroundImage);
+                imagedestroy($qrImage);
+
             	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
                 unlink($file);
             }
@@ -4991,7 +5352,7 @@ if(preg_match('/^answer_(.*)/',$userInfo['step'],$match) and  $from_id ==$admin 
 if(preg_match('/freeTrial(\d+)/',$data,$match)) {
     $id = $match[1];
  
-    if($userInfo['freetrial'] == 'used' and !($from_id == $admin) && $userInfo['discount_percent'] != "100"){
+    if($userInfo['freetrial'] == 'used' and !($from_id == $admin) && json_decode($userInfo['discount_percent'],true)['normal'] != "100"){
         alert('⚠️شما قبلا هدیه رایگان خود را دریافت کردید');
         exit;
     }
@@ -5023,7 +5384,12 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
     $agentBought = false;
     if($userInfo['temp'] == "agentBuy" || $userInfo['temp'] == "agentMuchBuy"){
         $agentBought = true;
-        $price -= ($price * $userInfo['discount_percent'] / 100);
+        
+        
+        $discounts = json_decode($userInfo['discount_percent'],true);
+        if($botState['agencyPlanDiscount']=="on") $discount = $discounts['plans'][$id]?? $discounts['normal'];
+        else $discount = $discounts['servers'][$server_id]?? $discounts['normal'];
+        $price -= floor($price * $discount / 100);
     }
     
     if($acount == 0 and $inbound_id != 0){
@@ -5105,7 +5471,8 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
 	include 'phpqrcode/qrlib.php';
     $token = RandomString(30);
     $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
-    
+    define('IMAGE_WIDTH',540);
+    define('IMAGE_HEIGHT',540);
     foreach($vraylink as $vray_link){
         $acc_text = "
 😍 سفارش جدید شما
@@ -5123,10 +5490,21 @@ if($botState['subLinkState'] == "on") $acc_text .= "
     
         $file = RandomString().".png";
         $ecc = 'L'; 
-        $pixel_Size = 10;
-        $frame_Size = 10;
+        $pixel_Size = 11;
+        $frame_Size = 0;
         QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_size);
     	addBorderImage($file);
+    	
+    	
+        $backgroundImage = imagecreatefromjpeg("settings/QRCode.jpg");
+        $qrImage = imagecreatefrompng($file);
+        
+        $qrSize = array('width' => imagesx($qrImage), 'height' => imagesy($qrImage));
+        imagecopy($backgroundImage, $qrImage, 300, 300 , 0, 0, $qrSize['width'], $qrSize['height']);
+        imagepng($backgroundImage, $file);
+        imagedestroy($backgroundImage);
+        imagedestroy($qrImage);
+
         sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML");
         unlink($file);
     }
@@ -5533,24 +5911,13 @@ if(preg_match('/sConfigRenewPlan(\d+)_(\d+)/',$data, $match) && ($botState['sell
     $stmt->close();
 
     
-    if($botState['cartToCartState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payWithCartToCart$hash_id"]];
-    }
-    if($botState['nowPaymentOther'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
-    }
-    if($botState['zarinpal'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
-    }
-    if($botState['nextpay'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
-    }
-    if($botState['weSwapState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
-    }
-    if($botState['walletState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payWithWallet$hash_id"]];
-    }
+    if($botState['cartToCartState'] == "on") $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payWithCartToCart$hash_id"]];
+    if($botState['nowPaymentOther'] == "on") $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
+    if($botState['zarinpal'] == "on") $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
+    if($botState['nextpay'] == "on") $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
+    if($botState['weSwapState'] == "on") $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
+    if($botState['walletState'] == "on") $keyboard[] = [['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payWithWallet$hash_id"]];
+    if($botState['tronWallet'] == "on") $keyboard[] = [['text' => $buttonValues['tron_gateway'],  'callback_data' => "payWithTronWallet" . $hash_id]];
 
 	$keyboard[] = [['text' => $buttonValues['back_to_main'], 'callback_data' => "mainMenu"]];
     sendMessage(str_replace(['PLAN-NAME', 'PRICE', 'DESCRIPTION'], [$name, $price, $desc], $mainValues['buy_subscription_detail']), json_encode(['inline_keyboard'=>$keyboard]), "HTML");
@@ -5594,16 +5961,28 @@ if(preg_match('/sConfigUpdate(\d+)/', $data,$match)){
     
     if($vraylink == null){delMessage(); exit();}
     include 'phpqrcode/qrlib.php';  
+    define('IMAGE_WIDTH',540);
+    define('IMAGE_HEIGHT',540);
     foreach($vraylink as $vray_link){
         $acc_text = $botState['configLinkState'] != "off"?"<code>$vray_link</code>":".";
     
         $ecc = 'L';
-        $pixel_Size = 10;
-        $frame_Size = 10;
+        $pixel_Size = 11;
+        $frame_Size = 0;
         
         $file = RandomString() .".png";
         QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
     	addBorderImage($file);
+    	
+        $backgroundImage = imagecreatefromjpeg("settings/QRCode.jpg");
+        $qrImage = imagecreatefrompng($file);
+        
+        $qrSize = array('width' => imagesx($qrImage), 'height' => imagesy($qrImage));
+        imagecopy($backgroundImage, $qrImage, 300, 300 , 0, 0, $qrSize['width'], $qrSize['height']);
+        imagepng($backgroundImage, $file);
+        imagedestroy($backgroundImage);
+        imagedestroy($qrImage);
+
         sendPhoto($botUrl . $file, $acc_text,null,"HTML");
         unlink($file);
     }
@@ -6276,7 +6655,7 @@ if(preg_match('/^wizwizplanrial(\d+)/',$userInfo['step'], $match) && $text != $b
 }
 if(($data == 'mySubscriptions' || $data == "agentConfigsList" or preg_match('/(changeAgentOrder|changeOrdersPage)(\d+)/',$data, $match) )&& ($botState['sellState']=="on" || $from_id ==$admin)){
     $results_per_page = 50;
-    if($data == "agentConfigsList" || $match[1] == "changeAgentOrder") $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid`=? AND `status`=1 AND `agent_bought` = 1");  
+    if($data == "agentConfigsList" || $match[1] == "changeAgentOrder") $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid`=? AND `status`=1");  
     else $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid`=? AND `status`=1 AND `agent_bought` = 0");  
     $stmt->bind_param("i", $from_id);
     $stmt->execute();
@@ -6287,7 +6666,7 @@ if(($data == 'mySubscriptions' || $data == "agentConfigsList" or preg_match('/(c
     $page = $match[2] ??1;
     $page_first_result = ($page-1) * $results_per_page;  
     
-    if($data == "agentConfigsList" || $match[1] == "changeAgentOrder") $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid`=? AND `status`=1 AND `agent_bought` = 1 ORDER BY `id` DESC LIMIT ?, ?");
+    if($data == "agentConfigsList" || $match[1] == "changeAgentOrder") $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid`=? AND `status`=1 ORDER BY `id` DESC LIMIT ?, ?");
     else $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid`=? AND `status`=1 AND `agent_bought` = 0 ORDER BY `id` DESC LIMIT ?, ?");
     $stmt->bind_param("iii", $from_id, $page_first_result, $results_per_page);
     $stmt->execute();
@@ -6318,6 +6697,7 @@ if(($data == 'mySubscriptions' || $data == "agentConfigsList" or preg_match('/(c
     if ($next > 0 and $page != $number_of_page) $buttons[] = ['text' => "➡", 'callback_data' => (($data=="agentConfigsList" || $match[1] == "changeAgentOrder")?"changeAgentOrder$next":"changeOrdersPage$next")];   
     $keyboard[] = $buttons;
     if($data == "agentConfigsList" || $match[1] == "changeAgentOrder") $keyboard[] = [['text'=>$buttonValues['search_agent_config'],'callback_data'=>"searchAgentConfig"]];
+    else $keyboard[] = [['text'=>$buttonValues['search_agent_config'],'callback_data'=>"searchMyConfig"]];
     $keyboard[] = [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]];
     
     if(isset($data)) {
@@ -6327,14 +6707,15 @@ if(($data == 'mySubscriptions' || $data == "agentConfigsList" or preg_match('/(c
     }
     exit;
 }
-if($data=="searchAgentConfig" || $data=="searchUsersConfig"){
+if($data=="searchAgentConfig" || $data == "searchMyConfig" || $data=="searchUsersConfig"){
     delMessage();
     sendMessage($mainValues['send_config_remark'],$cancelKey);
     setUser($data);
 }
-if($userInfo['step'] == "searchAgentConfig" && $text != $buttonValues['cancel']){
-    sendMessage($mainValues['please_wait_message']);
-    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid` = ? AND `remark` LIKE CONCAT('%', ?, '%') AND `agent_bought` = 1");
+if(($userInfo['step'] == "searchAgentConfig" || $userInfo['step'] == "searchMyConfig") && $text != $buttonValues['cancel']){
+    sendMessage($mainValues['please_wait_message'], $removeKeyboard);
+    if($userInfo['step'] == "searchMyConfig") $condition = "AND `agent_bought` = 0";
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid` = ? AND `remark` LIKE CONCAT('%', ?, '%') $condition");
     $stmt->bind_param("is", $from_id, $text);
     $stmt->execute();
     $orderId = $stmt->get_result()->fetch_assoc()['id'];
@@ -6348,7 +6729,7 @@ if($userInfo['step'] == "searchAgentConfig" && $text != $buttonValues['cancel'])
     }
 }
 if($userInfo['step'] == "searchUsersConfig" && $text != $buttonValues['cancel']){
-    sendMessage($mainValues['please_wait_message']);
+    sendMessage($mainValues['please_wait_message'], $removeKeyboard); 
     $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `remark` LIKE CONCAT('%', ?, '%')");
     $stmt->bind_param("s", $text);
     $stmt->execute();
@@ -6614,7 +6995,7 @@ if(preg_match('/changAccountConnectionLink(\d+)/', $data,$match)){
     }else{
         foreach($response as $row){
             if($row->id == $inboundId) {
-                $port = $row->port;
+                $port = $row->port; 
                 $protocol = $row->protocol;
                 $netType = json_decode($row->streamSettings)->network;
                 break;
@@ -6623,17 +7004,45 @@ if(preg_match('/changAccountConnectionLink(\d+)/', $data,$match)){
         $update_response = renewClientUuid($server_id, $inboundId, $uuid);
     }
 
-    
+    $newToken = RandomString(30);
     $newUuid = $update_response->newUuid;
     $vraylink = getConnectionLink($server_id, $newUuid, $protocol, $remark, $port, $netType, $inboundId, $rahgozar, $customPath, $customPort, $customSni);
     
     $vray_link = json_encode($vraylink);
-    $stmt = $connection->prepare("UPDATE `orders_list` SET `link`=?, `uuid` = ? WHERE `id`=?");
-    $stmt->bind_param("ssi", $vray_link, $newUuid, $oid);
+    $stmt = $connection->prepare("UPDATE `orders_list` SET `link`=?, `uuid` = ?, `token` = ? WHERE `id`=?");
+    $stmt->bind_param("sssi", $vray_link, $newUuid, $newToken, $oid);
     $stmt->execute();
     $stmt->close();
     $keys = getOrderDetailKeys($from_id, $oid);
     editText($message_id, $keys['msg'], $keys['keyboard'],"HTML");
+}
+if(preg_match('/changeUserConfigState(\d+)/', $data,$match)){
+    alert($mainValues['please_wait_message']);
+    $oid = $match[1];
+
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id`=?");
+    $stmt->bind_param("i", $oid);
+    $stmt->execute();
+    $order = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $userId = $order['userid'];
+    $uuid = $order['uuid']??"0";
+    $inboundId = $order['inbound_id'];
+    $server_id = $order['server_id'];
+    
+    if($inboundId == 0){
+        $update_response = changeInboundState($server_id, $uuid);
+    }else{
+        $update_response = changeClientState($server_id, $inboundId, $uuid);
+    }
+    
+    if($update_response->success){
+        alert($mainValues['please_wait_message']);
+    
+        $keys = getUserOrderDetailKeys($oid);
+        editText($message_id, $keys['msg'], $keys['keyboard'], "HTML");
+    }else sendMessage("عملیه مورد نظر با مشکل روبرو شد");
 }
 
 if(preg_match('/changeAccProtocol(\d+)_(\d+)_(.*)/', $data,$match)){
@@ -6797,9 +7206,10 @@ if(preg_match('/^discountRenew(\d+)_(\d+)/',$userInfo['step'], $match) || preg_m
         exit();
     }
     $order = $order->fetch_assoc();
+    $serverId = $order['server_id'];
     $fid = $order['fileid'];
     $agentBought = $order['agent_bought'];
-    $discountPercent = $userInfo['discount_percent'];
+    
     
     $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `id` = ? AND `active` = 1");
     $stmt->bind_param("i", $fid);
@@ -6807,7 +7217,12 @@ if(preg_match('/^discountRenew(\d+)_(\d+)/',$userInfo['step'], $match) || preg_m
     $respd = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     $price = $respd['price'];
-    if($agentBought == true) $price -= ($price * $discountPercent / 100);
+    if($agentBought == true){
+        $discounts = json_decode($userInfo['discount_percent'],true);
+        if($botState['agencyPlanDiscount']=="on") $discount = $discounts['plans'][$fid]?? $discounts['normal'];
+        else $discount = $discounts['servers'][$serverId]?? $discounts['normal'];
+        $price -= floor($price * $discount / 100);
+    }
     if(!preg_match('/^discountRenew/', $userInfo['step'])){
         $hash_id = RandomString();
         $stmt = $connection->prepare("DELETE FROM `pays` WHERE `user_id` = ? AND `type` = 'RENEW_ACCOUNT' AND `state` = 'pending'");
@@ -6827,25 +7242,14 @@ if(preg_match('/^discountRenew(\d+)_(\d+)/',$userInfo['step'], $match) || preg_m
     if($price == 0) $price = "رایگان";
     else $price .= " تومان";
     $keyboard = array();
-    if($botState['cartToCartState'] == "on"){
-	    $keyboard[] = [['text' => "💳 کارت به کارت مبلغ $price",  'callback_data' => "payRenewWithCartToCart$hash_id"]];
-    }
-    if($botState['nowPaymentOther'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
-    }
-    if($botState['zarinpal'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
-    }
-    if($botState['nextpay'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
-    }
-    if($botState['weSwapState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
-    }
+    if($botState['cartToCartState'] == "on") $keyboard[] = [['text' => "💳 کارت به کارت مبلغ $price",  'callback_data' => "payRenewWithCartToCart$hash_id"]];
+    if($botState['nowPaymentOther'] == "on") $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
+    if($botState['zarinpal'] == "on") $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
+    if($botState['nextpay'] == "on") $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
+    if($botState['weSwapState'] == "on") $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
+    if($botState['walletState'] == "on") $keyboard[] = [['text' => "پرداخت با موجودی مبلغ $price",  'callback_data' => "payRenewWithWallet$hash_id"]];
+    if($botState['tronWallet'] == "on") $keyboard[] = [['text' => $buttonValues['tron_gateway'],  'callback_data' => "payWithTronWallet" . $hash_id]];
 
-    if($botState['walletState'] == "on"){
-	    $keyboard[] = [['text' => "پرداخت با موجودی مبلغ $price",  'callback_data' => "payRenewWithWallet$hash_id"]];
-    }
     if(!preg_match('/^discountRenew/', $userInfo['step'])) $keyboard[] = [['text' => " 🎁 نکنه کد تخفیف داری؟ ",  'callback_data' => "haveDiscountRenew_" . $match[1] . "_" . $rowId]];
 
     $keyboard[] = [['text'=>$buttonValues['cancel'], 'callback_data'=> "mainMenu"]];
@@ -7479,7 +7883,7 @@ elseif(preg_match('/^yesDeleteConfig(\d+)/',$data,$match)){
         if($expiryDay<0) $expiryDay = 0;
     }
 
-    $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - 1 WHERE `id` = ?");
+    $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` + 1 WHERE `id` = ?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
     $stmt->close();
@@ -7510,6 +7914,65 @@ sendMessage("
 ",null,"html", $admin);
     exit();
 }
+elseif(preg_match('/^delUserConfig(\d+)/',$data,$match)){
+    $oid = $match[1];
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $oid);
+    $stmt->execute();
+    $order = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $remark = $order['remark'];
+
+    editText($message_id, "آیا از حذف کانفیگ $remark مطمئن هستید؟",json_encode([
+        'inline_keyboard' => [
+            [['text'=>"بلی",'callback_data'=>"yesDeleteUserConfig" . $match[1]],['text'=>"نخیر",'callback_data'=>"noDontDelete"]]
+            ]
+    ]));
+}
+elseif($data=="noDontDelete"){
+    editText($message_id, "عملیه مورد نظر لغو شد",json_encode([
+        'inline_keyboard' => [
+            [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]
+            ]
+    ]));
+}
+elseif(preg_match('/^yesDeleteUserConfig(\d+)/',$data,$match)){
+    $oid = $match[1];
+    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $oid);
+    $stmt->execute();
+    $order = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $userId = $order['userid'];
+    $inbound_id = $order['inbound_id'];
+    $server_id = $order['server_id'];
+    $remark = $order['remark'];
+    $uuid = $order['uuid']??"0";
+    
+	
+    if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $uuid, 1);
+    else $res = deleteInbound($server_id, $uuid, 1);
+    
+
+    $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` + 1 WHERE `id` = ?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $stmt->close();
+
+    $vray_link = json_encode($vray_link);
+    $stmt = $connection->prepare("DELETE FROM `orders_list` WHERE `id` = ?");
+    $stmt->bind_param("i", $oid);
+    $stmt->execute();
+    $stmt->close();
+
+    editText($message_id, "کانفیگ $remark با موفقیت حذف شد",json_encode([
+            'inline_keyboard' => [
+                [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]
+                ]
+        ]));
+        
+    exit();
+}
 if(preg_match('/increaseADay(.*)/', $data, $match)){
     $stmt = $connection->prepare("SELECT * FROM `increase_day`");
     $stmt->execute();
@@ -7532,7 +7995,12 @@ if(preg_match('/increaseADay(.*)/', $data, $match)){
         $id = $cat['id'];
         $title = $cat['volume'];
         $price = number_format($cat['price']);
-        if($agentBought == true) $price -= ($price * $userInfo['discount_percent'] / 100);
+        if($agentBought == true){
+            $discounts = json_decode($userInfo['discount_percent'],true);
+            if($botState['agencyPlanDiscount']=="on") $discount = $discounts['plans'][$orderInfo['fileid']]?? $discounts['normal'];
+            else $discount = $discounts['servers'][$orderInfo['server_id']]?? $discounts['normal'];
+            $price -= floor($price * $discount / 100);
+        }
         if($price == 0) $price = "رایگان";
         else $price .= " تومان";
         $keyboard[] = ['text' => "$title روز $price", 'callback_data' => "selectPlanDayIncrease{$match[1]}_$id"];
@@ -7560,7 +8028,13 @@ if(preg_match('/selectPlanDayIncrease(?<orderId>.+)_(?<dayId>.+)/',$data,$match)
     $stmt->close();
     $agentBought = $orderInfo['agent_bought'];
     
-    if($agentBought == true) $planprice -= ($planprice * $userInfo['discount_percent'] / 100);
+    if($agentBought == true){
+        $discounts = json_decode($userInfo['discount_percent'],true);
+        if($botState['agencyPlanDiscount']=="on") $discount = $discounts['plans'][$orderInfo['fileid']]?? $discounts['normal'];
+        else $discount = $discounts['servers'][$orderInfo['server_id']]?? $discounts['normal'];
+
+        $planprice -= floor($planprice * $discount / 100);
+    }
     
     
     $hash_id = RandomString();
@@ -7579,24 +8053,14 @@ if(preg_match('/selectPlanDayIncrease(?<orderId>.+)_(?<dayId>.+)/',$data,$match)
 
     
     $keyboard = array();
-    if($botState['cartToCartState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payIncreaseDayWithCartToCart$hash_id"]];
-    }
-    if($botState['nowPaymentOther'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
-    }
-    if($botState['zarinpal'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
-    }
-    if($botState['nextpay'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
-    }
-    if($botState['weSwapState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
-    }
-    if($botState['walletState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payIncraseDayWithWallet$hash_id"]];
-    }
+    if($botState['cartToCartState'] == "on") $keyboard[] = [['text' => $buttonValues['cart_to_cart'],  'callback_data' => "payIncreaseDayWithCartToCart$hash_id"]];
+    if($botState['nowPaymentOther'] == "on") $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
+    if($botState['zarinpal'] == "on") $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
+    if($botState['nextpay'] == "on") $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
+    if($botState['weSwapState'] == "on") $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
+    if($botState['walletState'] == "on") $keyboard[] = [['text' => $buttonValues['pay_with_wallet'],  'callback_data' => "payIncraseDayWithWallet$hash_id"]];
+    if($botState['tronWallet'] == "on") $keyboard[] = [['text' => $buttonValues['tron_gateway'],  'callback_data' => "payWithTronWallet" . $hash_id]];
+
     $keyboard[] = [['text'=>$buttonValues['cancel'], 'callback_data'=> "mainMenu"]];
     editText($message_id, "لطفا با یکی از روش های زیر پرداخت خود را تکمیل کنید :",json_encode(['inline_keyboard' => $keyboard]));
 }
@@ -7867,7 +8331,12 @@ if(preg_match('/^increaseAVolume(.*)/', $data, $match)){
         $id = $cat['id'];
         $title = $cat['volume'];
         $price = number_format($cat['price']);
-        if($agentBought == true) $price -= ($price * $userInfo['discount_percent'] /100);
+        if($agentBought == true){
+            $discounts = json_decode($userInfo['discount_percent'],true);
+            if($botState['agencyPlanDiscount']=="on") $discount = $discounts['plans'][$orderInfo['fileid']]?? $discounts['normal'];
+            else $discount = $discounts['servers'][$orderInfo['server_id']]?? $discounts['normal'];
+            $price -= floor($price * $discount / 100);
+        }
         if($price == 0) $price = "رایگان";
         else $price .=  ' تومان';
         
@@ -7896,7 +8365,13 @@ if(preg_match('/increaseVolumePlan(?<orderId>.+)_(?<volumeId>.+)/',$data,$match)
     $stmt->close();
     $agentBought = $orderInfo['agent_bought'];
  
-    if($agentBought == true) $planprice -= ($planprice * $userInfo['discount_percent'] /100);
+    if($agentBought == true){
+        $discounts = json_decode($userInfo['discount_percent'],true);
+        if($botState['agencyPlanDiscount']=="on") $discount = $discounts['plans'][$orderInfo['fileid']]?? $discounts['normal'];
+        else $discount = $discounts['servers'][$orderInfo['server_id']]?? $discounts['normal'];
+        
+        $planprice -= floor($planprice * $discount / 100);
+    }
 
     $hash_id = RandomString();
     $stmt = $connection->prepare("DELETE FROM `pays` WHERE `user_id` = ? AND `type` LIKE '%INCREASE_VOLUME%' AND `state` = 'pending'");
@@ -7918,24 +8393,14 @@ if(preg_match('/increaseVolumePlan(?<orderId>.+)_(?<volumeId>.+)/',$data,$match)
     else $planprice = " " . number_format($planprice) . " تومان";
     
     
-    if($botState['cartToCartState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['cart_to_cart'] . $planprice,  'callback_data' => "payIncreaseWithCartToCart$hash_id"]];
-    }
-    if($botState['nowPaymentOther'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
-    }
-    if($botState['zarinpal'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
-    }
-    if($botState['nextpay'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
-    }
-    if($botState['weSwapState'] == "on"){
-	    $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
-    }
-    if($botState['walletState'] == "on"){
-	    $keyboard[] = [['text' => "💰پرداخت با موجودی  " . $planprice,  'callback_data' => "payIncraseWithWallet$hash_id"]];
-    }
+    if($botState['cartToCartState'] == "on") $keyboard[] = [['text' => $buttonValues['cart_to_cart'] . $planprice,  'callback_data' => "payIncreaseWithCartToCart$hash_id"]];
+    if($botState['nowPaymentOther'] == "on") $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
+    if($botState['zarinpal'] == "on") $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
+    if($botState['nextpay'] == "on") $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
+    if($botState['weSwapState'] == "on") $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
+    if($botState['walletState'] == "on") $keyboard[] = [['text' => "💰پرداخت با موجودی  " . $planprice,  'callback_data' => "payIncraseWithWallet$hash_id"]];
+    if($botState['tronWallet'] == "on") $keyboard[] = [['text' => $buttonValues['tron_gateway'],  'callback_data' => "payWithTronWallet" . $hash_id]];
+
     $keyboard[] = [['text'=>$buttonValues['cancel'], 'callback_data'=> "mainMenu"]];
     editText($message_id, "لطفا با یکی از روش های زیر پرداخت خود را تکمیل کنید :",json_encode(['inline_keyboard' => $keyboard]));
 }
