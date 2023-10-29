@@ -13,17 +13,21 @@ include "jdf.php";
 if(isset($_REQUEST['id'])){
     $config_link = $_REQUEST['id'];
 
-    if(preg_match('/^vmess:\/\/(.*)/',$config_link,$match)){
-        $jsonDecode = json_decode(base64_decode($match[1]),true);
-        $config_link = $jsonDecode['id'];
-    }elseif(preg_match('/^vless:\/\/(.*?)\@/',$config_link,$match)){
-        $config_link = $match[1];
-    }elseif(preg_match('/^trojan:\/\/(.*?)\@/',$config_link,$match)){
-        $config_link = $match[1];
-    }elseif(!preg_match('/[a-f0-9]{8}\-[a-f0-9]{4}\-4[a-f0-9]{3}\-(8|9|a|b)[a-f0-9]{3}\-[a-f0-9]{12}/', $config_link)){
-        form("متن وارد شده معتبر نمی باشد");
-        exit();
-    }
+        if(preg_match('/^vmess:\/\/(.*)/',$config_link,$match)){
+            $jsonDecode = json_decode(base64_decode($match[1]),true);
+            $connectionLink = $config_link;
+            $config_link = $jsonDecode['id'];
+        }elseif(preg_match('/^vless:\/\/(.*?)\@/',$config_link,$match)){
+            $connectionLink = $config_link;
+            $config_link = $match[1];
+        }elseif(preg_match('/^trojan:\/\/(.*?)\@/',$config_link,$match)){
+            $connectionLink = $config_link;
+            $config_link = $match[1];
+        }elseif(!preg_match('/[a-f0-9]{8}\-[a-f0-9]{4}\-4[a-f0-9]{3}\-(8|9|a|b)[a-f0-9]{3}\-[a-f0-9]{12}/', $config_link)
+            && !(preg_match('/^[a-zA-Z0-9]{5,15}/',$config_link))){
+            form("متن وارد شده معتبر نمی باشد");
+            exit();
+        }
 
     $stmt = $connection->prepare("SELECT * FROM `server_config`");
     $stmt->execute();
