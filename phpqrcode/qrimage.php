@@ -86,8 +86,15 @@
                 }
             }
             
-            $target_image =ImageCreate($imgW * $pixelPerPoint, $imgH * $pixelPerPoint);
-            ImageCopyResized($target_image, $base_image, 0, 0, 0, 0, $imgW * $pixelPerPoint, $imgH * $pixelPerPoint, $imgW, $imgH);
+            // $target_image =ImageCreate($imgW * $pixelPerPoint, $imgH * $pixelPerPoint);
+            // ImageCopyResized($target_image, $base_image, 0, 0, 0, 0, $imgW * $pixelPerPoint, $imgH * $pixelPerPoint, $imgW, $imgH);
+
+            $targetW = (defined('IMAGE_WIDTH') ? IMAGE_WIDTH : $imgW * $pixelPerPoint );
+            $targetH = (defined('IMAGE_HEIGHT') ? IMAGE_HEIGHT : $imgH * $pixelPerPoint );
+
+            $target_image =ImageCreate($targetW, $targetH);
+
+            ImageCopyResized($target_image, $base_image, 0, 0, 0, 0, $targetW, $targetH, $imgW, $imgH);
             ImageDestroy($base_image);
             
             return $target_image;
