@@ -107,6 +107,7 @@ if($orders){
             $notif = $order['notif'];
             
             $response = getJson($server_id)->obj;  
+            $found = false;
             foreach($response as $row){
                 if($inbound_id == 0) {
                     $clients = json_decode($row->settings)->clients;
@@ -115,6 +116,7 @@ if($orders){
                         $up = $row->up;
                         $down = $row->down;
                         $expiryTime = $row->expiryTime;
+                        $found = true;
                         break;
                     }
                 }else{
@@ -135,12 +137,14 @@ if($orders){
                                 $enable = $clientsStates[$emailKey]->enable;
                                 $down = $clientsStates[$emailKey]->down; 
                                 $expiryTime = $clientsStates[$emailKey]->expiryTime;
+                                $found = true;
                                 break;
                             }
                         }
                     }
                 }
             } 
+            if(!$found) continue;
             $leftgb = round( ($total - $up - $down) / 1073741824, 2);
             $now_microdate = floor(microtime(true) * 1000);
             if($expiryTime <= $now_microdate) $send = true; elseif($leftgb <= 0) $send = true;
