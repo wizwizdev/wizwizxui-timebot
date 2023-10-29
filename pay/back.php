@@ -288,6 +288,8 @@ if($payType == "BUY_SUB"){
     $portType = $stmt->get_result()->fetch_assoc()['port_type'];
     $stmt->close();
     include '../phpqrcode/qrlib.php';
+    define('IMAGE_WIDTH',540);
+    define('IMAGE_HEIGHT',540);
 
     for($i =1; $i<= $accountCount; $i++){
         $uniqid = generateRandomString(42,$protocol); 
@@ -307,7 +309,11 @@ if($payType == "BUY_SUB"){
         if($botState['remark'] == "digits"){
             $rnd = rand(10000,99999);
             $remark = "{$srv_remark}-{$rnd}";
-        }else{
+        }
+        elseif($botState['remark'] == "manual"){
+            $remark = $description;
+        }
+        else{
             $rnd = rand(1111,99999);
             $remark = "{$srv_remark}-{$user_id}-{$rnd}";
         }
@@ -388,11 +394,21 @@ if($payType == "BUY_SUB"){
         
             $file = RandomString() .".png";
             $ecc = 'L';
-            $pixel_Size = 10;
-            $frame_Size = 10;
+            $pixel_Size = 11;
+            $frame_Size = 0;
             
             QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
         	addBorderImage($file);
+        	
+	        $backgroundImage = imagecreatefromjpeg("../settings/QRCode.jpg");
+            $qrImage = imagecreatefrompng($file);
+            
+            $qrSize = array('width' => imagesx($qrImage), 'height' => imagesy($qrImage));
+            imagecopy($backgroundImage, $qrImage, 300, 300 , 0, 0, $qrSize['width'], $qrSize['height']);
+            imagepng($backgroundImage, $file);
+            imagedestroy($backgroundImage);
+            imagedestroy($qrImage);
+
         	sendPhoto($botUrl . "pay/" . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>"صفحه اصلی 🏘",'callback_data'=>"mainMenu"]]]]),"HTML", $user_id);
             unlink($file);
         }
