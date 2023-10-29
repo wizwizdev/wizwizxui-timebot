@@ -246,7 +246,7 @@ $connection->query("CREATE TABLE `users` (
   `first_start` varchar(10) DEFAULT NULL,
   `temp` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL,
   `is_agent` int(1) NOT NULL DEFAULT 0,
-  `discount_percent` int(255) NOT NULL DEFAULT 0,
+  `discount_percent` VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL,
   `agent_date` int(255) NOT NULL DEFAULT 0,
   `spam_info` varchar(500),
   PRIMARY KEY (`id`)
