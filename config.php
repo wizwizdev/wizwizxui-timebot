@@ -1800,8 +1800,28 @@ function getOrderDetailKeys($from_id, $id){
                         $up = $row->up;
                         $down = $row->down; 
                         $enable = $row->enable;
+                        $expiryTime = $row->expiryTime;
+                        
                         $netType = json_decode($row->streamSettings)->network;
                         $security = json_decode($row->streamSettings)->security;
+                        
+                        $clientsStates = $row->clientStats;
+                        
+                        $inboundEmail = $clients[0]->email;
+                        $allEmails = array_column($clientsStates,'email');
+                        $clienEmailKey = array_search($inboundEmail,$allEmails);
+
+                        $clientTotal = $clientsStates[$clienEmailKey]->total;
+                        $clientUp = $clientsStates[$clienEmailKey]->up;
+                        $clientDown = $clientsStates[$clienEmailKey]->down;
+                        $clientExpiryTime = $clientsStates[$clienEmailKey]->expiryTime;
+                            
+                        if($clientTotal != 0 && $clientTotal != null && $clientExpiryTime != 0 && $clientExpiryTime != null){
+                            $up += $clientUp;
+                            $down += $clientDown;
+                            $total = $clientTotal;
+                        }
+
                         break;
                     }
                 }
