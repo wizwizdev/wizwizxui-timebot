@@ -160,5 +160,50 @@ function updateBot(){
             }
         }
     }
+    
+    $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = 'BOT_STATES'");
+    $stmt->execute();
+    $isExists = $stmt->get_result();
+    $stmt->close();
+    if($isExists->num_rows>0){
+        
+        $botState = $isExists->fetch_assoc()['value'];
+        if(!is_null($botState)) $botState = json_decode($botState,true);
+        else $botState = array();
+        
+        if(!isset($botState['USDRate']) && !isset($botState['TRXRate'])){
+            $query = "UPDATE `setting` SET `value` = ? WHERE `type` = 'BOT_STATES'";
+            
+            $rate = json_decode(file_get_contents("https://api.changeto.technology/api/rate"),true)['result'];
+            if(!empty($rate['USD'])) $botState['USDRate'] = $rate['USD'];
+            if(!empty($rate['TRX'])) $botState['TRXRate'] = $rate['TRX'];
+            
+            $newData = json_encode($botState);
+            
+            $stmt = $connection->prepare($query);
+            $stmt->bind_param("s", $newData);
+            $stmt->execute();
+            $stmt->close();
+        }
+    }
+    else{
+        $query = "INSERT INTO `setting` (`type`, `value`) VALUES ('BOT_STATES', ?)";
+
+        $botState = array();
+        
+        $rate = json_decode(file_get_contents("https://api.changeto.technology/api/rate"),true)['result'];
+        if(!empty($rate['USD'])) $botState['USDRate'] = $rate['USD'];
+        if(!empty($rate['TRX'])) $botState['TRXRate'] = $rate['TRX'];
+        
+        $newData = json_encode($botState);
+        
+        $stmt = $connection->prepare($query);
+        $stmt->bind_param("s", $newData);
+        $stmt->execute();
+        $stmt->close();
+    }
+    
+    
+
 }
 ?>
