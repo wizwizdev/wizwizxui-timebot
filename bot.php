@@ -111,9 +111,13 @@ if(preg_match('/^addDiscount(Server|Plan)Agent(\d+)/',$data,$match)){
     $userName = $info['name'];
     
     if($match[1] == "Plan"){
+        $offset = 0;
+        $limit = 20;
+        
         $condition = array_values(array_keys(json_decode($info['discount_percent'],true)['plans']??array()));
         $condition = count($condition) > 0? "WHERE `id` NOT IN (" . implode(",", $condition) . ")":"";
-        $stmt = $connection->prepare("SELECT * FROM `server_plans` $condition");
+        $stmt = $connection->prepare("SELECT * FROM `server_plans` $condition LIMIT ? OFFSET ?");
+        $stmt->bind_param("ii", $limit, $offset);
         $stmt->execute();
         $list = $stmt->get_result();
         $stmt->close();
@@ -130,6 +134,9 @@ if(preg_match('/^addDiscount(Server|Plan)Agent(\d+)/',$data,$match)){
                 $keys[] = [['text'=>$row['title'] . " " . $catInfo['title'],'callback_data'=>"editAgentDiscountPlan" . $match[2] . "_" . $row['id']]];
             }
             
+            if($list->num_rows >= $limit){
+                $keys[] = [['text'=>"▶️",'callback_data'=>"nextAgentDiscountPlan" . $match[2] . "_" . ($offset + $limit)]];
+            }
             $keys[] = [['text' => $buttonValues['back_button'], 'callback_data' => "agentPercentDetails" . $match[2]]];
             $keys = json_encode(['inline_keyboard'=>$keys]);
             
@@ -155,6 +162,57 @@ if(preg_match('/^addDiscount(Server|Plan)Agent(\d+)/',$data,$match)){
             editText($message_id,"لطفا سرور مورد نظر را برای افزودن تخفیف به نماینده $userName انتخاب کنید",$keys);
         }else alert("سروری باقی نمانده است");
     }
+}
+if(preg_match('/^nextAgentDiscountPlan(?<agentId>\d+)_(?<offset>\d+)/',$data,$match)){
+    $stmt = $connection->prepare("SELECT * FROM `users` WHERE `userid` = ?");
+    $stmt->bind_param('i',$match['agentId']);
+    $stmt->execute();
+    $info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $userName = $info['name'];
+    
+    $offset = $match['offset'];
+    $limit = 20;
+    
+    $condition = array_values(array_keys(json_decode($info['discount_percent'],true)['plans']??array()));
+    $condition = count($condition) > 0? "WHERE `id` NOT IN (" . implode(",", $condition) . ")":"";
+    $stmt = $connection->prepare("SELECT * FROM `server_plans` $condition LIMIT ? OFFSET ?");
+    $stmt->bind_param("ii", $limit, $offset);
+    $stmt->execute();
+    $list = $stmt->get_result();
+    $stmt->close();
+    
+    if($list->num_rows > 0){
+        $keys = array();
+        while($row = $list->fetch_assoc()){
+            $stmt = $connection->prepare("SELECT * FROM `server_categories` WHERE `id` = ?");
+            $stmt->bind_param("i", $row['catid']);
+            $stmt->execute();
+            $catInfo = $stmt->get_result()->fetch_assoc();
+            $stmt->close();
+            
+            $keys[] = [['text'=>$row['title'] . " " . $catInfo['title'],'callback_data'=>"editAgentDiscountPlan" . $match['agentId'] . "_" . $row['id']]];
+        }
+        
+        if($list->num_rows >= $limit && $offset == 0){
+            $keys[] = [['text'=>"▶️",'callback_data'=>"nextAgentDiscountPlan" . $match['agentId'] . "_" . ($offset + $limit)]];
+        }
+        elseif($list->num_rows >= $limit && $offset != 0){
+            $keys[] = [
+                ['text'=>"◀️️",'callback_data'=>"nextAgentDiscountPlan" . $match['agentId'] . "_" . ($offset - $limit)],
+                ['text'=>"▶️",'callback_data'=>"nextAgentDiscountPlan" . $match['agentId'] . "_" . ($offset + $limit)]
+                ];
+        }
+        elseif($offset != 0){
+            $keys[] = [
+                ['text'=>"◀️️",'callback_data'=>"nextAgentDiscountPlan" . $match['agentId'] . "_" . ($offset - $limit)]
+                ];
+        }
+        $keys[] = [['text' => $buttonValues['back_button'], 'callback_data' => "agentPercentDetails" . $match['agentId']]];
+        $keys = json_encode(['inline_keyboard'=>$keys]);
+        
+        editText($message_id,"لطفا سرور مورد نظر را برای افزودن تخفیف به نماینده $userName انتخاب کنید",$keys);
+    }else alert("سروری باقی نمانده است");
 }
 if(preg_match('/^removePercentOfAgent(?<type>Server|Plan)(?<agentId>\d+)_(?<serverId>\d+)/',$data,$match)){
     $stmt = $connection->prepare("SELECT * FROM `users` WHERE `userid` = ?");
@@ -329,7 +387,7 @@ if(($data=="botSettings" or preg_match("/^changeBot(\w+)/",$data,$match)) && ($f
         $stmt->bind_param("s", $newData);
         $stmt->execute();
         $stmt->close();
-        }
+    }
     editText($message_id,$mainValues['change_bot_settings_message'],getBotSettingKeys());
 }
 if($data=="changeUpdateConfigLinkState" && ($from_id == $admin || $userInfo['isAdmin'] == true)){
@@ -1418,8 +1476,7 @@ if(preg_match('/payWithTronWallet(.*)/',$data,$match)) {
     delMessage();
     
     $price = $payInfo['price'];
-    $rate = json_decode(file_get_contents("https://api.changeto.technology/api/rate"),true)['result'];
-    $priceInTrx = round($price / $rate['TRX'],2);
+    $priceInTrx = round($price / $botState['TRXRate'],2);
     
     $stmt = $connection->prepare("UPDATE `pays` SET `tron_price` = ? WHERE `hash_id` = ?");
     $stmt->bind_param("ds", $priceInTrx, $match[1]);
@@ -1518,9 +1575,8 @@ if(preg_match('/payWithWeSwap(.*)/',$data,$match)) {
     
     
     $price = $payInfo['price'];
-    $rate = json_decode(file_get_contents("https://api.changeto.technology/api/rate"),true)['result'];
-    $priceInUSD = round($price / $rate['USD'],2);
-    $priceInTrx = round($price / $rate['TRX'],2);
+    $priceInUSD = round($price / $botState['USDRate'],2);
+    $priceInTrx = round($price / $botState['TRXRate'],2);
     $pay = NOWPayments('POST', 'payment', [
         'price_amount' => $priceInUSD,
         'price_currency' => 'usd',
@@ -2693,6 +2749,7 @@ if((preg_match('/^discountSelectPlan(\d+)_(\d+)_(\d+)/',$userInfo['step'],$match
     }
     if($price == 0 or ($from_id == $admin)){
         $keyboard[] = [['text' => '📥 دریافت رایگان', 'callback_data' => "freeTrial$id"]];
+        setUser($remark, 'temp');
     }else{
         $token = base64_encode("{$from_id}.{$id}");
         
@@ -5429,12 +5486,17 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
     $portType = $stmt->get_result()->fetch_assoc()['port_type'];
     $stmt->close();
 
-    if($botState['remark'] == "digits"){
-        $rnd = rand(10000,99999);
-        $remark = "{$srv_remark}-{$rnd}";
+    if($from_id == $admin && !empty($userInfo['temp'])){
+        $remark = $userInfo['temp'];
+        setUser('','temp');
     }else{
-        $rnd = rand(1111,99999);
-        $remark = "{$srv_remark}-{$from_id}-{$rnd}";
+        if($botState['remark'] == "digits"){
+            $rnd = rand(10000,99999);
+            $remark = "{$srv_remark}-{$rnd}";
+        }else{
+            $rnd = rand(1111,99999);
+            $remark = "{$srv_remark}-{$from_id}-{$rnd}";
+        }
     }
     
     if($portType == "auto"){
@@ -5705,23 +5767,42 @@ if($userInfo['step'] == "showAccount" and $text != $buttonValues['cancel']){
                             $remark = $email;
                         }
                         else{
-                            $upload = sumerize($list[$keys]->up);
-                            $download = sumerize($list[$keys]->down);
+                            $clientUpload = $clientState[$emailKey]->up;
+                            $clientDownload = $clientState[$emailKey]->down;
+                            $clientTotal = $clientState[$emailKey]->total;
+                            $clientExpTime = $clientState[$emailKey]->expiryTime;
+                            
+                            $up = $list[$keys]->up;
+                            $down = $list[$keys]->down;
+                            $total = $list[$keys]->total;
+                            $expiry = $list[$keys]->expiryTime;
+                            
+                            if(($clientTotal != 0 || $clientTotal != null) && ($clientExpTime != 0 || $clientExpTime != null)){
+                                $up = $clientUpload;
+                                $down = $clientDownload;
+                                $total = $clientTotal;
+                                $expiry = $clientExpTime;
+                            }
+
+                            $upload = sumerize($up);
+                            $download = sumerize($down);
                             $configLocation = ["uuid" => $text, "remark"=>$list[$keys]->remark];
-                            $leftMb = $list[$keys]->total!=0?($list[$keys]->total - $list[$keys]->up - $list[$keys]->down):"نامحدود";
+                            $leftMb = $total!=0?($total - $up - $down):"نامحدود";
                             if(is_numeric($leftMb)){
                                 if($leftMb<0){
                                     $leftMb = 0;
                                 }else{
-                                    $leftMb = sumerize($list[$keys]->total - $list[$keys]->up - $list[$keys]->down);
+                                    $leftMb = sumerize($total - $up - $down);
                                 }
                             }
-                            $totalUsed = sumerize($list[$keys]->up + $list[$keys]->down);
-                            $total = $list[$keys]->total!=0?sumerize($list[$keys]->total):"نامحدود";
-                            $expiryTime = $list[$keys]->expiryTime != 0?jdate("Y-m-d H:i:s",substr($list[$keys]->expiryTime,0,-3)):"نامحدود";
-                            $expiryDay = $list[$keys]->expiryTime != 0?
+                            $totalUsed = sumerize($up + $down);
+                            $total = $total!=0?sumerize($total):"نامحدود";
+                            
+                            
+                            $expiryTime = $expiry != 0?jdate("Y-m-d H:i:s",substr($expiry,0,-3)):"نامحدود";
+                            $expiryDay = $expiry != 0?
                                 floor(
-                                    ((substr($list[$keys]->expiryTime,0,-3)-time())/(60 * 60 * 24))
+                                    ((substr($expiry,0,-3)-time())/(60 * 60 * 24))
                                     ):
                                     "نامحدود";
                             if(is_numeric($expiryDay)){
@@ -9191,12 +9272,12 @@ if(preg_match('/^editServer(\D+)(\d+)/',$data,$match) && $text != $buttonValues[
             break;
         case "Max":
             $txt = "ظرفیت";
-            break;
+            break; 
         case "Remark":
             $txt ="ریمارک";
             break;
         case "Flag":
-            $txt = "پرچم";
+            $txt = "پرچم"; 
             break;
         default:
             $txt = str_replace("_", " ", $match[1]);
