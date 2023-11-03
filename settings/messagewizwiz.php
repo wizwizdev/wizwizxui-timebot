@@ -2,12 +2,38 @@
 $msgInfo = json_decode(file_get_contents("messagewizwiz.json"),true);
 $offset = $msgInfo['offset']??-1;
 $messageParam = json_decode($msgInfo['text']);
-
-if($offset == '-1') exit;
+$rateLimit = $msgInfo['rateLimit']??0;
 
 include_once '../baseInfo.php';
 include_once '../config.php';
 include_once 'jdf.php';
+
+if(time() > $rateLimit){
+    $rate = json_decode(file_get_contents("https://api.changeto.technology/api/rate"),true)['result'];
+    if(!empty($rate['USD'])) $botState['USDRate'] = $rate['USD'];
+    if(!empty($rate['TRX'])) $botState['TRXRate'] = $rate['TRX'];
+    
+    $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = 'BOT_STATES'");
+    $stmt->execute();
+    $isExists = $stmt->get_result();
+    $stmt->close();
+    if($isExists->num_rows>0) $query = "UPDATE `setting` SET `value` = ? WHERE `type` = 'BOT_STATES'";
+    else $query = "INSERT INTO `setting` (`type`, `value`) VALUES ('BOT_STATES', ?)";
+    $newData = json_encode($botState);
+    
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("s", $newData);
+    $stmt->execute();
+    $stmt->close();
+    
+    $msgInfo['rateLimit'] = strtotime("+1 hour");
+    file_put_contents("messagewizwiz.json",json_encode($msgInfo));
+
+}
+
+
+if($offset == '-1') exit;
+
 if($offset == '0'){
     if($messageParam->type == "forwardall") $msg = "عملیات هدایت همگانی شروع شد";
     else $msg = "عملیات ارسال پیام همگانی شروع شد";
