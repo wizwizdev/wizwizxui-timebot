@@ -67,8 +67,7 @@ sudo systemctl restart apache2
 
 wait
 
-sudo apt-get install -y php-soap
-sudo apt-get install libapache2-mod-php
+sudo apt-get install -y php-soap libapache2-mod-php
 
 # extension=soap.so
 # echo "extension=soap.so" >> /usr/local/lib/php.ini
@@ -91,12 +90,8 @@ echo -e "\n\e[92mInstalling ...\033[0m\n"
 
 sleep 1
 
-sudo apt-get install -y git
-sudo apt-get install -y wget
-sudo apt-get install -y unzip
-sudo apt install curl -y
-sudo apt-get install -y php-ssh2
-sudo apt-get install -y libssh2-1-dev libssh2-1
+sudo apt-get install -y git wget unzip curl php-ssh2 libssh2-1-dev libssh2-1
+
 
 sudo systemctl restart apache2.service
 
