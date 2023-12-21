@@ -118,7 +118,7 @@ function updateBot(){
         try{
             $connection->query($query);
         }catch (exception $error){
-            echo json_encode($error);
+
         }
     }
     
@@ -211,7 +211,7 @@ function updateBot(){
     }
     
     
-    if(file_exists('../tempCookie.txt')) unlink('../tempCookie.txt');
-    if(file_exists('../settings/messagewizwiz.json')) unlink('../settings/messagewizwiz.json');
+    if(file_exists(getcwd() . '/tempCookie.txt')) unlink('../tempCookie.txt');
+    if(file_exists(getcwd() . '/settings/messagewizwiz.json')) unlink('../settings/messagewizwiz.json');
 }
 ?>
