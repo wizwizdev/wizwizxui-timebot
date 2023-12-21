@@ -3,7 +3,6 @@ if(!file_exists("baseInfo.php") || !file_exists("config.php")){
     form("فایل های مورد نیاز یافت نشد");
     exit();
 }
-// ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_reporting(E_ALL);
 
 require "baseInfo.php";
 require "config.php";
