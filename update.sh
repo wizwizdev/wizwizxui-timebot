@@ -83,6 +83,11 @@ do
 			sudo rm -r /var/www/html/wizwizxui-timebot/install
 			rm /var/www/html/wizwizxui-timebot/createDB.php
 			rm /var/www/html/wizwizxui-timebot/updateShareConfig.php
+			rm /var/www/html/wizwizxui-timebot/README.md
+			rm /var/www/html/wizwizxui-timebot/README-fa.md
+			rm /var/www/html/wizwizxui-timebot/LICENSE
+			rm /var/www/html/wizwizxui-timebot/update.sh
+			rm /var/www/html/wizwizxui-timebot/wizwiz.sh
 			clear
 			
 			echo -e "\n\e[92mThe script was successfully updated! \033[0m\n"
