@@ -280,6 +280,18 @@ $connection->query("CREATE TABLE `servers` (
   PRIMARY KEY (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_persian_ci");
 
+$connection->query("CREATE TABLE  `send_list` (
+        `id` int(255) NOT NULL AUTO_INCREMENT,
+        `offset` int(255) NOT NULL DEFAULT 0,
+        `type` varchar(20) NOT NULL,
+        `text` text CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+        `chat_id` bigint(10),
+        `message_id` int(255),
+        `file_id` varchar(500),
+        `state` int(1) NOT NULL DEFAULT 0,
+        PRIMARY KEY (`id`)
+        )");
+
 
 
 ?>
