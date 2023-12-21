@@ -2,7 +2,6 @@
 include_once "settings/values.php";
 include_once 'settings/jdf.php';
 include_once 'baseInfo.php';
-
 $connection = new mysqli('localhost',$dbUserName,$dbPassword,$dbName);
 if($connection->connect_error){
     exit("error " . $connection->connect_error);  
@@ -160,11 +159,11 @@ $time = time();
 $update = json_decode(file_get_contents("php://input"));
 if(isset($update->message)){
     $from_id = $update->message->from->id;
-    $text = $update->message->text;
-    $first_name = $update->message->from->first_name;
-    $caption = $update->message->caption;
+    $text = htmlspecialchars($update->message->text);
+    $first_name = htmlspecialchars($update->message->from->first_name);
+    $caption = htmlspecialchars($update->message->caption);
     $chat_id = $update->message->chat->id;
-    $last_name = $update->message->from->last_name;
+    $last_name = htmlspecialchars($update->message->from->last_name);
     $username = $update->message->from->username?? " ندارد ";
     $message_id = $update->message->message_id;
     $forward_from_name = $update->message->reply_to_message->forward_sender_name;
@@ -174,13 +173,13 @@ if(isset($update->message)){
 if(isset($update->callback_query)){
     $callbackId = $update->callback_query->id;
     $data = $update->callback_query->data;
-    $text = $update->callback_query->message->text;
+    $text = htmlspecialchars($update->callback_query->message->text);
     $message_id = $update->callback_query->message->message_id;
     $chat_id = $update->callback_query->message->chat->id;
     $chat_type = $update->callback_query->message->chat->type;
-    $username = $update->callback_query->from->username?? " ندارد ";
+    $username = htmlspecialchars($update->callback_query->from->username)?? " ندارد ";
     $from_id = $update->callback_query->from->id;
-    $first_name = $update->callback_query->from->first_name;
+    $first_name = htmlspecialchars($update->callback_query->from->first_name);
     $markup = json_decode(json_encode($update->callback_query->message->reply_markup->inline_keyboard),true);
 }
 $stmt = $connection->prepare("SELECT * FROM `users` WHERE `userid`=?");
@@ -342,6 +341,24 @@ function getAdminKeys(){
         [['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]],
     ]]);
     
+}
+
+function setSettings($field, $value){
+    global $connection, $botState;
+    $botState[$field]= $value;
+    
+    $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = 'BOT_STATES'");
+    $stmt->execute();
+    $isExists = $stmt->get_result();
+    $stmt->close();
+    if($isExists->num_rows>0) $query = "UPDATE `setting` SET `value` = ? WHERE `type` = 'BOT_STATES'";
+    else $query = "INSERT INTO `setting` (`type`, `value`) VALUES ('BOT_STATES', ?)";
+    $newData = json_encode($botState);
+    
+    $stmt = $connection->prepare($query);
+    $stmt->bind_param("s", $newData);
+    $stmt->execute();
+    $stmt->close();
 }
 function getRejectedAgentList(){
     global $connection, $mainValues, $buttonValues;
@@ -2113,7 +2130,6 @@ function getOrderDetailKeys($from_id, $id){
     }
 }
 
-
 function RandomString($count = 9, $type = "all") {
     if($type == "all") $characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz123456789';
     elseif($type == "small") $characters = 'abcdef123456789';
@@ -2166,11 +2182,11 @@ function setUser($value = 'none', $field = 'step'){
 
     
     if($uinfo->num_rows == 0){
-        $sql = "INSERT INTO `users` (`userid`, `name`, `username`, `refcode`, `wallet`, `date`)
-                            VALUES (?,?,?, 0,0,?)";
+        $sql = "INSERT INTO `users` (`userid`, `name`, `username`, `refcode`, `wallet`, `date`, `$field`)
+                            VALUES (?,?,?, 0,0,?, ?)";
         $stmt = $connection->prepare($sql);
         $time = time();
-        $stmt->bind_param("issi", $from_id, $first_name, $username, $time);
+        $stmt->bind_param("issis", $from_id, $first_name, $username, $time, $value);
         $stmt->execute();
         $stmt->close();
     }else{
@@ -2212,14 +2228,7 @@ function sumerize($amount){
 
 function sumerize2($amount){
     $gb = $amount / (1024 * 1024 * 1024);
-    // if($gb > 1){
-      return round($gb,2);
-    // }
-    // else{
-        // $gb *= 1024;
-        // return round($gb,2) . " مگابایت";
-    // }
-
+    return round($gb,2);
 }
 function deleteClient($server_id, $inbound_id, $uuid, $delete = 0){
     global $connection;
@@ -2229,7 +2238,6 @@ function deleteClient($server_id, $inbound_id, $uuid, $delete = 0){
     $server_info = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
 
     $response = getJson($server_id);
@@ -2267,9 +2275,6 @@ function deleteClient($server_id, $inbound_id, $uuid, $delete = 0){
         'expiryTime' => $row->expiryTime, 'listen' => '','port' => $row->port,'protocol' => $row->protocol,'settings' => $settings,
         'streamSettings' => $row->streamSettings, 'sniffing' => $row->sniffing);
 
-
-
-
         $serverName = $server_info['username'];
         $serverPass = $server_info['password'];
         
@@ -2288,14 +2293,22 @@ function deleteClient($server_id, $inbound_id, $uuid, $delete = 0){
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
         curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-        curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-        $loginResponse = json_decode(curl_exec($curl),true);
+        curl_setopt($curl, CURLOPT_HEADER, 1);
+        $response = curl_exec($curl);
+        
+        $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+        $header = substr($response, 0, $header_size);
+        $body = substr($response, $header_size);
+        preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+        $session = $match[1];
+        
+        $loginResponse = json_decode($body,true);
+        
         if(!$loginResponse['success']){
             curl_close($curl);
             return $loginResponse;
         }
         
-        $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
         if($serverType == "sanaei" || $serverType == "alireza"){
             if($serverType == "sanaei") $url = "$panel_url/panel/inbound/" . $inbound_id . "/delClient/" . rawurlencode($uuid);
             elseif($serverType == "alireza") $url = "$panel_url/xui/inbound/" . $inbound_id . "/delClient/" . rawurlencode($uuid);
@@ -2311,9 +2324,17 @@ function deleteClient($server_id, $inbound_id, $uuid, $delete = 0){
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => 'POST',
                 CURLOPT_POSTFIELDS => $dataArr,
-                CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
                 CURLOPT_SSL_VERIFYHOST => false,
                 CURLOPT_SSL_VERIFYPEER => false,
+                CURLOPT_HEADER => false,
+                CURLOPT_HTTPHEADER => array(
+                    'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                    'Accept:  application/json, text/plain, */*',
+                    'Accept-Language:  en-US,en;q=0.5',
+                    'Accept-Encoding:  gzip, deflate',
+                    'X-Requested-With:  XMLHttpRequest',
+                    'Cookie: ' . $session
+                )
             ));
         }else{
             curl_setopt_array($curl, array(
@@ -2327,13 +2348,19 @@ function deleteClient($server_id, $inbound_id, $uuid, $delete = 0){
                 CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
                 CURLOPT_CUSTOMREQUEST => 'POST',
                 CURLOPT_POSTFIELDS => $dataArr,
-                CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+                CURLOPT_HEADER => false,
+                CURLOPT_HTTPHEADER => array(
+                    'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                    'Accept:  application/json, text/plain, */*',
+                    'Accept-Language:  en-US,en;q=0.5',
+                    'Accept-Encoding:  gzip, deflate',
+                    'X-Requested-With:  XMLHttpRequest',
+                    'Cookie: ' . $session
+                )
             ));
         }
         
         $response = curl_exec($curl);
-        unlink("tempCookie.txt");
-
         curl_close($curl);
     }	
     return ['id' => $old_data->id,'expiryTime' => $old_data->expiryTime, 'limitIp' => $old_data->limitIp, 'flow' => $old_data->flow, 'total' => $total, 'up' => $up, 'down' => $down,];
@@ -2392,8 +2419,16 @@ function editInboundRemark($server_id, $uuid, $newRemark){
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+    
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse;
@@ -2402,7 +2437,6 @@ function editInboundRemark($server_id, $uuid, $newRemark){
     if($serverType == "sanaei") $url = "$panel_url/panel/inbound/update/$inbound_id";
     else $url = "$panel_url/xui/inbound/update/$inbound_id";
 
-    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
     curl_setopt_array($curl, array(
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
@@ -2414,12 +2448,19 @@ function editInboundRemark($server_id, $uuid, $newRemark){
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'POST',
         CURLOPT_POSTFIELDS => $dataArr,
-        CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+        CURLOPT_HEADER => false,
+        CURLOPT_HTTPHEADER => array(
+            'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+            'Accept:  application/json, text/plain, */*',
+            'Accept-Language:  en-US,en;q=0.5',
+            'Accept-Encoding:  gzip, deflate',
+            'X-Requested-With:  XMLHttpRequest',
+            'Cookie: ' . $session
+        )
     ));
 
     $response = curl_exec($curl);
     curl_close($curl);
-    unlink("tempCookie.txt");
     return $response = json_decode($response);
 }
 function editInboundTraffic($server_id, $uuid, $volume, $days, $editType = null){
@@ -2497,8 +2538,16 @@ function editInboundTraffic($server_id, $uuid, $volume, $days, $editType = null)
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+    
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse;
@@ -2519,17 +2568,21 @@ function editInboundTraffic($server_id, $uuid, $volume, $days, $editType = null)
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'POST',
         CURLOPT_POSTFIELDS => $dataArr,
-        CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+        CURLOPT_HEADER => false,
+        CURLOPT_HTTPHEADER => array(
+            'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+            'Accept:  application/json, text/plain, */*',
+            'Accept-Language:  en-US,en;q=0.5',
+            'Accept-Encoding:  gzip, deflate',
+            'X-Requested-With:  XMLHttpRequest',
+            'Cookie: ' . $session
+        )
     ));
 
     $response = curl_exec($curl);
     curl_close($curl);
-    
     resetIpLog($server_id, $email);
-
-    unlink("tempCookie.txt");
     return $response = json_decode($response);
-
 }
 function changeInboundState($server_id, $uuid){
     global $connection;
@@ -2588,8 +2641,17 @@ function changeInboundState($server_id, $uuid){
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+    
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse;
@@ -2610,12 +2672,19 @@ function changeInboundState($server_id, $uuid){
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'POST',
         CURLOPT_POSTFIELDS => $dataArr,
-        CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+        CURLOPT_HEADER => false,
+        CURLOPT_HTTPHEADER => array(
+            'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+            'Accept:  application/json, text/plain, */*',
+            'Accept-Language:  en-US,en;q=0.5',
+            'Accept-Encoding:  gzip, deflate',
+            'X-Requested-With:  XMLHttpRequest',
+            'Cookie: ' . $session
+        )
     ));
 
     $response = curl_exec($curl);
     curl_close($curl);
-    unlink("tempCookie.txt");
 
     $response = json_decode($response);
     return $response;
@@ -2686,8 +2755,16 @@ function renewInboundUuid($server_id, $uuid){
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse;
@@ -2708,16 +2785,21 @@ function renewInboundUuid($server_id, $uuid){
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'POST',
         CURLOPT_POSTFIELDS => $dataArr,
-        CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+        CURLOPT_HEADER => false,
+        CURLOPT_HTTPHEADER => array(
+            'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+            'Accept:  application/json, text/plain, */*',
+            'Accept-Language:  en-US,en;q=0.5',
+            'Accept-Encoding:  gzip, deflate',
+            'X-Requested-With:  XMLHttpRequest',
+            'Cookie: ' . $session
+        )
     ));
 
     $response = curl_exec($curl);
     curl_close($curl);
-    unlink("tempCookie.txt");
-
     $response = json_decode($response);
     $response->newUuid = $newUuid;
-
     return $response;
 
 }
@@ -2780,14 +2862,21 @@ function changeClientState($server_id, $inbound_id, $uuid){
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse;
     }
 
-    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
     if($serverType == "sanaei" || $serverType == "alireza"){
         
         $newSetting = array();
@@ -2815,7 +2904,15 @@ function changeClientState($server_id, $inbound_id, $uuid){
             CURLOPT_POSTFIELDS => $dataArr,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+            CURLOPT_HEADER => false,
+            CURLOPT_HTTPHEADER => array(
+                'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                'Accept:  application/json, text/plain, */*',
+                'Accept-Language:  en-US,en;q=0.5',
+                'Accept-Encoding:  gzip, deflate',
+                'X-Requested-With:  XMLHttpRequest',
+                'Cookie: ' . $session
+            )
         ));
     }else{
         curl_setopt_array($curl, array(
@@ -2829,12 +2926,19 @@ function changeClientState($server_id, $inbound_id, $uuid){
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => $dataArr,
-            CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+            CURLOPT_HEADER => false,
+            CURLOPT_HTTPHEADER => array(
+                'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                'Accept:  application/json, text/plain, */*',
+                'Accept-Language:  en-US,en;q=0.5',
+                'Accept-Encoding:  gzip, deflate',
+                'X-Requested-With:  XMLHttpRequest',
+                'Cookie: ' . $session
+            )
         ));
     }
 
     $response = curl_exec($curl);
-    unlink("tempCookie.txt");
     $response = json_decode($response);
     curl_close($curl);
     return $response;
@@ -2902,14 +3006,21 @@ function renewClientUuid($server_id, $inbound_id, $uuid){
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse;
     }
 
-    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
     if($serverType == "sanaei" || $serverType == "alireza"){
         
         $newSetting = array();
@@ -2937,7 +3048,15 @@ function renewClientUuid($server_id, $inbound_id, $uuid){
             CURLOPT_POSTFIELDS => $dataArr,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+            CURLOPT_HEADER => false,
+            CURLOPT_HTTPHEADER => array(
+                'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                'Accept:  application/json, text/plain, */*',
+                'Accept-Language:  en-US,en;q=0.5',
+                'Accept-Encoding:  gzip, deflate',
+                'X-Requested-With:  XMLHttpRequest',
+                'Cookie: ' . $session
+            )
         ));
     }else{
         curl_setopt_array($curl, array(
@@ -2951,12 +3070,19 @@ function renewClientUuid($server_id, $inbound_id, $uuid){
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => $dataArr,
-            CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+            CURLOPT_HEADER => false,
+            CURLOPT_HTTPHEADER => array(
+                'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                'Accept:  application/json, text/plain, */*',
+                'Accept-Language:  en-US,en;q=0.5',
+                'Accept-Encoding:  gzip, deflate',
+                'X-Requested-With:  XMLHttpRequest',
+                'Cookie: ' . $session
+            )
         ));
     }
 
     $response = curl_exec($curl);
-    unlink("tempCookie.txt");
     $response = json_decode($response);
     $response->newUuid = $newUuid;
 
@@ -3030,14 +3156,21 @@ function editClientRemark($server_id, $inbound_id, $uuid, $newRemark){
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse; 
     } 
 
-    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
     if($serverType == "sanaei" || $serverType == "alireza"){
         
         $newSetting = array();
@@ -3065,7 +3198,15 @@ function editClientRemark($server_id, $inbound_id, $uuid, $newRemark){
             CURLOPT_POSTFIELDS => $dataArr,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+            CURLOPT_HEADER => false,
+            CURLOPT_HTTPHEADER => array(
+                'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                'Accept:  application/json, text/plain, */*',
+                'Accept-Language:  en-US,en;q=0.5',
+                'Accept-Encoding:  gzip, deflate',
+                'X-Requested-With:  XMLHttpRequest',
+                'Cookie: ' . $session
+            )
         ));
     }else{
         curl_setopt_array($curl, array(
@@ -3079,13 +3220,19 @@ function editClientRemark($server_id, $inbound_id, $uuid, $newRemark){
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => $dataArr,
-            CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+            CURLOPT_HEADER => false,
+            CURLOPT_HTTPHEADER => array(
+                'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                'Accept:  application/json, text/plain, */*',
+                'Accept-Language:  en-US,en;q=0.5',
+                'Accept-Encoding:  gzip, deflate',
+                'X-Requested-With:  XMLHttpRequest',
+                'Cookie: ' . $session
+            )
         ));
     }
 
     $response = curl_exec($curl);
-    unlink("tempCookie.txt");
-
     curl_close($curl);
     return $response = json_decode($response);
 
@@ -3176,14 +3323,21 @@ function editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, $edit
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+    
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse; 
     } 
 
-    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
     if($serverType == "sanaei" || $serverType == "alireza"){
         
         $newSetting = array();
@@ -3211,7 +3365,15 @@ function editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, $edit
             CURLOPT_POSTFIELDS => $dataArr,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+            CURLOPT_HEADER => false,
+            CURLOPT_HTTPHEADER => array(
+                'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                'Accept:  application/json, text/plain, */*',
+                'Accept-Language:  en-US,en;q=0.5',
+                'Accept-Encoding:  gzip, deflate',
+                'X-Requested-With:  XMLHttpRequest',
+                'Cookie: ' . $session
+            )
         ));
     }else{
         curl_setopt_array($curl, array(
@@ -3225,17 +3387,21 @@ function editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, $edit
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
             CURLOPT_POSTFIELDS => $dataArr,
-            CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+            CURLOPT_HEADER => false,
+            CURLOPT_HTTPHEADER => array(
+                'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                'Accept:  application/json, text/plain, */*',
+                'Accept-Language:  en-US,en;q=0.5',
+                'Accept-Encoding:  gzip, deflate',
+                'X-Requested-With:  XMLHttpRequest',
+                'Cookie: ' . $session
+            )
         ));
     }
 
     $response = curl_exec($curl);
-    unlink("tempCookie.txt");
-
     curl_close($curl);
-    
     resetIpLog($server_id, $email);
-
     return $response = json_decode($response);
 
 }
@@ -3294,8 +3460,16 @@ function deleteInbound($server_id, $uuid, $delete = 0){
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
         curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
         curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-        curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-        $loginResponse = json_decode(curl_exec($curl),true);
+        curl_setopt($curl, CURLOPT_HEADER, 1);
+        $response = curl_exec($curl);
+
+        $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+        $header = substr($response, 0, $header_size);
+        $body = substr($response, $header_size);
+        preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+        $session = $match[1];
+
+        $loginResponse = json_decode($body,true);
         if(!$loginResponse['success']){
             curl_close($curl);
             return $loginResponse;
@@ -3304,7 +3478,6 @@ function deleteInbound($server_id, $uuid, $delete = 0){
         if($serverType == "sanaei") $url = "$panel_url/panel/inbound/del/$inbound_id";
         else $url = "$panel_url/xui/inbound/del/$inbound_id";
        
-        $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
         curl_setopt_array($curl, array(
             CURLOPT_URL => $url,
             CURLOPT_RETURNTRANSFER => true,
@@ -3315,16 +3488,20 @@ function deleteInbound($server_id, $uuid, $delete = 0){
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+            CURLOPT_HEADER => false,
+            CURLOPT_HTTPHEADER => array(
+                'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                'Accept:  application/json, text/plain, */*',
+                'Accept-Language:  en-US,en;q=0.5',
+                'Accept-Encoding:  gzip, deflate',
+                'X-Requested-With:  XMLHttpRequest',
+                'Cookie: ' . $session
+            )
         ));
-
         $response = curl_exec($curl);
-        unlink("tempCookie.txt");
-
         curl_close($curl);
     }
     return $oldData;
-
 }
 function resetIpLog($server_id, $remark){
     global $connection;
@@ -3356,13 +3533,20 @@ function resetIpLog($server_id, $remark){
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse;
     }
-    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
     
     if($serverType == "sanaei") $url = $panel_url. "/panel/inbound/clearClientIps/" . urlencode($remark);
     else $url = $panel_url. "/xui/inbound/clearClientIps/" . urlencode($remark);
@@ -3377,15 +3561,20 @@ function resetIpLog($server_id, $remark){
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'POST',
-        CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+        CURLOPT_HEADER => false,
+        CURLOPT_HTTPHEADER => array(
+            'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+            'Accept:  application/json, text/plain, */*',
+            'Accept-Language:  en-US,en;q=0.5',
+            'Accept-Encoding:  gzip, deflate',
+            'X-Requested-With:  XMLHttpRequest',
+            'Cookie: ' . $session
+        )
     ));
 
     $response = curl_exec($curl);
-    unlink("tempCookie.txt");
-
     curl_close($curl);
     return $response = json_decode($response);
-
 }
 function resetClientTraffic($server_id, $remark, $inboundId = null){
     global $connection;
@@ -3417,13 +3606,20 @@ function resetClientTraffic($server_id, $remark, $inboundId = null){
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse;
     }
-    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
     if($serverType == "sanaei") $url = "$panel_url/panel/inbound/$inboundId/resetClientTraffic/" . rawurlencode($remark);
     elseif($inboundId == null) $url = "$panel_url/xui/inbound/resetClientTraffic/" . rawurlencode($remark);
     else $url = "$panel_url/xui/inbound/$inboundId/resetClientTraffic/" . rawurlencode($remark);
@@ -3437,15 +3633,20 @@ function resetClientTraffic($server_id, $remark, $inboundId = null){
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'POST',
-        CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+        CURLOPT_HEADER => false,
+        CURLOPT_HTTPHEADER => array(
+            'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+            'Accept:  application/json, text/plain, */*',
+            'Accept-Language:  en-US,en;q=0.5',
+            'Accept-Encoding:  gzip, deflate',
+            'X-Requested-With:  XMLHttpRequest',
+            'Cookie: ' . $session
+        )
     ));
 
     $response = curl_exec($curl);
-    unlink("tempCookie.txt");
-
     curl_close($curl);
     return $response = json_decode($response);
-
 }
 function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $remark, $volume, $limitip = 1, $newarr = '', $planId = null){
     global $connection;
@@ -3545,14 +3746,21 @@ function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $re
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse;
     }
     
-    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
     if($serverType == "sanaei" || $serverType == "alireza"){
         $newSetting = array();
         if($newarr == '')$newSetting['clients'][] = $newClient;
@@ -3580,7 +3788,15 @@ function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $re
             CURLOPT_POSTFIELDS => $dataArr,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+            CURLOPT_HEADER => false,
+            CURLOPT_HTTPHEADER => array(
+                'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                'Accept:  application/json, text/plain, */*',
+                'Accept-Language:  en-US,en;q=0.5',
+                'Accept-Encoding:  gzip, deflate',
+                'X-Requested-With:  XMLHttpRequest',
+                'Cookie: ' . $session
+            )
         ));
     }else{
         curl_setopt_array($curl, array(
@@ -3596,12 +3812,19 @@ function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $re
             CURLOPT_POSTFIELDS => $dataArr,
             CURLOPT_SSL_VERIFYHOST => false,
             CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+            CURLOPT_HEADER => false,
+            CURLOPT_HTTPHEADER => array(
+                'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+                'Accept:  application/json, text/plain, */*',
+                'Accept-Language:  en-US,en;q=0.5',
+                'Accept-Encoding:  gzip, deflate',
+                'X-Requested-With:  XMLHttpRequest',
+                'Cookie: ' . $session
+            )
         ));
     }
 
     $response = curl_exec($curl);
-    unlink("tempCookie.txt");
     curl_close($curl);
     return $response = json_decode($response);
 
@@ -4290,8 +4513,16 @@ function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $secu
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse;
@@ -4299,7 +4530,6 @@ function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $secu
     
     if($serverType == "sanaei") $url = "$panel_url/panel/inbound/update/$iid";
     else $url = "$panel_url/xui/inbound/update/$iid";
-    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
     curl_setopt_array($curl, array(
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
@@ -4313,12 +4543,18 @@ function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $secu
         CURLOPT_POSTFIELDS => $dataArr,
         CURLOPT_SSL_VERIFYHOST => false,
         CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+        CURLOPT_HEADER => false,
+        CURLOPT_HTTPHEADER => array(
+            'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+            'Accept:  application/json, text/plain, */*',
+            'Accept-Language:  en-US,en;q=0.5',
+            'Accept-Encoding:  gzip, deflate',
+            'X-Requested-With:  XMLHttpRequest',
+            'Cookie: ' . $session
+        )
     ));
 
     $response = curl_exec($curl);
-    unlink("tempCookie.txt");
-
     curl_close($curl);
     return $response = json_decode($response);
 }
@@ -4405,7 +4641,8 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
         	  "clients": [
         		{
         		  "id": "'.$uniqid.'",
-        		  "flow": ""
+        		  "flow": "",
+        		  "email": "' . $remark. '"
         		}
         	  ],
         	  "decryption": "none",
@@ -4436,7 +4673,8 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
               "clients": [
                 {
                   "id": "'.$uniqid.'",
-    			  "flow": "xtls-rprx-direct"
+    			  "flow": "xtls-rprx-direct".
+    			  "email": "' . $remark. '"
                 }
               ],
               "decryption": "none",
@@ -4481,7 +4719,8 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
 		  "clients": [
 			{
 			  "password": "'.$uniqid.'",
-			  "flow": ""
+			  "flow": "",
+			  "email": "' . $remark. '"
 			}
 		  ],
 		  "fallbacks": []
@@ -4572,7 +4811,8 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
         	  "clients": [
         		{
         		  "id": "'.$client_id.'",
-        		  "flow": ""
+        		  "flow": "",
+        		  "email": "' . $remark. '"
         		}
         	  ],
         	  "decryption": "none",
@@ -4667,7 +4907,8 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
                   "clients": [
                     {
                       "id": "'.$uniqid.'",
-        			  "flow": ""
+        			  "flow": "",
+        			  "email": "' . $remark. '"
                     }
                   ],
                   "decryption": "none",
@@ -4712,7 +4953,8 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
             	  "clients": [
             		{
             		  "id": "'.$uniqid.'",
-            		  "flow": ""
+            		  "flow": "",
+            		  "email": "' . $remark. '"
             		}
             	  ],
             	  "decryption": "none",
@@ -4751,8 +4993,16 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse;
@@ -4761,7 +5011,6 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
     if($serverType == "sanaei") $url = "$panel_url/panel/inbound/update/$iid";
     else $url = "$panel_url/xui/inbound/update/$iid";
     
-    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
     curl_setopt_array($curl, array(
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
@@ -4775,12 +5024,18 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
         CURLOPT_POSTFIELDS => $dataArr,
         CURLOPT_SSL_VERIFYHOST => false,
         CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+        CURLOPT_HEADER => false,
+        CURLOPT_HTTPHEADER => array(
+            'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+            'Accept:  application/json, text/plain, */*',
+            'Accept-Language:  en-US,en;q=0.5',
+            'Accept-Encoding:  gzip, deflate',
+            'X-Requested-With:  XMLHttpRequest',
+            'Cookie: ' . $session
+        )
     ));
 
     $response = curl_exec($curl);
-    unlink("tempCookie.txt");
-
     curl_close($curl);
     return $response = json_decode($response);
 }
@@ -4814,17 +5069,23 @@ function getJson($server_id){
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+    
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
+    
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse;
     }
-
     if($serverType == "sanaei") $url = "$panel_url/panel/inbound/list";
     else $url = "$panel_url/xui/inbound/list";
-
-    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
     curl_setopt_array($curl, array(
         CURLOPT_URL => $url,
         CURLOPT_RETURNTRANSFER => true,
@@ -4835,18 +5096,22 @@ function getJson($server_id){
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'POST',
+        CURLOPT_HEADER => false,
+        CURLOPT_HTTPHEADER => array(
+            'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+            'Accept:  application/json, text/plain, */*',
+            'Accept-Language:  en-US,en;q=0.5',
+            'Accept-Encoding:  gzip, deflate',
+            'X-Requested-With:  XMLHttpRequest',
+            'Cookie: ' . $session
+        ),
         CURLOPT_SSL_VERIFYHOST => false,
         CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
     ));
-
+    
     $response = curl_exec($curl);
-    unlink("tempCookie.txt");
-
     curl_close($curl);
-    return $response = json_decode($response);
-
-
+    return json_decode($response);
 }
 function getNewCert($server_id){
     global $connection;
@@ -4877,15 +5142,21 @@ function getNewCert($server_id){
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
         curl_close($curl);
         return $loginResponse;
     }
     
-
-    $phost = str_ireplace('https://','',str_ireplace('http://','',$panel_url));
     curl_setopt_array($curl, array(
         CURLOPT_URL => "$panel_url/server/getNewX25519Cert",
         CURLOPT_RETURNTRANSFER => true,
@@ -4898,16 +5169,20 @@ function getNewCert($server_id){
         CURLOPT_CUSTOMREQUEST => 'POST',
         CURLOPT_SSL_VERIFYHOST => false,
         CURLOPT_SSL_VERIFYPEER => false,
-        CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
+        CURLOPT_HEADER => false,
+        CURLOPT_HTTPHEADER => array(
+            'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+            'Accept:  application/json, text/plain, */*',
+            'Accept-Language:  en-US,en;q=0.5',
+            'Accept-Encoding:  gzip, deflate',
+            'X-Requested-With:  XMLHttpRequest',
+            'Cookie: ' . $session
+        )
     ));
 
     $response = curl_exec($curl);
-    unlink("tempCookie.txt");
-
     curl_close($curl);
     return $response = json_decode($response);
-
-
 }
 function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark, $volume, $netType, $security = 'none', $rahgozar = false, $planId = null){
     global $connection;
@@ -4981,7 +5256,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
         	  "clients": [
         		{
         		  "id": "'.$client_id.'",
-        		  "flow": ""
+        		  "flow": "",
+        		  "email": "' . $remark. '"
         		}
         	  ],
         	  "decryption": "none",
@@ -5057,7 +5333,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
 		  "clients": [
 			{
 			  "password": "'.$client_id.'",
-			  "flow": ""
+			  "flow": "",
+			  "email": "' . $remark. '"
 			}
 		  ],
 		  "fallbacks": []
@@ -5157,7 +5434,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
         	  "clients": [
         		{
         		  "id": "'.$client_id.'",
-        		  "flow": ""
+        		  "flow": "",
+        		  "email": "' . $remark. '"
         		}
         	  ],
         	  "decryption": "none",
@@ -5273,7 +5551,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
         	  "clients": [
         		{
         		  "id": "'.$client_id.'",
-        		  "flow": ""
+        		  "flow": "",
+        		  "email": "' . $remark. '"
         		}
         	  ],
         	  "decryption": "none",
@@ -5405,7 +5684,8 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
 			  "clients": [
 				{
 				  "id": "'.$client_id.'",
-				  "flow": ""
+				  "flow": "",
+				  "email": "' . $remark. '"
 				}
 			  ],
 			  "decryption": "none",
@@ -5497,8 +5777,16 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    curl_setopt($curl, CURLOPT_COOKIEJAR, dirname(__FILE__) . '/tempCookie.txt');
-    $loginResponse = json_decode(curl_exec($curl),true);
+    curl_setopt($curl, CURLOPT_HEADER, 1);
+    $response = curl_exec($curl);
+
+    $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
+    $header = substr($response, 0, $header_size);
+    $body = substr($response, $header_size);
+    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
+    $session = $match[1];
+
+    $loginResponse = json_decode($body,true);
 
     if(!$loginResponse['success']){
         curl_close($curl);
@@ -5515,19 +5803,24 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
         CURLOPT_MAXREDIRS => 10,
         CURLOPT_CONNECTTIMEOUT => 15, 
         CURLOPT_TIMEOUT => 15,
-        CURLOPT_COOKIEJAR => dirname(__FILE__) . '/tempCookie.txt',
         CURLOPT_FOLLOWLOCATION => true,
         CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
         CURLOPT_CUSTOMREQUEST => 'POST',
         CURLOPT_POSTFIELDS => $dataArr,
         CURLOPT_SSL_VERIFYHOST => false,
         CURLOPT_SSL_VERIFYPEER => false, 
+        CURLOPT_HEADER => false,
+        CURLOPT_HTTPHEADER => array(
+            'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
+            'Accept:  application/json, text/plain, */*',
+            'Accept-Language:  en-US,en;q=0.5',
+            'Accept-Encoding:  gzip, deflate',
+            'X-Requested-With:  XMLHttpRequest',
+            'Cookie: ' . $session
+        )
     ));
     $response = curl_exec($curl);
-    unlink("tempCookie.txt");
-
     curl_close($curl);
-
     return json_decode($response);
 }
 
