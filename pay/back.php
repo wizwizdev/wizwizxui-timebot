@@ -189,6 +189,9 @@ $from_id = $user_id;
 $plan_id = $payParam['plan_id'];
 $volume = $payParam['volume'];
 $days = $payParam['day'];
+// for buy
+$volumePay = $payParam['volume'];
+$daysPay = $payParam['day'];
 $agentBought = $payParam['agent_bought'];
 
 if($payType == "BUY_SUB") $payDescription = "خرید اشتراک";
