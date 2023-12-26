@@ -342,8 +342,16 @@ wait
         sleep 1
         
         sudo rm -r /var/www/html/wizwizxui-timebot/webpanel
-	    sudo rm -r /var/www/html/wizwizxui-timebot/install
-	    sudo rm /var/www/html/wizwizxui-timebot/createDB.php
+        sudo rm -r /var/www/html/wizwizxui-timebot/install
+        sudo rm /var/www/html/wizwizxui-timebot/createDB.php
+	rm /var/www/html/wizwizxui-timebot/updateShareConfig.php
+	rm /var/www/html/wizwizxui-timebot/README.md
+	rm /var/www/html/wizwizxui-timebot/README-fa.md
+	rm /var/www/html/wizwizxui-timebot/LICENSE
+	rm /var/www/html/wizwizxui-timebot/update.sh
+	rm /var/www/html/wizwizxui-timebot/wizwiz.sh
+	rm /var/www/html/wizwizxui-timebot/tempCookie.txt
+	rm /var/www/html/wizwizxui-timebot/settings/messagewizwiz.json
             
         clear
         
