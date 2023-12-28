@@ -159,9 +159,9 @@ $time = time();
 $update = json_decode(file_get_contents("php://input"));
 if(isset($update->message)){
     $from_id = $update->message->from->id;
-    $text = $update->message->text;
+    $text = htmlspecialchars($update->message->text);
     $first_name = htmlspecialchars($update->message->from->first_name);
-    $caption = $update->message->caption;
+    $caption = htmlspecialchars($update->message->caption);
     $chat_id = $update->message->chat->id;
     $last_name = htmlspecialchars($update->message->from->last_name);
     $username = $update->message->from->username?? " ندارد ";
@@ -173,7 +173,7 @@ if(isset($update->message)){
 if(isset($update->callback_query)){
     $callbackId = $update->callback_query->id;
     $data = $update->callback_query->data;
-    $text = $update->callback_query->message->text;
+    $text = htmlspecialchars($update->callback_query->message->text);
     $message_id = $update->callback_query->message->message_id;
     $chat_id = $update->callback_query->message->chat->id;
     $chat_type = $update->callback_query->message->chat->type;
@@ -754,7 +754,7 @@ function getServerListKeys($offset = 0){
         } 
     }
     if($offset == 0 && $cats->num_rows >= $limit){
-        $key,s[] = [['text'=>" »» صفحه بعدی »»",'callback_data'=>"nextServerPage" . ($offset + $limit)]];
+        $keys[] = [['text'=>" »» صفحه بعدی »»",'callback_data'=>"nextServerPage" . ($offset + $limit)]];
     }
     elseif($cats->num_rows >= $limit){
         $keys[] = [
@@ -1434,7 +1434,7 @@ function getUserOrderDetailKeys($id){
                 if($row->id == $inbound_id) {
                     $netType = json_decode($row->streamSettings)->network;
                     $security = json_decode($row->streamSettings)->security;
-       ,             $clientsStates = $row->clientStats;
+                    $clientsStates = $row->clientStats;
                     $clients = json_decode($row->settings)->clients;
                     foreach($clients as $key => $client){
                         if($client->id == $uuid || $client->password == $uuid){
@@ -2032,7 +2032,7 @@ function getOrderDetailKeys($from_id, $id){
                         ],
                         [
             			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
-                            [,'text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
+                            ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
             			],
                         [
                             ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
@@ -2799,7 +2799,7 @@ function renewInboundUuid($server_id, $uuid){
     $response = curl_exec($curl);
     curl_close($curl);
     $response = json_decode($response);
-    $response->newUuid = $newUui,d;
+    $response->newUuid = $newUuid;
     return $response;
 
 }
@@ -3602,7 +3602,7 @@ function resetClientTraffic($server_id, $remark, $inboundId = null){
     curl_setopt($curl, CURLOPT_URL, $loginUrl);
     curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
     curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
-    ,curl_setopt($curl, CURLOPT_POST, 1);
+    curl_setopt($curl, CURLOPT_POST, 1);
     curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
     curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
@@ -4280,7 +4280,7 @@ function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $secu
     $tlsSettings = $server_info['tlsSettings'];
     $header_type = $server_info['header_type'];
     $request_header = $server_info['request_header'];
- ,   $response_header = $server_info['response_header'];
+    $response_header = $server_info['response_header'];
     $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
     $xtlsTitle = ($serverType == "sanaei" || $serverType == "alireza")?"XTLSSettings":"xtlsSettings";
@@ -5258,7 +5258,7 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
         		  "id": "'.$client_id.'",
         		  "flow": "",
         		  "email": "' . $remark. '"
-        		},
+        		}
         	  ],
         	  "decryption": "none",
         	  "fallbacks": []
