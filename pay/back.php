@@ -189,10 +189,7 @@ $from_id = $user_id;
 $plan_id = $payParam['plan_id'];
 $volume = $payParam['volume'];
 $days = $payParam['day'];
-// // for buy
-// $volumePay = $payParam['volume'];
-// $daysPay = $payParam['day'];
-// $agentBought = $payParam['agent_bought'];
+$agentBought = $payParam['agent_bought'];
 
 if($payType == "BUY_SUB") $payDescription = "خرید اشتراک";
 elseif($payType == "RENEW_ACCOUNT") $payDescription = "تمدید اکانت";
@@ -230,8 +227,11 @@ if($payType == "BUY_SUB"){
     $expire_microdate = floor(microtime(true) * 1000) + (864000 * $days * 100);
     $expire_date = $date + (86400 * $days);
     $type = $file_detail['type'];
-    $volume = $file_detail['volume'];
-    $protocol = $file_detail['protocol'];
+    
+    if($volume == 0 && $days == 0){
+        $volume = $file_detail['volume'];
+        $days = $file_detail['days'];
+    }
 
     $server_id = $file_detail['server_id'];
     $netType = $file_detail['type'];
@@ -288,7 +288,9 @@ if($payType == "BUY_SUB"){
     $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
-    $portType = $stmt->get_result()->fetch_assoc()['port_type'];
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $serverType = $server_info['type'];
+    $portType = $server_info['port_type'];
     $stmt->close();
     include '../phpqrcode/qrlib.php';
     define('IMAGE_WIDTH',540);
@@ -325,11 +327,17 @@ if($payType == "BUY_SUB"){
         if($inbound_id == 0){    
             $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
             if(! $response->success){
+                if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+                elseif(strstr($response->msg, "Port already exists")) $port = rand(1111,65000);
+
                 $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
             } 
         }else {
+            if($botState['firstUseState'] == "on" && ($serverType == "sanaei" || $serverType == "alireza")) $expire_microdate = $days * -86400000;
+
             $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
             if(! $response->success){
+                if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
                 $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
             } 
         }
