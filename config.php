@@ -159,9 +159,9 @@ $time = time();
 $update = json_decode(file_get_contents("php://input"));
 if(isset($update->message)){
     $from_id = $update->message->from->id;
-    $text = htmlspecialchars($update->message->text);
+    $text = $update->message->text;
     $first_name = htmlspecialchars($update->message->from->first_name);
-    $caption = htmlspecialchars($update->message->caption);
+    $caption = $update->message->caption;
     $chat_id = $update->message->chat->id;
     $last_name = htmlspecialchars($update->message->from->last_name);
     $username = $update->message->from->username?? " ندارد ";
@@ -173,7 +173,7 @@ if(isset($update->message)){
 if(isset($update->callback_query)){
     $callbackId = $update->callback_query->id;
     $data = $update->callback_query->data;
-    $text = htmlspecialchars($update->callback_query->message->text);
+    $text = $update->callback_query->message->text;
     $message_id = $update->callback_query->message->message_id;
     $chat_id = $update->callback_query->message->chat->id;
     $chat_type = $update->callback_query->message->chat->type;
