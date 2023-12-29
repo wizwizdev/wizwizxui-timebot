@@ -74,10 +74,10 @@ do
       
 			sleep 2
 
-           		url2="${bot_url}updateShareConfig.php"
-  			curl $url2
+                        # url2="${bot_url}updateShareConfig.php"
+  			# curl $url2
      
-			sleep 1
+			# sleep 1
    
 			sudo rm -r /var/www/html/wizwizxui-timebot/webpanel
 			sudo rm -r /var/www/html/wizwizxui-timebot/install
