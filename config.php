@@ -3949,7 +3949,8 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                 if($netType == 'grpc') {
                     if($tlsStatus == 'tls'){
                         $alpn = $tlsSetting->certificates->alpn;
-                        if(isset($tlsSetting->settings->serverName)) $sni = $tlsSetting->settings->serverName;
+						if(isset($tlsSetting->serverName)) $sni = $tlsSetting->serverName;
+						if(isset($tlsSetting->settings->serverName)) $sni = $tlsSetting->settings->serverName;
                     } 
                     elseif($tlsStatus == "reality"){
                         $realitySettings = json_decode($row->streamSettings)->realitySettings;
@@ -3965,11 +3966,13 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                 }
                 if($tlsStatus == 'tls'){
                     $serverName = $tlsSetting->serverName;
+					if(isset($tlsSetting->serverName)) $sni = $tlsSetting->serverName;
                     if(isset($tlsSetting->settings->serverName)) $sni = $tlsSetting->settings->serverName;
                 }
                 if($tlsStatus == "xtls"){
                     $serverName = $xtlsSetting->serverName;
                     $alpn = $xtlsSetting->alpn;
+					if(isset($xtlsSetting->serverName)) $sni = $xtlsSetting->serverName;
                     if(isset($xtlsSetting->settings->serverName)) $sni = $xtlsSetting->settings->serverName;
                 }
                 if($netType == 'kcp'){
@@ -4020,6 +4023,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                 }elseif($netType == 'grpc') {
                     if($tlsStatus == 'tls'){
                         $alpn = $tlsSetting->alpn;
+						if(isset($tlsSetting->serverName)) $sni = $tlsSetting->serverName;
                         if(isset($tlsSetting->settings->serverName)) $sni = $tlsSetting->settings->serverName;
                     }
                     elseif($tlsStatus == "reality"){
@@ -4039,11 +4043,13 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                 }
                 if($tlsStatus == 'tls'){
                     $serverName = $tlsSetting->serverName;
+					if(isset($tlsSetting->serverName)) $sni = $tlsSetting->serverName;
                     if(isset($tlsSetting->settings->serverName)) $sni = $tlsSetting->settings->serverName;
                 }
                 if($tlsStatus == "xtls"){
                     $serverName = $xtlsSetting->serverName;
                     $alpn = $xtlsSetting->alpn;
+					if(isset($xtlsSetting->serverName)) $sni = $xtlsSetting->serverName;
                     if(isset($xtlsSetting->settings->serverName)) $sni = $xtlsSetting->settings->serverName;
                 }
 
@@ -4192,7 +4198,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                     $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus&headerType=$kcpType&seed=$kcpSeed#$remark";
                 elseif($netType == 'grpc'){
                     if($tlsStatus == 'tls'){
-                        $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus&serviceName=$serviceName&sni=$serverName#$remark";
+                        $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus&serviceName=$serviceName&sni=$sni#$remark";
                     }
                     elseif($tlsStatus=="reality"){
                         $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus&serviceName=$serviceName&fp=$fp&pbk=$pbk&sni=$sni" . ($flow != ""?"&flow=$flow":"") . "&sid=$sid&spx=$spiderX#$remark";
@@ -4287,7 +4293,7 @@ function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $secu
     $sni = $server_info['sni'];
     if(!empty($sni) && ($serverType == "sanaei" || $serverType == "alireza")){
         $tlsSettings = json_decode($tlsSettings,true);
-        $tlsSettings['settings']['serverName'] = $sni;
+        $tlsSettings['serverName'] = $sni;
         $tlsSettings = json_encode($tlsSettings,488|JSON_UNESCAPED_UNICODE);
     }
     
@@ -4383,7 +4389,9 @@ function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $secu
   "network": "grpc",
   "security": "tls",
   "tlsSettings": {
-    "serverName": "' . parse_url($panel_url, PHP_URL_HOST) . '",
+    "serverName": "' .
+    (!empty($sni) && ($serverType == "sanaei" || $serverType == "alireza") ?  $sni: parse_url($panel_url, PHP_URL_HOST))
+     . '",
     "certificates": [
       {
         "certificateFile": "' . $certificateFile . '",
@@ -4391,11 +4399,6 @@ function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $secu
       }
     ],
     "alpn": []'
-    .
-    (!empty($sni) && ($serverType == "sanaei" || $serverType == "alireza") ? ',
-    "settings": {
-            "serverName": "' . $sni . '"
-            }':'')
     .'
   },
   "grpcSettings": {
@@ -4578,7 +4581,7 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
     $sni = $server_info['sni'];
     if(!empty($sni) && ($serverType == "sanaei" || $serverType == "alireza")){
         $tlsSettings = json_decode($tlsSettings,true);
-        $tlsSettings['settings']['serverName'] = $sni;
+        $tlsSettings['serverName'] = $sni;
         $tlsSettings = json_encode($tlsSettings);
     }
 
@@ -4745,7 +4748,9 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
   "network": "grpc",
   "security": "tls",
   "tlsSettings": {
-    "serverName": "' . parse_url($panel_url, PHP_URL_HOST) . '",
+    "serverName": "' .
+    (!empty($sni) && ($serverType == "sanaei" || $serverType == "alireza") ?  $sni: parse_url($panel_url, PHP_URL_HOST))
+     . '",
     "certificates": [
       {
         "certificateFile": "' . $certificateFile . '",
@@ -4753,11 +4758,6 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
       }
     ],
     "alpn": []'
-    .
-    (!empty($sni) && ($serverType == "sanaei" || $serverType == "alireza") ? ',
-    "settings": {
-            "serverName": "' . $sni . '"
-            }':'')
     .'
   },
   "grpcSettings": {
@@ -5206,7 +5206,7 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
 
     if(!empty($sni) && ($serverType == "sanaei" || $serverType == "alireza")){
         $tlsSettings = json_decode($tlsSettings,true);
-        $tlsSettings['settings']['serverName'] = $sni;
+        $tlsSettings['serverName'] = $sni;
         $tlsSettings = json_encode($tlsSettings);
     }
     
@@ -5360,7 +5360,9 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
   "network": "grpc",
   "security": "tls",
   "tlsSettings": {
-    "serverName": "' . parse_url($panel_url, PHP_URL_HOST) . '",
+    "serverName": "' .
+    (!empty($sni) && ($serverType == "sanaei" || $serverType == "alireza") ?  $sni: parse_url($panel_url, PHP_URL_HOST))
+     . '",
     "certificates": [
       {
         "certificateFile": "' . $certificateFile . '",
@@ -5368,11 +5370,6 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
       }
     ],
     "alpn": []'
-    .
-    (!empty($sni) && ($serverType == "sanaei" || $serverType == "alireza") ? ',
-    "settings": {
-            "serverName": "' . $sni . '"
-            }':'')
     .'
   },
   "grpcSettings": {
