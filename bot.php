@@ -7234,7 +7234,7 @@ if(preg_match('/^discountRenew(\d+)_(\d+)/',$userInfo['step'], $match) || preg_m
         $stmt->close();
     }else $price = $afterDiscount;
 
-    if($price == 0) $price = "رایگان";
+    if($price == 0 or ($from_id == $admin)|| $userInfo['isAdmin'] == true) $price = "رایگان";
     else $price .= " تومان";
     $keyboard = array();
     if($botState['cartToCartState'] == "on") $keyboard[] = [['text' => "💳 کارت به کارت مبلغ $price",  'callback_data' => "payRenewWithCartToCart$hash_id"]];
