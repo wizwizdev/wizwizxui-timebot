@@ -185,7 +185,6 @@ $payType = $payParam['type'];
 $description = $payParam['description'];
 
 $from_id = $user_id; 
-
 $plan_id = $payParam['plan_id'];
 $volume = $payParam['volume'];
 $days = $payParam['day'];
@@ -221,21 +220,22 @@ if($payType == "BUY_SUB"){
     $stmt->execute();
     $file_detail = $stmt->get_result()->fetch_assoc();
     $stmt->close();
-
-    $days = $file_detail['days'];
-    $date = time();
-    $expire_microdate = floor(microtime(true) * 1000) + (864000 * $days * 100);
-    $expire_date = $date + (86400 * $days);
-    $type = $file_detail['type'];
     
     if($volume == 0 && $days == 0){
         $volume = $file_detail['volume'];
         $days = $file_detail['days'];
     }
 
+    $date = time();
+    $expire_microdate = floor(microtime(true) * 1000) + (864000 * $days * 100);
+    $expire_date = $date + (86400 * $days);
+    $type = $file_detail['type'];
+    
+
     $server_id = $file_detail['server_id'];
     $netType = $file_detail['type'];
     $acount = $file_detail['acount'];
+    $protocol = $file_detail['protocol'];
     $inbound_id = $file_detail['inbound_id'];
     $limitip = $file_detail['limitip'];
     $rahgozar = $file_detail['rahgozar'];
@@ -341,7 +341,6 @@ if($payType == "BUY_SUB"){
                 $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
             } 
         }
-        
         if(is_null($response)){
             showForm('پرداخت شما با موفقیت انجام شد ولی گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...مبلغ ' . number_format($amount) ." به کیف پولت اضافه شد",$payDescription);
             
