@@ -262,8 +262,19 @@ $connection->query("CREATE TABLE `admins` (
   PRIMARY KEY (`id`)
 )");
 
-$connection->query("INSERT INTO `admins` (`id`, `username`, `password`, `backupchannel`, `lang`) VALUES
-(1, 'admin', 'admin', '-1002545458541', 'en');
+$connection->query("CREATE TABLE `black_list` (
+  `id` int(255) NOT NULL AUTO_INCREMENT,
+  `info` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  PRIMARY KEY (`id`)
+)");
+
+
+$characters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz$#@'; // Characters to choose from for random username and password
+$random_username = substr(str_shuffle($characters), 0, 15); // Generate a random 8-character username
+$random_password = substr(str_shuffle($characters), 0, 15); // Generate a random 8-character password
+
+$connection->query("INSERT INTO `admins` (`username`, `password`, `backupchannel`, `lang`) VALUES
+('$random_username', '$random_password', '-1002545458541', 'en');
 ");
 
 
