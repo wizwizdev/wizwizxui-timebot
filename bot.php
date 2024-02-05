@@ -114,17 +114,7 @@ if($userInfo['phone'] == null && $from_id != $admin && $userInfo['isAdmin'] != t
 }
 if(preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main'] or $data == 'mainMenu') {
     setUser();
-    setUser("", "temp");
-    if ($uinfo->num_rows == 0) {
-        $first_name = !empty($first_name)?$first_name:" ";
-        $username = !empty($username)?$username:" ";
-        $refcode = time();
-        $sql = "INSERT INTO `users` VALUES (NULL,?,?,?,?, 0,?)";
-        $stmt = $connection->prepare($sql);
-        $stmt->bind_param("issii", $from_id, $first_name, $username, $refcode, $time);
-        $stmt->execute();
-        $stmt->close();
-    }
+    setUser("", "temp"); 
     if(isset($data) and $data == "mainMenu"){
         $res = editText($message_id, $mainValues['start_message'], getMainKeys());
         if(!$res->ok){
@@ -690,7 +680,7 @@ if($data=="myInfo"){
 👤 اسم:  <code> $first_name </code>
 💰 موجودی: <code> $myWallet </code>
 
-👈🏻 کل سرویس ها : <code> $totalBuys </code> عدد
+☑️ کل سرویس ها : <code> $totalBuys </code> عدد
 ⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
 ",
             $keys,"html");
@@ -9194,29 +9184,26 @@ if(preg_match('/^editServer(\D+)(\d+)/',$data,$match) && $text != $buttonValues[
 if(preg_match('/^editServer(\D+)(\d+)/',$userInfo['step'],$match) && $text != $buttonValues['cancel'] && ($from_id == $admin || $userInfo['isAdmin'] == true)){
     switch($match[1]){
         case "Name":
-            $txt ="title";
-            break;
-        case "Max":
-            $txt = "ucount";
-            break;
-        case "Remark":
-            $txt ="remark";
+            $sql = "UPDATE `server_info` SET `title`";
             break;
         case "Flag":
-            $txt = "flag";
+            $sql = "UPDATE `server_info` SET `flag`";
             break;
-        default:
-            $txt = $match[1];
+        case "Remark":
+            $sql = "UPDATE `server_info` SET `remark`";
+            break;
+        case "Max":
+            $sql = "UPDATE `server_info` SET `ucount`";
             break;
     }
     
     if($text == "/empty"){
-        $stmt = $connection->prepare("UPDATE `server_info` SET `$txt` IS NULL WHERE `id`=?");
+        $stmt = $connection->prepare("$sql IS NULL WHERE `id`=?");
         $stmt->bind_param("i", $match[2]);
         $stmt->execute();
         $stmt->close();
     }else{
-        $stmt = $connection->prepare("UPDATE `server_info` SET `$txt`=? WHERE `id`=?");
+        $stmt = $connection->prepare("$sql=? WHERE `id`=?");
         $stmt->bind_param("si",$text, $match[2]);
         $stmt->execute();
         $stmt->close();
@@ -9238,23 +9225,31 @@ if(preg_match('/^editsServer(\D+)(\d+)/',$data,$match) && $text != $buttonValues
 }
 if(preg_match('/^editsServer(\D+)(\d+)/',$userInfo['step'],$match) && $text != $buttonValues['cancel'] && ($from_id == $admin || $userInfo['isAdmin'] == true)){
     if($text == "/empty"){
-        if($match[1] == "header_type" || $match[1] == "security"){
-            $stmt = $connection->prepare("UPDATE `server_config` SET `{$match[1]}` = 'none' WHERE `id`=?");
-            $stmt->bind_param("i", $match[2]);
-        }else{
-            $stmt = $connection->prepare("UPDATE `server_config` SET `{$match[1]}` = '' WHERE `id`=?");
-            $stmt->bind_param("i", $match[2]);
-        }
+        if($match[1] == "sni") $stmt = $connection->prepare("UPDATE `server_config` SET `sni` = '' WHERE `id`=?");
+        elseif($match[1] == "header_type") $stmt = $connection->prepare("UPDATE `server_config` SET `header_type` = 'none' WHERE `id`=?");
+        elseif($match[1] == "request_header") $stmt = $connection->prepare("UPDATE `server_config` SET `request_header` = '' WHERE `id`=?");
+        elseif($match[1] == "response_header") $stmt = $connection->prepare("UPDATE `server_config` SET `response_header` = '' WHERE `id`=?");
+        elseif($match[1] == "security") $stmt = $connection->prepare("UPDATE `server_config` SET `security` = 'none' WHERE `id`=?");
+        elseif($match[1] == "tlsSettings") $stmt = $connection->prepare("UPDATE `server_config` SET `tlsSettings` = '' WHERE `id`=?");
+
+        $stmt->bind_param("i", $match[2]);
     }else{
-        if($match[1] == "header_type" && $text != "http" && $text != "none"){
-            sendMessage("برای نوع header type فقط none و یا http مجاز است");
-            exit();
+        if($match[1] == "sni") $stmt = $connection->prepare("UPDATE `server_config` SET `sni`=? WHERE `id`=?");
+        elseif($match[1] == "header_type"){
+            if($text != "http" && $text != "none"){
+                sendMessage("برای نوع header type فقط none و یا http مجاز است");
+                exit();
+            }else $stmt = $connection->prepare("UPDATE `server_config` SET `header_type`=? WHERE `id`=?");
         }
-        elseif($match[1] == "security" && $text != "tls" && $text != "none" && $text != "xtls"){
-            sendMessage("برای نوع security فقط tls یا xtls و یا هم none مجاز است");
-            exit();
+        elseif($match[1] == "request_header") $stmt = $connection->prepare("UPDATE `server_config` SET `request_header`=? WHERE `id`=?");
+        elseif($match[1] == "response_header") $stmt = $connection->prepare("UPDATE `server_config` SET `response_header`=? WHERE `id`=?");
+        elseif($match[1] == "security"){
+            if($text != "tls" && $text != "none" && $text != "xtls"){
+                sendMessage("برای نوع security فقط tls یا xtls و یا هم none مجاز است");
+                exit();
+            }else $stmt = $connection->prepare("UPDATE `server_config` SET `security`=? WHERE `id`=?");
         }
-        $stmt = $connection->prepare("UPDATE `server_config` SET `{$match[1]}`=? WHERE `id`=?");
+        elseif($match[1] == "tlsSettings") $stmt = $connection->prepare("UPDATE `server_config` SET `tlsSettings`=? WHERE `id`=?");
         $stmt->bind_param("si",$text, $match[2]);
     }
     $stmt->execute();
@@ -9289,20 +9284,19 @@ if(preg_match('/^editServer(\D+)(\d+)/',$data,$match) && $text != $buttonValues[
 if(preg_match('/^editServer(\D+)(\d+)/',$userInfo['step'],$match) && $text != $buttonValues['cancel'] && ($from_id == $admin || $userInfo['isAdmin'] == true)){
     switch($match[1]){
         case "Name":
-            $txt ="title";
+            $stmt = $connection->prepare("UPDATE `server_info` SET `title`=? WHERE `id`=?");
             break;
         case "Max":
-            $txt = "ucount";
+            $stmt = $connection->prepare("UPDATE `server_info` SET `ucount`=? WHERE `id`=?");
             break;
         case "Remark":
-            $txt ="remark";
+            $stmt = $connection->prepare("UPDATE `server_info` SET `remark`=? WHERE `id`=?");
             break;
         case "Flag":
-            $txt = "flag";
+            $stmt = $connection->prepare("UPDATE `server_info` SET `flag`=? WHERE `id`=?");
             break;
     }
     
-    $stmt = $connection->prepare("UPDATE `server_info` SET `$txt`=? WHERE `id`=?");
     $stmt->bind_param("si",$text, $match[2]);
     $stmt->execute();
     $stmt->close();
