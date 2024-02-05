@@ -109,7 +109,12 @@ $arrays = [
     "ALTER TABLE `pays` ADD `tron_price` DOUBLE(255,2) NOT NULL DEFAULT '0' AFTER `price`;",
     "ALTER TABLE `gift_list` CHANGE `id` `id` INT(255) NOT NULL AUTO_INCREMENT;",
     "ALTER TABLE `users` CHANGE `discount_percent` `discount_percent` VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL;",
-    "UPDATE `users` SET discount_percent = IF(discount_percent = 0, NULL, CONCAT('{\"normal\": ', discount_percent, '}')) WHERE discount_percent REGEXP '^[0-9]+$';"
+    "UPDATE `users` SET discount_percent = IF(discount_percent = 0, NULL, CONCAT('{\"normal\": ', discount_percent, '}')) WHERE discount_percent REGEXP '^[0-9]+$';",
+    "CREATE TABLE `black_list` (
+      `id` int(255) NOT NULL AUTO_INCREMENT,
+      `info` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+      PRIMARY KEY (`id`)
+      );"
     ];
 function updateBot(){
     global $arrays, $connection, $walletwizwiz, $nowPaymentKey, $zarinpalId;
