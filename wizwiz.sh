@@ -36,7 +36,6 @@ PKG=(
     php-gd 
     php-json 
     php-curl 
-#     phpmyadmin
 )
 
 for i in "${PKG[@]}"
@@ -55,10 +54,12 @@ done
 
 echo -e "\n\e[92mPackages Installed Continuing ...\033[0m\n"
 
+randomdbpasstxt69=$(openssl rand -base64 10 | tr -dc 'a-zA-Z0-9' | cut -c1-20)
+
 echo 'phpmyadmin phpmyadmin/dbconfig-install boolean true' | debconf-set-selections
-echo 'phpmyadmin phpmyadmin/app-password-confirm password wizwizhipass' | debconf-set-selections
-echo 'phpmyadmin phpmyadmin/mysql/admin-pass password wizwizhipass' | debconf-set-selections
-echo 'phpmyadmin phpmyadmin/mysql/app-pass password wizwizhipass' | debconf-set-selections
+echo 'phpmyadmin phpmyadmin/app-password-confirm password $randomdbpasstxt69' | debconf-set-selections
+echo 'phpmyadmin phpmyadmin/mysql/admin-pass password $randomdbpasstxt69' | debconf-set-selections
+echo 'phpmyadmin phpmyadmin/mysql/app-pass password $randomdbpasstxt69' | debconf-set-selections
 echo 'phpmyadmin phpmyadmin/reconfigure-webserver multiselect apache2' | debconf-set-selections
 sudo apt-get install phpmyadmin -y
 sudo ln -s /etc/phpmyadmin/apache.conf /etc/apache2/conf-available/phpmyadmin.conf
@@ -70,12 +71,6 @@ wait
 sudo apt-get install -y php-soap
 sudo apt-get install libapache2-mod-php
 
-# extension=soap.so
-# echo "extension=soap.so" >> /usr/local/lib/php.ini
-# sed -i 's/;extension=soap/extension=soap/g' /usr/local/lib/php.ini
-
-
-# services
 sudo systemctl enable mysql.service
 sudo systemctl start mysql.service
 sudo systemctl enable apache2
@@ -109,25 +104,17 @@ echo -e "\n\033[33mWizWiz config and script have been installed successfully\033
 
 wait
     
-    
-destination_dir=$(find /var/www/html -type d -name "*wizpanel*" | head -n 1)
-    
-if [ -z "$destination_dir" ]; then
-    RANDOM_NUMBER=$(( RANDOM % 10000000 + 1000000 ))
-    mkdir "/var/www/html/wizpanel${RANDOM_NUMBER}"
-    echo "Directory created: wizpanel${RANDOM_NUMBER}"
-    echo "Folder created successfully!"
-else
-    echo "Folder already exists."
-fi
-   
- destination_dir=$(find /var/www/html -type d -name "*wizpanel*" | head -n 1)
+        
+RANDOM_CODE=$(LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 25)
+mkdir "/var/www/html/${RANDOM_CODE}"
+echo "Directory created: ${RANDOM_CODE}"
+echo "Folder created successfully!"
 
  cd /var/www/html/
- wget -O wizwizpanel.zip https://github.com/wizwizdev/wizwizxui-timebot/releases/download/9.1.3/wizwizpanel.zip
+ wget -O wizwizpanel.zip https://github.com/wizwizdev/wizwizxui-timebot/releases/download/9.1.9/wizwizpanel.zip
 
  file_to_transfer="/var/www/html/wizwizpanel.zip"
- destination_dir=$(find /var/www/html -type d -name "*wizpanel*" | head -n 1)
+ destination_dir=$(find /var/www/html -type d -name "*${RANDOM_CODE}*" -print -quit)
 
  if [ -z "$destination_dir" ]; then
    echo "Error: Could not find directory containing 'wiz' in '/var/www/html'"
@@ -150,13 +137,13 @@ if [ ! -d "/root/confwizwiz" ]; then
     sudo chmod -R 777 /root/confwizwiz/dbrootwizwiz.txt
     sleep 1
     
-    randomdbpasstxt=$(openssl rand -base64 10 | tr -dc 'a-zA-Z0-9' | cut -c1-8)
+    randomdbpasstxt=$(openssl rand -base64 10 | tr -dc 'a-zA-Z0-9' | cut -c1-30)
 
     ASAS="$"
 
     echo "${ASAS}user = 'root';" >> /root/confwizwiz/dbrootwizwiz.txt
     echo "${ASAS}pass = '${randomdbpasstxt}';" >> /root/confwizwiz/dbrootwizwiz.txt
-    echo "${ASAS}path = '${RANDOM_NUMBER}';" >> /root/confwizwiz/dbrootwizwiz.txt
+    #echo "${ASAS}paths = '${RANDOM_CODE}';" >> /root/confwizwiz/dbrootwizwiz.txt
     
     sleep 1
 
@@ -205,7 +192,7 @@ PATHS=$(cat /root/confwizwiz/dbrootwizwiz.txt | grep '$path' | cut -d"'" -f2)
 (crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizwizxui-timebot/settings/warnusers.php >/dev/null 2>&1") | sort - | uniq - | crontab -
 (crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizwizxui-timebot/settings/gift2all.php >/dev/null 2>&1") | sort - | uniq - | crontab -
 (crontab -l ; echo "*/3 * * * * curl https://${DOMAIN_NAME}/wizwizxui-timebot/settings/tronChecker.php >/dev/null 2>&1") | sort - | uniq - | crontab -
-(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizpanel${PATHS}/backupnutif.php >/dev/null 2>&1") | sort - | uniq - | crontab -
+(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/${PATHS}/backupnutif.php >/dev/null 2>&1") | sort - | uniq - | crontab -
 
 echo -e "\n\e[92m Setting Up Cron...\033[0m\n"
 
@@ -256,9 +243,9 @@ if [ $? -eq 0 ]; then
 
 wait
 
-    randomdbpass=$(openssl rand -base64 10 | tr -dc 'a-zA-Z0-9' | cut -c1-8)
+    randomdbpass=$(openssl rand -base64 10 | tr -dc 'a-zA-Z0-9' | cut -c1-22)
 
-    randomdbdb=$(openssl rand -base64 10 | tr -dc 'a-zA-Z' | cut -c1-8)
+    randomdbdb=$(openssl rand -base64 10 | tr -dc 'a-zA-Z0-9' | cut -c1-22)
 
     if [[ $(mysql -u root -p$ROOT_PASSWORD -e "SHOW DATABASES LIKE 'wizwiz'") ]]; then
         clear
@@ -357,15 +344,14 @@ wait
         
         echo " "
         
-        echo -e "\e[100mDatabase information: https://${YOUR_DOMAIN}/phpmyadmin\033[0m"
+        echo -e "\e[100mDatabase information:\033[0m"
+	echo -e "\e[33maddres: \e[36mhttps://${YOUR_DOMAIN}/phpmyadmin\033[0m"
         echo -e "\e[33mDatabase name: \e[36m${dbname}\033[0m"
         echo -e "\e[33mDatabase username: \e[36m${dbuser}\033[0m"
         echo -e "\e[33mDatabase password: \e[36m${dbpass}\033[0m"
         echo " "
         echo -e "\e[100mwizwiz panel:\033[0m"
-        echo -e "\e[33maddres: \e[36mhttps://${YOUR_DOMAIN}/wizpanel${RANDOM_NUMBER}\033[0m"
-        echo -e "\e[33musername panel: \e[36madmin\033[0m"
-        echo -e "\e[33mpassword panel: \e[36madmin\033[0m\n"
+        echo -e "\e[33maddres: \e[36mhttps://${YOUR_DOMAIN}/${RANDOM_CODE}/login.php\033[0m"
         
         wait
         
