@@ -120,7 +120,7 @@ $range = [
 function check($return = false){
     global $range;
     foreach ($range as $rg) {
-        if (ip_in_range(GetRealIp(), $rg)) {
+        if (ip_in_range($_SERVER['REMOTE_ADDR'], $rg)) {
             return true;
         }
     }
@@ -130,17 +130,6 @@ function check($return = false){
 
     die('You do not have access');
 
-}
-function GetRealIp(){
-    if (!empty($_SERVER['HTTP_CLIENT_IP']))
-        //check ip from share internet
-        $ip = $_SERVER['HTTP_CLIENT_IP'];
-    elseif (!empty($_SERVER['HTTP_X_FORWARDED_FOR']))
-        //to check ip is pass from proxy
-        $ip = $_SERVER['HTTP_X_FORWARDED_FOR'];
-    else
-        $ip = $_SERVER['REMOTE_ADDR'];
-    return $ip;
 }
 function ip_in_range($ip, $range){
     if (strpos($range, '/') == false) {
@@ -469,7 +458,8 @@ function getAgentsList($offset = 0){
     global $connection, $mainValues, $buttonValues;
     $limit = 15;
     
-    $stmt = $connection->prepare("SELECT * FROM `users` WHERE `is_agent` = 1 LIMIT $limit OFFSET $offset");
+    $stmt = $connection->prepare("SELECT * FROM `users` WHERE `is_agent` = 1 LIMIT ? OFFSET ?");
+    $stmt->bind_param('ii', $limit, $offset);
     $stmt->execute();
     $agentList = $stmt->get_result();
     $stmt->close();
@@ -714,7 +704,8 @@ function getServerListKeys($offset = 0){
     
     $limit = 15;
     
-    $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `active`=1 LIMIT $limit OFFSET $offset");
+    $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `active`=1 LIMIT ? OFFSET ?");
+    $stmt->bind_param('ii', $limit, $offset);
     $stmt->execute();
     $cats= $stmt->get_result();
     $stmt->close();
@@ -773,7 +764,8 @@ function getCategoriesKeys($offset = 0){
     $limit = 15;
     
     global $connection, $mainValues, $buttonValues;
-    $stmt = $connection->prepare("SELECT * FROM `server_categories` WHERE `active`=1 AND `parent`=0 LIMIT $limit OFFSET $offset");
+    $stmt = $connection->prepare("SELECT * FROM `server_categories` WHERE `active`=1 AND `parent`=0 LIMIT ? OFFSET ?");
+    $stmt->bind_param('ii', $limit, $offset);
     $stmt->execute();
     $cats = $stmt->get_result();
     $stmt->close();
@@ -2164,8 +2156,9 @@ function generateUID(){
 function checkStep($table){
     global $connection;
     
-    $sql = "SELECT * FROM `" . $table . "` WHERE `active`=0";
-    $stmt = $connection->prepare("SELECT * FROM `$table` WHERE `active` = 0");
+    if($table == "server_plans") $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `active` = 0");
+    if($table == "server_categories") $stmt = $connection->prepare("SELECT * FROM `server_categories` WHERE `active` = 0");
+    
     $stmt->execute();
     $res = $stmt->get_result()->fetch_assoc();
     $stmt->close();
@@ -2182,21 +2175,30 @@ function setUser($value = 'none', $field = 'step'){
 
     
     if($uinfo->num_rows == 0){
-        $sql = "INSERT INTO `users` (`userid`, `name`, `username`, `refcode`, `wallet`, `date`, `$field`)
-                            VALUES (?,?,?, 0,0,?, ?)";
-        $stmt = $connection->prepare($sql);
+        $stmt = $connection->prepare("INSERT INTO `users` (`userid`, `name`, `username`, `refcode`, `wallet`, `date`)
+                            VALUES (?,?,?, 0,0,?)");
         $time = time();
-        $stmt->bind_param("issis", $from_id, $first_name, $username, $time, $value);
-        $stmt->execute();
-        $stmt->close();
-    }else{
-        $refcode = time();
-        $sql = "UPDATE `users` SET `$field` = ? WHERE `userid` = ?";
-        $stmt = $connection->prepare($sql);
-        $stmt->bind_param("si", $value, $from_id);
+        $stmt->bind_param("issi", $from_id, $first_name, $username, $time);
         $stmt->execute();
         $stmt->close();
     }
+    
+    if($field == "wallet") $stmt = $connection->prepare("UPDATE `users` SET `wallet` = ? WHERE `userid` = ?");
+    elseif($field == "phone") $stmt = $connection->prepare("UPDATE `users` SET `phone` = ? WHERE `userid` = ?");
+    elseif($field == "refered_by") $stmt = $connection->prepare("UPDATE `users` SET `refered_by` = ? WHERE `userid` = ?");
+    elseif($field == "step") $stmt = $connection->prepare("UPDATE `users` SET `step` = ? WHERE `userid` = ?");
+    elseif($field == "freetrial") $stmt = $connection->prepare("UPDATE `users` SET `freetrial` = ? WHERE `userid` = ?");
+    elseif($field == "isAdmin") $stmt = $connection->prepare("UPDATE `users` SET `isAdmin` = ? WHERE `userid` = ?");
+    elseif($field == "first_start") $stmt = $connection->prepare("UPDATE `users` SET `first_start` = ? WHERE `userid` = ?");
+    elseif($field == "temp") $stmt = $connection->prepare("UPDATE `users` SET `temp` = ? WHERE `userid` = ?");
+    elseif($field == "is_agent") $stmt = $connection->prepare("UPDATE `users` SET `is_agent` = ? WHERE `userid` = ?");
+    elseif($field == "discount_percent") $stmt = $connection->prepare("UPDATE `users` SET `discount_percent` = ? WHERE `userid` = ?");
+    elseif($field == "agent_date") $stmt = $connection->prepare("UPDATE `users` SET `agent_date` = ? WHERE `userid` = ?");
+    elseif($field == "spam_info") $stmt = $connection->prepare("UPDATE `users` SET `spam_info` = ? WHERE `userid` = ?");
+    
+    $stmt->bind_param("si", $value, $from_id);
+    $stmt->execute();
+    $stmt->close();
 }
 function generateRandomString($length, $protocol) {
     return ($protocol == 'trojan') ? substr(md5(time()),5,15) : generateUID();
