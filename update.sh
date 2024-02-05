@@ -22,7 +22,6 @@ do
 			echo " "
 			if [ "$answer" != "${answer#[Yy]}" ]; then
 			mv /var/www/html/wizwizxui-timebot/baseInfo.php /root/
-      			# mv /var/www/html/wizwizxui-timebot/settings/values.php /root/
 			sudo apt-get install -y git
 			sudo apt-get install -y wget
 			sudo apt-get install -y unzip
@@ -37,17 +36,12 @@ do
 			sudo chmod -R 755 /var/www/html/wizwizxui-timebot/
 			sleep 3
 			mv /root/baseInfo.php /var/www/html/wizwizxui-timebot/
-      			# mv /root/values.php /var/www/html/wizwizxui-timebot/settings/
-# 			if [ $? -ne 0 ]; then
-# 			echo -e "\n\e[41mError: The update failed!\033[0m\n"
-# 			exit 1
-# 			else
-			
+
 			sleep 1
 
-   			db_namewizwiz=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbName' | cut -d"'" -f2)
-		      	db_userwizwiz=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbUserName' | cut -d"'" -f2)
-		      	db_passwizwiz=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbPassword' | cut -d"'" -f2)
+   		db_namewizwiz=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbName' | cut -d"'" -f2)
+		  db_userwizwiz=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbUserName' | cut -d"'" -f2)
+		  db_passwizwiz=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$dbPassword' | cut -d"'" -f2)
 			bot_token=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botToken' | cut -d"'" -f2)
 			bot_token2=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botToken' | cut -d'"' -f2)
 			bot_url=$(cat /var/www/html/wizwizxui-timebot/baseInfo.php | grep '$botUrl' | cut -d'"' -d"'" -f2)
@@ -74,10 +68,6 @@ do
       
 			sleep 2
 
-                        # url2="${bot_url}updateShareConfig.php"
-  			# curl $url2
-     
-			# sleep 1
    
 			sudo rm -r /var/www/html/wizwizxui-timebot/webpanel
 			sudo rm -r /var/www/html/wizwizxui-timebot/install
@@ -94,8 +84,6 @@ do
 			
 			echo -e "\n\e[92mThe script was successfully updated! \033[0m\n"
 			
-# 			fi
-
 			else
 			  echo -e "\e[41mCancel the update.\033[0m\n"
 			fi
@@ -107,46 +95,35 @@ do
 			read -p "Are you sure you want to update?[y/n]: " answer
 			echo " "
 			if [ "$answer" != "${answer#[Yy]}" ]; then
+   
+			wait
+   			cd /var/www/html/ && find . -mindepth 1 -maxdepth 1 ! -name wizwizxui-timebot -type d -exec rm -r {} \;
+
+	 		touch /var/www/html/index.html
+    			echo "<!DOCTYPE html><html><head><title>My Website</title></head><body><h1>Hello, world!</h1></body></html>" > /var/www/html/index.html
+       
 			
-			sudo apt-get install -y php-ssh2
-			sudo apt-get install -y libssh2-1-dev libssh2-1
-
-			destination_dir=$(find /var/www/html -type d -name "*wizpanel*" | head -n 1)
-
-			if [ -z "$destination_dir" ]; then
-			    RANDOM_NUMBER=$(( RANDOM % 10000000 + 1000000 ))
-			    mkdir "/var/www/html/wizpanel${RANDOM_NUMBER}"
-			    echo "Directory created: wizpanel${RANDOM_NUMBER}"
-			    echo "Folder created successfully!"
-			    sudo mkdir /root/updatewizwiz
-   			    sleep 1
-			    touch /root/updatewizwiz/wizup.txt
-			    sudo chmod -R 777 /root/updatewizwiz/wizup.txt
-			    sleep 1
-			    ASAS="$"
-			    echo "${ASAS}path = '${RANDOM_NUMBER}';" >> /root/updatewizwiz/wizup.txt
-			else
-			    echo "Folder already exists."
-			fi
+			    
+			        
+			RANDOM_CODE=$(LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 25)
+			mkdir "/var/www/html/${RANDOM_CODE}"
+			echo "Directory created: ${RANDOM_CODE}"
+			echo "Folder created successfully!"
 			
-			
-
-			 destination_dir=$(find /var/www/html -type d -name "*wizpanel*" | head -n 1)
-
 			 cd /var/www/html/
-			 wget -O wizwizpanel.zip https://github.com/wizwizdev/wizwizxui-timebot/releases/download/9.1.3/wizwizpanel.zip
-
+			 wget -O wizwizpanel.zip https://github.com/wizwizdev/wizwizxui-timebot/releases/download/9.1.9/wizwizpanel.zip
+			
 			 file_to_transfer="/var/www/html/wizwizpanel.zip"
-			 destination_dir=$(find /var/www/html -type d -name "*wizpanel*" | head -n 1)
-
+			 destination_dir=$(find /var/www/html -type d -name "*${RANDOM_CODE}*" -print -quit)
+			
 			 if [ -z "$destination_dir" ]; then
 			   echo "Error: Could not find directory containing 'wiz' in '/var/www/html'"
 			   exit 1
 			 fi
-
+			
 			 mv "$file_to_transfer" "$destination_dir/" && yes | unzip "$destination_dir/wizwizpanel.zip" -d "$destination_dir/" && rm "$destination_dir/wizwizpanel.zip" && sudo chmod -R 755 "$destination_dir/" && sudo chown -R www-data:www-data "$destination_dir/" 
-
-
+			
+			
 			wait
 
 
@@ -170,57 +147,14 @@ do
 			echo -e "\n\e[41mError: The update failed!\033[0m\n"
 			exit 1
 			else
-			
-# 			echo -e '\e[31m'
 
-# 			find /var/www/html -type d -name "*wizpanel*" -print | sed "s|/var/www/html|& \n\n\nPanel: https://yourdomain.com|g"
-			
-# 			echo -e '\033[0m'
-
-
-
-
-# 			echo -e ' '
-# 			echo -e ' '
-
-# 			read -p "Enter the domain: " domainname
-			
-# 			if [ "$domainname" = "" ]; then
-
-# 			exit
-
-# 			else
-			
-			
-# 			DOMAIN_NAME="$domainname"
-			
-# 			PATHS=$(cat /root/updatewizwiz/wizup.txt | grep '$path' | cut -d"'" -f2)
-# 			PATHS=$(cat /root/confwizwiz/dbrootwizwiz.txt | grep '$path' | cut -d"'" -f2)
-# 			(crontab -l | grep -v "backupnutif.php") | crontab -
-			
-# 			(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizpanel${PATHS}/backupnutif.php >/dev/null 2>&1") | sort - | uniq - | crontab -
-# 			(crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizpanel${PATHS}/backupnutif.php >/dev/null 2>&1") | sort - | uniq - | crontab -
-# 			fi
-			
 			clear
 
 			echo -e ' '
-
-			
-# 			PATHS2=$(cat /root/confwizwiz/dbrootwizwiz.txt | grep '$path' | cut -d"'" -f2)
-# 			PATHS3=$(cat /root/updatewizwiz/wizup.txt | grep '$path' | cut -d"'" -f2)
-# 			if [ -d "/root/confwizwiz/dbrootwizwiz.txt" ]; then
-#                             echo -e "\e[92mPanel: \e[31mhttps://${DOMAIN_NAME}/wizpanel${PATHS}\033[0m\n"
-# 			    (crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizpanel${PATHS}/backupnutif.php >/dev/null 2>&1") | sort - | uniq - | crontab -
-# 			else
-# 			    echo -e "\e[92mPanel: \e[31mhttps://${DOMAIN_NAME}/wizpanel${PATHS3}\033[0m\n"
-# 			    (crontab -l ; echo "* * * * * curl https://${DOMAIN_NAME}/wizpanel${PATHS3}/backupnutif.php >/dev/null 2>&1") | sort - | uniq - | crontab -
-# 			fi
-			
-			
-		
-			echo -e "\e[92mThe script was successfully updated!\033[0m\n"
-			
+			      echo -e "\e[100mwizwiz panel:\033[0m"
+			      echo -e "\e[33maddres: \e[36mhttps://domain.com/${RANDOM_CODE}/login.php\033[0m"
+			      echo " "
+			      echo -e "\e[92mThe script was successfully updated!\033[0m\n"
 			fi
 
 
