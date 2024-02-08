@@ -110,6 +110,7 @@ $arrays = [
     "ALTER TABLE `gift_list` CHANGE `id` `id` INT(255) NOT NULL AUTO_INCREMENT;",
     "ALTER TABLE `users` CHANGE `discount_percent` `discount_percent` VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL;",
     "UPDATE `users` SET discount_percent = IF(discount_percent = 0, NULL, CONCAT('{\"normal\": ', discount_percent, '}')) WHERE discount_percent REGEXP '^[0-9]+$';",
+    "ALTER TABLE `server_plans` CHANGE `flow` `flow` VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_persian_ci NULL DEFAULT 'None';",
     "CREATE TABLE `black_list` (
       `id` int(255) NOT NULL AUTO_INCREMENT,
       `info` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
