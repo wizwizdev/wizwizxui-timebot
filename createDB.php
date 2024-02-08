@@ -205,7 +205,7 @@ $connection->query("CREATE TABLE `server_plans` (
   `dest` varchar(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
   `serverNames` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL,
   `spiderX` varchar(500) DEFAULT NULL,
-  `flow` varchar(50) NOT NULL DEFAULT 'None',
+  `flow` varchar(50) NULL DEFAULT 'None',
   `custom_path` int(10) DEFAULT 1,
   `custom_port` int(255) NOT NULL DEFAULT 0,
   `custom_sni` varchar(500)  CHARACTER SET utf8mb4 COLLATE utf8mb4_persian_ci DEFAULT NULL,
