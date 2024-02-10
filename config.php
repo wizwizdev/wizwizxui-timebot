@@ -171,6 +171,7 @@ if(isset($update->callback_query)){
     $first_name = htmlspecialchars($update->callback_query->from->first_name);
     $markup = json_decode(json_encode($update->callback_query->message->reply_markup->inline_keyboard),true);
 }
+if($from_id < 0) exit();
 $stmt = $connection->prepare("SELECT * FROM `users` WHERE `userid`=?");
 $stmt->bind_param("i", $from_id);
 $stmt->execute();
