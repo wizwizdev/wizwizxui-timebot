@@ -34,7 +34,7 @@ if($robotState == "off" && $from_id != $admin){
 }
 if(strpos($text, "/start ") !== false){
     $inviter = str_replace("/start ", "", $text);
-    
+    if($inviter < 0) exit();
     if($uinfo->num_rows == 0 && $inviter != $from_id){
         $stmt = $connection->prepare("SELECT * FROM `users` WHERE `userid` = ?");
         $stmt->bind_param("i", $inviter);
