@@ -1122,7 +1122,7 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
         }
         
         if(is_null($response)){
-            sendMessage('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
+            sendMessage('❌ | 🥺  ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
             break;
         }
     	if($response == "inbound not Found"){
@@ -1444,7 +1444,7 @@ if($inbound_id == 0){
 }
 
 if(is_null($response)){
-    alert('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
+    alert('❌ | 🥺  ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
     exit;
 }
 if($response == "inbound not Found"){
@@ -2395,7 +2395,7 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
     }
     
     if(is_null($response)){
-        alert('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
+        alert('❌ | 🥺  ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
         exit;
     }
 	if($response == "inbound not Found"){
@@ -2726,7 +2726,7 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $cancelText){
     }
     
     if(is_null($response)){
-        alert('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
+        alert('❌ | 🥺  ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
         exit;
     }
 	if($response == "inbound not Found"){
@@ -2961,7 +2961,7 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
     }
     
     if(is_null($response)){
-        alert('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
+        alert('❌ | 🥺  ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
         exit;
     }
 	if($response == "inbound not Found"){
@@ -3368,7 +3368,7 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $cancelText){
         } 
     }
     if(is_null($response)){
-        alert('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
+        alert('❌ | 🥺  ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
         exit;
     }
 	if($response == "inbound not Found"){
@@ -3533,7 +3533,7 @@ if($data== "usersNewTicket"){
         array_push($keys,$temp);
         editText($message_id,"💠لطفا واحد مورد نظر خود را انتخاب نمایید!",json_encode(['inline_keyboard'=>$keys]));
     }else{
-        alert("ای وای، ببخشید الان نیستم");
+        alert(" ببخشید الان نیستم");
     }
 }
 if($data == 'dayPlanSettings' and ($from_id == $admin || $userInfo['isAdmin'] == true)){
@@ -4704,7 +4704,7 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
         }
     }
     if(is_null($response)){
-        alert('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
+        alert('❌ | 🥺  اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
         exit;
     }
 	if($response == "inbound not Found"){
@@ -4784,7 +4784,7 @@ if($userInfo['step'] == "showAccount" and $text != $cancelText){
         exit();
     }
     
-    sendMessage("گلم لطفا یکم منتظر بمون ...", $removeKeyboard);
+    sendMessage(" لطفا یکم منتظر بمون ...", $removeKeyboard);
     $stmt = $connection->prepare("SELECT * FROM `server_config`");
     $stmt->execute();
     $serversList = $stmt->get_result();
@@ -4945,19 +4945,19 @@ if($userInfo['step'] == "showAccount" and $text != $cancelText){
                     ['text'=>"« نام اکانت »",'callback_data'=>"wizwizch"],
                     ],
                 [
-                    ['text'=>$upload*1.25?? " ",'callback_data'=>"wizwizch"],
+                    ['text'=>$upload?? " ",'callback_data'=>"wizwizch"],
                     ['text'=>"√ آپلود √",'callback_data'=>"wizwizch"],
                     ],
                 [
-                    ['text'=>$download*1.25??" ",'callback_data'=>"wizwizch"],
+                    ['text'=>$download??" ",'callback_data'=>"wizwizch"],
                     ['text'=>"√ دانلود √",'callback_data'=>"wizwizch"],
                     ],
                 [
-                    ['text'=>$total*1.25??" ",'callback_data'=>"wizwizch"],
+                    ['text'=>$total??" ",'callback_data'=>"wizwizch"],
                     ['text'=>"† حجم کلی †",'callback_data'=>"wizwizch"],
                     ],
                 [
-                    ['text'=>$leftMb*1.25??" ",'callback_data'=>"wizwizch"],
+                    ['text'=>$leftMb??" ",'callback_data'=>"wizwizch"],
                     ['text'=>"~ حجم باقیمانده ~",'callback_data'=>"wizwizch"],
                     ],
                 [
@@ -4976,7 +4976,7 @@ if($userInfo['step'] == "showAccount" and $text != $cancelText){
         }
     }
     if(!$found){
-         sendMessage("ای وای ، اطلاعاتت اشتباهه 😔",$cancelKey);
+         sendMessage("، اطلاعاتت اشتباهه 😔",$cancelKey);
     }
 }
 if (($data == 'addNewPlan' || $data=="addNewRahgozarPlan") and (($from_id == $admin || $userInfo['isAdmin'] == true))){
