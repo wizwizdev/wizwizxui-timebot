@@ -523,7 +523,7 @@ if ($data == "myInfo") {
 
     $myWallet = number_format($userInfo['wallet']) . " تومان";
 
-    $keys = getUserInfoKeys($userId);
+    $keys = getUserInfoKeys($from_id);
     editText(
         $message_id,
         "💞 اطلاعات حساب شما:",
