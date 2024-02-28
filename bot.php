@@ -517,6 +517,7 @@ if ($data == "myInfo") {
     $stmt->bind_param("i", $userId);
     $stmt->execute();
     $info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
 
     $totalBoughtPrice = number_format($info['total']) . " تومان";
 
