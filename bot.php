@@ -511,6 +511,8 @@ if($data=="myInfo"){
     $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid` = ?");
     $stmt->bind_param("i", $from_id);
     $stmt->execute();
+    $info = $stmt->get_result()->fetch_assoc();
+    $totalBoughtPrice = number_format($info['total']) . " تومان";
     $totalBuys = $stmt->get_result()->num_rows;
     $stmt->close();
     
@@ -532,6 +534,10 @@ if($data=="myInfo"){
         [
             ['text'=>$totalBuys,'callback_data'=>"wizwizch"],
             ['text'=>"تعداد خرید ها",'callback_data'=>"wizwizch"]
+        ],
+        [
+            ['text'=>$totalBoughtPrice??" ",'callback_data'=>"wizwizch"],
+            ['text'=>"مبلغ خرید",'callback_data'=>"wizwizch"]
         ],
         [
             ['text'=>$myWallet,'callback_data'=>"wizwizch"],
