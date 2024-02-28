@@ -523,42 +523,7 @@ if ($data == "myInfo") {
 
     $myWallet = number_format($userInfo['wallet']) . " تومان";
 
-    $keys = json_encode(['inline_keyboard' => [
-        [
-            ['text' => $from_id, 'callback_data' => "wizwizch"],
-            ['text' => "آیدی عددی", 'callback_data' => "wizwizch"]
-        ],
-        [
-            ['text' => "@$username", 'callback_data' => "wizwizch"],
-            ['text' => "یوزرنیم", 'callback_data' => "wizwizch"]
-        ],
-        [
-            ['text' => $first_name, 'callback_data' => "wizwizch"],
-            ['text' => "اسم", 'callback_data' => "wizwizch"]
-        ],
-        [
-            ['text' => $totalBuys, 'callback_data' => "wizwizch"],
-            ['text' => "تعداد خرید ها", 'callback_data' => "wizwizch"]
-        ],
-        [
-            ['text'=>$totalBoughtPrice??" ",'callback_data'=>"wizwizch"],
-            ['text'=>"مبلغ خرید",'callback_data'=>"wizwizch"]
-            ],
-        [
-            ['text' => $myWallet, 'callback_data' => "wizwizch"],
-            ['text' => "موجودی کیف پول", 'callback_data' => "wizwizch"]
-        ],
-        [
-            ['text' => "🔻🔻🔻🔻", 'callback_data' => "wizwizch"],
-        ],
-        [
-            ['text' => "شارژ کیف پول 💰", 'callback_data' => "increaseMyWallet"],
-            ['text' => "انتقال موجودی", 'callback_data' => "transferMyWallet"]
-        ],
-        [
-            ['text' => "برگشت 🔙", 'callback_data' => "mainMenu"]
-        ]
-    ]]);
+    $keys = getUserInfoKeys($userId);
     editText(
         $message_id,
         "💞 اطلاعات حساب شما:",
