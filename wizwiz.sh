@@ -105,7 +105,7 @@ echo -e "\n\033[33mWizWiz config and script have been installed successfully\033
 wait
     
         
-RANDOM_CODE=$(LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 25)
+RANDOM_CODE=$(LC_CTYPE=C tr -dc 'a-zA-Z0-9' < /dev/urandom | head -c 40)
 mkdir "/var/www/html/${RANDOM_CODE}"
 echo "Directory created: ${RANDOM_CODE}"
 echo "Folder created successfully!"
