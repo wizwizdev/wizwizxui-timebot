@@ -12,39 +12,121 @@ include "jdf.php";
 if(isset($_REQUEST['id'])){
     $config_link = $_REQUEST['id'];
 
-        if(preg_match('/^vmess:\/\/(.*)/',$config_link,$match)){
-            $jsonDecode = json_decode(base64_decode($match[1]),true);
-            $connectionLink = $config_link;
-            $config_link = $jsonDecode['id'];
-        }elseif(preg_match('/^vless:\/\/(.*?)\@/',$config_link,$match)){
-            $connectionLink = $config_link;
-            $config_link = $match[1];
-        }elseif(preg_match('/^trojan:\/\/(.*?)\@/',$config_link,$match)){
-            $connectionLink = $config_link;
-            $config_link = $match[1];
-        }elseif(!preg_match('/[a-f0-9]{8}\-[a-f0-9]{4}\-4[a-f0-9]{3}\-(8|9|a|b)[a-f0-9]{3}\-[a-f0-9]{12}/', $config_link)
-            && !(preg_match('/^[a-zA-Z0-9]{5,15}/',$config_link))){
-            form("متن وارد شده معتبر نمی باشد");
-            exit();
-        }
+    if(preg_match('/^vmess:\/\/(.*)/',$config_link,$match)){
+        $jsonDecode = json_decode(base64_decode($match[1]),true);
+        $connectionLink = $config_link;
+        $marzbanText = $match[1];
+        $config_link = $jsonDecode['id'];
+    }elseif(preg_match('/^vless:\/\/(.*?)\@/',$config_link,$match)){
+        $connectionLink = $config_link;
+        $marzbanText = $config_link = $match[1];
+    }elseif(preg_match('/^trojan:\/\/(.*?)\@/',$config_link,$match)){
+        $connectionLink = $config_link;
+        $marzbanText = $config_link = $match[1];
+    }elseif(!preg_match('/[a-f0-9]{8}\-[a-f0-9]{4}\-4[a-f0-9]{3}\-(8|9|a|b)[a-f0-9]{3}\-[a-f0-9]{12}/', $config_link)
+        && !(preg_match('/^[a-zA-Z0-9]{5,15}/',$config_link))){
+        form("متن وارد شده معتبر نمی باشد");
+        exit();
+    }
+    $config_link = htmlspecialchars(stripslashes(trim($config_link)));
 
     $stmt = $connection->prepare("SELECT * FROM `server_config`");
     $stmt->execute();
     $serversList = $stmt->get_result();
     $stmt->close();
     $found = false;
+    $isMarzban = false;
     while($row = $serversList->fetch_assoc()){
         $serverId = $row['id'];
-        $response = getJson($serverId);
-        if($response->success){
-            $list = json_encode($response->obj);
-
-            if(strpos($list, $config_link)){
+        $serverType = $row['type'];
+        
+        if($serverType == "marzban"){
+            $usersList = getMarzbanJson($serverId)->users;
+            if(strstr(json_encode($usersList, JSON_UNESCAPED_UNICODE), $marzbanText) && !empty($marzbanText)){
                 $found = true;
-                $list = $response->obj;
-                if(!isset($list[0]->clientStats)){
-                    foreach($list as $keys=>$packageInfo){
-                        if(strpos($packageInfo->settings, $config_link)!=false){
+                $isMarzban = true;
+                
+                foreach($usersList as $key => $config){
+                    if(strstr(json_encode($config->links, JSON_UNESCAPED_UNICODE), $marzbanText)){
+                	    $remark = $config->username;
+                        $total = $config->data_limit!=0?sumerize($config->data_limit):"نامحدود";
+                        $totalUsed = sumerize($config->used_traffic);
+                        $state = $config->status == "active"?$buttonValues['active']:$buttonValues['deactive'];
+                        $expiryTime = $config->expire != 0?jdate("Y-m-d H:i:s",$config->expire):"نامحدود";
+                        $leftMb = $config->data_limit!=0?$config->data_limit - $config->used_traffic:"نامحدود";
+                        
+                        if(is_numeric($leftMb)){
+                            if($leftMb<0) $leftMb = 0;
+                            else $leftMb = sumerize($leftMb);
+                        }
+                        
+                        $expiryDay = $config->expire != 0?
+                            floor(
+                                ($config->expire - time())/(60 * 60 * 24)
+                                ):
+                                "نامحدود";    
+                        if(is_numeric($expiryDay)){
+                            if($expiryDay<0) $expiryDay = 0;
+                        }
+                        break;
+                    }
+                }
+                break;
+            }
+        }else{
+            $response = getJson($serverId);
+            if($response->success){
+                $list = json_encode($response->obj);
+    
+                if(strpos($list, $config_link)){
+                    $found = true;
+                    $list = $response->obj;
+                    if(!isset($list[0]->clientStats)){
+                        foreach($list as $keys=>$packageInfo){
+                            if(strpos($packageInfo->settings, $config_link)!=false){
+                                $remark = $packageInfo->remark;
+                                $upload = sumerize2($packageInfo->up);
+                                $download = sumerize2($packageInfo->down);
+                                $state = $packageInfo->enable == true?"فعال 🟢":"غیر فعال 🔴";
+                                $totalUsed = sumerize2($packageInfo->up + $packageInfo->down);
+                                $total = $packageInfo->total!=0?sumerize2($packageInfo->total):"نامحدود";
+                                $expiryTime = $packageInfo->expiryTime != 0?jdate("Y-m-d H:i:s",substr($packageInfo->expiryTime,0,-3)):"نامحدود";
+                                $leftMb = $packageInfo->total!=0?sumerize2($packageInfo->total - $packageInfo->up - $packageInfo->down):"نامحدود";
+                                $expiryDay = $packageInfo->expiryTime != 0?
+                                    floor(
+                                        (substr($packageInfo->expiryTime,0,-3)-time())/(60 * 60 * 24))
+                                    :
+                                    "نامحدود";
+                                if(is_numeric($expiryDay)){
+                                    if($expiryDay<0) $expiryDay = 0;
+                                }
+                                break;
+                            }
+                        }
+                    }
+                    else{
+                        $keys = -1;
+                        $settings = array_column($list,'settings');
+                        foreach($settings as $key => $value){
+                            if(strpos($value, $config_link)!= false){
+                                $keys = $key;
+                                break;
+                            }
+                        }
+                        if($keys == -1){
+                            $found = false;
+                            break;
+                        }
+                        $clientsSettings = json_decode($list[$keys]->settings,true)['clients'];
+                        if(!is_array($clientsSettings)){
+                            form("با عرض پوزش، متأسفانه مشکلی رخ داده است، لطفا مجدد اقدام کنید");
+                            exit();
+                        }
+                        $settingsId = array_column($clientsSettings,'id');
+                        $settingKey = array_search($config_link,$settingsId);
+    
+                        if(!isset($clientsSettings[$settingKey]['email'])){
+                            $packageInfo = $list[$keys];
                             $remark = $packageInfo->remark;
                             $upload = sumerize2($packageInfo->up);
                             $download = sumerize2($packageInfo->down);
@@ -53,126 +135,84 @@ if(isset($_REQUEST['id'])){
                             $total = $packageInfo->total!=0?sumerize2($packageInfo->total):"نامحدود";
                             $expiryTime = $packageInfo->expiryTime != 0?jdate("Y-m-d H:i:s",substr($packageInfo->expiryTime,0,-3)):"نامحدود";
                             $leftMb = $packageInfo->total!=0?sumerize2($packageInfo->total - $packageInfo->up - $packageInfo->down):"نامحدود";
+                            if(is_numeric($leftMb)){
+                                if($leftMb<0){
+                                    $leftMb = 0;
+                                }else{
+                                    $leftMb = sumerize2($packageInfo->total - $packageInfo->up - $packageInfo->down);
+                                }
+                            }
+    
+    
                             $expiryDay = $packageInfo->expiryTime != 0?
                                 floor(
-                                    (substr($packageInfo->expiryTime,0,-3)-time())/(60 * 60 * 24))
-                                :
-                                "نامحدود";
-                            if(is_numeric($expiryDay)){
-                                if($expiryDay<0) $expiryDay = 0;
-                            }
-                            break;
-                        }
-                    }
-                }
-                else{
-                    $keys = -1;
-                    $settings = array_column($list,'settings');
-                    foreach($settings as $key => $value){
-                        if(strpos($value, $config_link)!= false){
-                            $keys = $key;
-                            break;
-                        }
-                    }
-                    if($keys == -1){
-                        $found = false;
-                        break;
-                    }
-                    $clientsSettings = json_decode($list[$keys]->settings,true)['clients'];
-                    if(!is_array($clientsSettings)){
-                        form("با عرض پوزش، متأسفانه مشکلی رخ داده است، لطفا مجدد اقدام کنید");
-                        exit();
-                    }
-                    $settingsId = array_column($clientsSettings,'id');
-                    $settingKey = array_search($config_link,$settingsId);
-
-                    if(!isset($clientsSettings[$settingKey]['email'])){
-                        $packageInfo = $list[$keys];
-                        $remark = $packageInfo->remark;
-                        $upload = sumerize2($packageInfo->up);
-                        $download = sumerize2($packageInfo->down);
-                        $state = $packageInfo->enable == true?"فعال 🟢":"غیر فعال 🔴";
-                        $totalUsed = sumerize2($packageInfo->up + $packageInfo->down);
-                        $total = $packageInfo->total!=0?sumerize2($packageInfo->total):"نامحدود";
-                        $expiryTime = $packageInfo->expiryTime != 0?jdate("Y-m-d H:i:s",substr($packageInfo->expiryTime,0,-3)):"نامحدود";
-                        $leftMb = $packageInfo->total!=0?sumerize2($packageInfo->total - $packageInfo->up - $packageInfo->down):"نامحدود";
-                        if(is_numeric($leftMb)){
-                            if($leftMb<0){
-                                $leftMb = 0;
-                            }else{
-                                $leftMb = sumerize2($packageInfo->total - $packageInfo->up - $packageInfo->down);
-                            }
-                        }
-
-
-                        $expiryDay = $packageInfo->expiryTime != 0?
-                            floor(
-                                (substr($packageInfo->expiryTime,0,-3)-time())/(60 * 60 * 24)
-                            ):
-                            "نامحدود";
-                        if(is_numeric($expiryDay)){
-                            if($expiryDay<0) $expiryDay = 0;
-                        }
-                    }else{
-                        $email = $clientsSettings[$settingKey]['email'];
-                        $clientState = $list[$keys]->clientStats;
-                        $emails = array_column($clientState,'email');
-                        $emailKey = array_search($email,$emails);
-                        if($clientState[$emailKey]->total != 0 || $clientState[$emailKey]->up != 0  ||  $clientState[$emailKey]->down != 0 || $clientState[$emailKey]->expiryTime != 0){
-                            $upload = sumerize2($clientState[$emailKey]->up);
-                            $download = sumerize2($clientState[$emailKey]->down);
-                            $total = $clientState[$emailKey]->total==0 && $list[$keys]->total !=0?$list[$keys]->total:$clientState[$emailKey]->total;
-                            $leftMb = $total!=0?($total - $clientState[$emailKey]->up - $clientState[$emailKey]->down):"نامحدود";
-                            if(is_numeric($leftMb)){
-                                if($leftMb<0){
-                                    $leftMb = 0;
-                                }else{
-                                    $leftMb = sumerize2($total - $clientState[$emailKey]->up - $clientState[$emailKey]->down);
-                                }
-                            }
-                            $totalUsed = sumerize2($clientState[$emailKey]->up + $clientState[$emailKey]->down);
-                            $total = $total!=0?sumerize2($total):"نامحدود";
-                            $expTime = $clientState[$emailKey]->expiryTime == 0 && $list[$keys]->expiryTime?$list[$keys]->expiryTime:$clientState[$emailKey]->expiryTime;
-                            $expiryTime = $expTime != 0?jdate("Y-m-d H:i:s",substr($expTime,0,-3)):"نامحدود";
-                            $expiryDay = $expTime != 0?
-                                floor(
-                                    ((substr($expTime,0,-3)-time())/(60 * 60 * 24))
+                                    (substr($packageInfo->expiryTime,0,-3)-time())/(60 * 60 * 24)
                                 ):
                                 "نامحدود";
                             if(is_numeric($expiryDay)){
                                 if($expiryDay<0) $expiryDay = 0;
                             }
-                            $state = $clientState[$emailKey]->enable == true?"فعال 🟢":"غیر فعال 🔴";
-                            $remark = $email;
-                        }
-                        elseif($list[$keys]->total != 0 || $list[$keys]->up != 0  ||  $list[$keys]->down != 0 || $list[$keys]->expiryTime != 0){
-                            $upload = sumerize2($list[$keys]->up);
-                            $download = sumerize2($list[$keys]->down);
-                            $leftMb = $list[$keys]->total!=0?($list[$keys]->total - $list[$keys]->up - $list[$keys]->down):"نامحدود";
-                            if(is_numeric($leftMb)){
-                                if($leftMb<0){
-                                    $leftMb = 0;
-                                }else{
-                                    $leftMb = sumerize2($list[$keys]->total - $list[$keys]->up - $list[$keys]->down);
+                        }else{
+                            $email = $clientsSettings[$settingKey]['email'];
+                            $clientState = $list[$keys]->clientStats;
+                            $emails = array_column($clientState,'email');
+                            $emailKey = array_search($email,$emails);
+                            if($clientState[$emailKey]->total != 0 || $clientState[$emailKey]->up != 0  ||  $clientState[$emailKey]->down != 0 || $clientState[$emailKey]->expiryTime != 0){
+                                $upload = sumerize2($clientState[$emailKey]->up);
+                                $download = sumerize2($clientState[$emailKey]->down);
+                                $total = $clientState[$emailKey]->total==0 && $list[$keys]->total !=0?$list[$keys]->total:$clientState[$emailKey]->total;
+                                $leftMb = $total!=0?($total - $clientState[$emailKey]->up - $clientState[$emailKey]->down):"نامحدود";
+                                if(is_numeric($leftMb)){
+                                    if($leftMb<0){
+                                        $leftMb = 0;
+                                    }else{
+                                        $leftMb = sumerize2($total - $clientState[$emailKey]->up - $clientState[$emailKey]->down);
+                                    }
                                 }
+                                $totalUsed = sumerize2($clientState[$emailKey]->up + $clientState[$emailKey]->down);
+                                $total = $total!=0?sumerize2($total):"نامحدود";
+                                $expTime = $clientState[$emailKey]->expiryTime == 0 && $list[$keys]->expiryTime?$list[$keys]->expiryTime:$clientState[$emailKey]->expiryTime;
+                                $expiryTime = $expTime != 0?jdate("Y-m-d H:i:s",substr($expTime,0,-3)):"نامحدود";
+                                $expiryDay = $expTime != 0?
+                                    floor(
+                                        ((substr($expTime,0,-3)-time())/(60 * 60 * 24))
+                                    ):
+                                    "نامحدود";
+                                if(is_numeric($expiryDay)){
+                                    if($expiryDay<0) $expiryDay = 0;
+                                }
+                                $state = $clientState[$emailKey]->enable == true?"فعال 🟢":"غیر فعال 🔴";
+                                $remark = $email;
                             }
-                            $totalUsed = sumerize2($list[$keys]->up + $list[$keys]->down);
-                            $total = $list[$keys]->total!=0?sumerize2($list[$keys]->total):"نامحدود";
-                            $expiryTime = $list[$keys]->expiryTime != 0?jdate("Y-m-d H:i:s",substr($list[$keys]->expiryTime,0,-3)):"نامحدود";
-                            $expiryDay = $list[$keys]->expiryTime != 0?
-                                floor(
-                                    ((substr($list[$keys]->expiryTime,0,-3)-time())/(60 * 60 * 24))
-                                ):
-                                "نامحدود";
-                            if(is_numeric($expiryDay)){
-                                if($expiryDay<0) $expiryDay = 0;
+                            elseif($list[$keys]->total != 0 || $list[$keys]->up != 0  ||  $list[$keys]->down != 0 || $list[$keys]->expiryTime != 0){
+                                $upload = sumerize2($list[$keys]->up);
+                                $download = sumerize2($list[$keys]->down);
+                                $leftMb = $list[$keys]->total!=0?($list[$keys]->total - $list[$keys]->up - $list[$keys]->down):"نامحدود";
+                                if(is_numeric($leftMb)){
+                                    if($leftMb<0){
+                                        $leftMb = 0;
+                                    }else{
+                                        $leftMb = sumerize2($list[$keys]->total - $list[$keys]->up - $list[$keys]->down);
+                                    }
+                                }
+                                $totalUsed = sumerize2($list[$keys]->up + $list[$keys]->down);
+                                $total = $list[$keys]->total!=0?sumerize2($list[$keys]->total):"نامحدود";
+                                $expiryTime = $list[$keys]->expiryTime != 0?jdate("Y-m-d H:i:s",substr($list[$keys]->expiryTime,0,-3)):"نامحدود";
+                                $expiryDay = $list[$keys]->expiryTime != 0?
+                                    floor(
+                                        ((substr($list[$keys]->expiryTime,0,-3)-time())/(60 * 60 * 24))
+                                    ):
+                                    "نامحدود";
+                                if(is_numeric($expiryDay)){
+                                    if($expiryDay<0) $expiryDay = 0;
+                                }
+                                $state = $list[$keys]->enable == true?"فعال 🟢":"غیر فعال 🔴";
+                                $remark = $list[$keys]->remark;
                             }
-                            $state = $list[$keys]->enable == true?"فعال 🟢":"غیر فعال 🔴";
-                            $remark = $list[$keys]->remark;
                         }
                     }
+                    break;
                 }
-                break;
             }
         }
     }
@@ -188,7 +228,7 @@ else{
 ?>
 <?php
 function showForm($type){
-    global $remark, $state, $upload, $download, $total, $leftMb, $expiryTime, $expiryDay;
+    global $remark, $isMarzban, $totalUsed, $state, $upload, $download, $total, $leftMb, $expiryTime, $expiryDay;
     ?>
     <html lang="en">
     <head>
@@ -206,6 +246,7 @@ function showForm($type){
         $download = $download != 0 && $total != "نامحدود"? round(100 * $download / $total,2):0;
         $upload = $upload != 0 && $total != "نامحدود"? round(100 * $upload / $total,2):0;
         $leftMb = $leftMb != "نامحدود" && $total != "نامحدود"?round(100 * $leftMb / $total,2):"100";
+        $totalUsed = $totalUsed != "نامحدود" && $total != "نامحدود"?round(100 * $totalUsed / $total,2):"100";
         ?>
         <div class="container" style="">
             <form id="contact" class="contactw">
@@ -217,7 +258,7 @@ function showForm($type){
                 
                 
                 <div class="mainform" >
-    
+                    
                     <div>
                     <svg xmlns="http://www.w3.org/2000/svg" id="Capa_1" x="0px" y="0px" viewBox="0 0 512 512" style="margin-left: 6px;enable-background:new 0 0 512 512;" xml:space="preserve" width="20" height="20">
                         <g>
@@ -225,17 +266,18 @@ function showForm($type){
                             <path d="M490.667,341.333L490.667,341.333c-11.782,0-21.333,9.551-21.333,21.333V448c0,11.782-9.551,21.333-21.333,21.333H64   c-11.782,0-21.333-9.551-21.333-21.333v-85.333c0-11.782-9.551-21.333-21.333-21.333l0,0C9.551,341.333,0,350.885,0,362.667V448   c0,35.346,28.654,64,64,64h384c35.346,0,64-28.654,64-64v-85.333C512,350.885,502.449,341.333,490.667,341.333z"/>
                         </g>
                     </svg>
-                        <p style="font-size:16px">حجم دانلود</p>
+                        <p style="font-size:16px"><?php if($isMarzban) echo "حجم دانلود + آپلود"; else echo "حجم دانلود";?></p>
                         <div class="progress-bar" style="display:flex; background: radial-gradient(closest-side, #F9F9F9 79%, transparent 80% 100%),conic-gradient(<?php if($download <= 50) echo "#04a777 "; elseif($download <= 70 && $download > 50) echo "yellow "; elseif($download > 70) echo "red "; echo $download . "%";?>, #e2eafc 0);">
-                        <?php echo $download . "%";?></div>
+                        <?php if($isMarzban) echo $totalUsed . "%"; else echo $download . "%";?></div>
                     </div>
-                    
-                    <div style="margin-right:50px;">
-                        <svg style="margin-left: 6px" xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="20" height="20"><path d="M23.9,11.437A12,12,0,0,0,0,13a11.878,11.878,0,0,0,3.759,8.712A4.84,4.84,0,0,0,7.113,23H16.88a4.994,4.994,0,0,0,3.509-1.429A11.944,11.944,0,0,0,23.9,11.437Zm-4.909,8.7A3,3,0,0,1,16.88,21H7.113a2.862,2.862,0,0,1-1.981-.741A9.9,9.9,0,0,1,2,13,10.014,10.014,0,0,1,5.338,5.543,9.881,9.881,0,0,1,11.986,3a10.553,10.553,0,0,1,1.174.066,9.994,9.994,0,0,1,5.831,17.076ZM7.807,17.285a1,1,0,0,1-1.4,1.43A8,8,0,0,1,12,5a8.072,8.072,0,0,1,1.143.081,1,1,0,0,1,.847,1.133.989.989,0,0,1-1.133.848,6,6,0,0,0-5.05,10.223Zm12.112-5.428A8.072,8.072,0,0,1,20,13a7.931,7.931,0,0,1-2.408,5.716,1,1,0,0,1-1.4-1.432,5.98,5.98,0,0,0,1.744-5.141,1,1,0,0,1,1.981-.286Zm-5.993.631a2.033,2.033,0,1,1-1.414-1.414l3.781-3.781a1,1,0,1,1,1.414,1.414Z"/></svg>
-                        <p style="font-size:16px; font-family:iransans !important;">حجم آپلود</p>
-                        <div class="progress-bar" style="display:flex; background: radial-gradient(closest-side, #F9F9F9 79%, transparent 80% 100%),conic-gradient(<?php if($upload <= 30) echo "#f48c06 "; elseif($upload < 50 && $upload > 30) echo "yellow "; elseif($upload >= 50) echo "#ed254e ";  echo $upload . "%";?>, #e2eafc 0);">
-                        <?php echo $upload . "%";?></div>
-                    </div>
+                    <?php if(!$isMarzban){?>
+                        <div style="margin-right:50px;">
+                            <svg style="margin-left: 6px" xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24" width="20" height="20"><path d="M23.9,11.437A12,12,0,0,0,0,13a11.878,11.878,0,0,0,3.759,8.712A4.84,4.84,0,0,0,7.113,23H16.88a4.994,4.994,0,0,0,3.509-1.429A11.944,11.944,0,0,0,23.9,11.437Zm-4.909,8.7A3,3,0,0,1,16.88,21H7.113a2.862,2.862,0,0,1-1.981-.741A9.9,9.9,0,0,1,2,13,10.014,10.014,0,0,1,5.338,5.543,9.881,9.881,0,0,1,11.986,3a10.553,10.553,0,0,1,1.174.066,9.994,9.994,0,0,1,5.831,17.076ZM7.807,17.285a1,1,0,0,1-1.4,1.43A8,8,0,0,1,12,5a8.072,8.072,0,0,1,1.143.081,1,1,0,0,1,.847,1.133.989.989,0,0,1-1.133.848,6,6,0,0,0-5.05,10.223Zm12.112-5.428A8.072,8.072,0,0,1,20,13a7.931,7.931,0,0,1-2.408,5.716,1,1,0,0,1-1.4-1.432,5.98,5.98,0,0,0,1.744-5.141,1,1,0,0,1,1.981-.286Zm-5.993.631a2.033,2.033,0,1,1-1.414-1.414l3.781-3.781a1,1,0,1,1,1.414,1.414Z"/></svg>
+                            <p style="font-size:16px; font-family:iransans !important;">حجم آپلود</p>
+                            <div class="progress-bar" style="display:flex; background: radial-gradient(closest-side, #F9F9F9 79%, transparent 80% 100%),conic-gradient(<?php if($upload <= 30) echo "#f48c06 "; elseif($upload < 50 && $upload > 30) echo "yellow "; elseif($upload >= 50) echo "#ed254e ";  echo $upload . "%";?>, #e2eafc 0);">
+                            <?php echo $upload . "%";?></div>
+                        </div>
+                    <?php }?>
                 </div>
                 
                 
