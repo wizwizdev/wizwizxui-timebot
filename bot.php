@@ -32,7 +32,7 @@ if($robotState == "off" && $from_id != $admin){
     sendMessage($mainValues['bot_is_updating']);
     exit();
 }
-if(strpos($text, "/start ") !== false){
+if(strstr($text, "/start ")){
     $inviter = str_replace("/start ", "", $text);
     if($inviter < 0) exit();
     if($uinfo->num_rows == 0 && $inviter != $from_id){
@@ -1222,7 +1222,10 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
     $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
-    $portType = $stmt->get_result()->fetch_assoc()['port_type'];
+    $serverConfig = $stmt->get_result()->fetch_assoc();
+    $serverType = $serverConfig['type'];
+    $portType = $serverConfig['port_type'];
+    $panelUrl = $serverConfig['panel_url'];
     $stmt->close();
 
 
@@ -1232,7 +1235,6 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
     define('IMAGE_WIDTH',540);
     define('IMAGE_HEIGHT',540);
     for($i = 1; $i<= $text; $i++){
-        $token = RandomString(30);
         $uniqid = generateRandomString(42,$protocol); 
         if($portType == "auto"){
             $port++;
@@ -1249,10 +1251,33 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
             $remark = "{$srv_remark}-{$from_id}-{$rnd}";
         }
     
-        if($inbound_id == 0){    
-            $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
+        if($inbound_id == 0){                    
+            if($serverType == "marzban"){
+                $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+                if(!$response->success){
+                    if($response->msg == "User already exists"){
+                        $remark .= rand(1111,99999);
+                        $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+                    }
+                }
+            }
+            else{
+                $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
+                
+                if(!$response->success){
+                    if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+                    elseif(strstr($response->msg, "Port already exists")) $port = rand(1111,65000);
+    
+                    $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
+                }
+            }
         }else {
             $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
+            if(!$response->success){
+                if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+                
+                $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
+            }
         }
         
         if(is_null($response)){
@@ -1269,8 +1294,16 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
             break;
         }
     
-        $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
-        $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+        if($serverType == "marzban"){
+            $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
+            $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
+            $vraylink = $response->vray_links;
+        }
+        else{
+            $token = RandomString(30);
+            $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+            $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+        }
         foreach($vraylink as $vray_link){
             $acc_text = "
     
@@ -1614,7 +1647,10 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
     $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
-    $portType = $stmt->get_result()->fetch_assoc()['port_type'];
+    $serverConfig = $stmt->get_result()->fetch_assoc();
+    $serverType = $serverConfig['type'];
+    $portType = $serverConfig['port_type'];
+    $panelUrl = $serverConfig['panel_url'];
     $stmt->close();
     include 'phpqrcode/qrlib.php';
 
@@ -1648,13 +1684,28 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
         }
         
         if($inbound_id == 0){    
-            $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
-            if(!$response->success){
-                $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
-            } 
+            if($serverType == "marzban"){
+                $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+                if(!$response->success){
+                    if($response->msg == "User already exists"){
+                        $remark .= rand(1111,99999);
+                        $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+                    }
+                }
+            }else{
+                $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
+                if(!$response->success){
+                    if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+                    elseif(strstr($response->msg, "Port already exists")) $port = rand(1111,65000);
+                    
+                    $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
+                } 
+            }
         }else {
             $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
             if(!$response->success){
+                if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+
                 $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
             } 
         }
@@ -1673,10 +1724,16 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
             exit;
         }
         
-        $token = RandomString(30);
-        $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
-
-        $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+        if($serverType == "marzban"){
+            $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
+            $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
+            $vraylink = $response->vray_links;
+        }else{
+            $token = RandomString(30);
+            $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+    
+            $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+        }
         foreach($vraylink as $vray_link){
         $acc_text = "
         
@@ -1791,10 +1848,21 @@ elseif($payType == "RENEW_ACCOUNT"){
     $volume = $respd['volume'];
     $price = $payInfo['price'];
     
-    if($inbound_id > 0)
-        $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
-    else
-        $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $serverType = $server_info['type'];
+
+    if($serverType == "marzban"){
+        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'days'=>$days, 'volume' => $volume]);
+    }else{
+        if($inbound_id > 0)
+            $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
+        else
+            $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+    }
     
     if(is_null($response)){
     	alert('🔻مشکل فنی در اتصال به سرور. لطفا به مدیریت اطلاع بدید',true);
@@ -1847,11 +1915,21 @@ elseif(preg_match('/^INCREASE_DAY_(\d+)_(\d+)/',$payType, $increaseInfo)){
     $price = $payInfo['price'];
     $volume = $res['volume'];
 
+    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $serverType = $server_info['type'];
 
-if($inbound_id > 0)
-    $response = editClientTraffic($server_id, $inbound_id, $uuid, 0, $volume);
-else
-    $response = editInboundTraffic($server_id, $uuid, 0, $volume);
+    if($serverType == "marzban"){
+        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'plus_day'=>$volume]);
+    }else{
+        if($inbound_id > 0)
+            $response = editClientTraffic($server_id, $inbound_id, $uuid, 0, $volume);
+        else
+            $response = editInboundTraffic($server_id, $uuid, 0, $volume);
+    }
     
 if($response->success){
     $stmt = $connection->prepare("UPDATE `orders_list` SET `expire_date` = `expire_date` + ?, `notif` = 0 WHERE `uuid` = ?");
@@ -1915,10 +1993,21 @@ $stmt->close();
 $price = $payInfo['price'];
 $volume = $res['volume'];
 
-if($inbound_id > 0)
-    $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, 0);
-else
-    $response = editInboundTraffic($server_id, $uuid, $volume, 0);
+    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $serverType = $server_info['type'];
+
+    if($serverType == "marzban"){
+        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'plus_volume'=>$volume]);
+    }else{
+        if($inbound_id > 0)
+            $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, 0);
+        else
+            $response = editInboundTraffic($server_id, $uuid, $volume, 0);
+    }
     
 if($response->success){
     $stmt = $connection->prepare("UPDATE `orders_list` SET `notif` = 0 WHERE `uuid` = ?");
@@ -1967,14 +2056,19 @@ elseif($payType == "RENEW_SCONFIG"){
     $configInfo = json_decode($payInfo['description'],true);
     $remark = $configInfo['remark'];
     $uuid = $configInfo['uuid'];
+    $isMarzban = $configInfo['marzban'];
     
     $remark = $payInfo['description'];
     $inbound_id = $payInfo['volume']; 
     
-    if($inbound_id > 0)
-        $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
-    else
-        $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+    if($isMarzban){
+        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'days'=>$days, 'volume' => $volume]);
+    }else{
+        if($inbound_id > 0)
+            $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
+        else
+            $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+    }
     
 	if(is_null($response)){
 		alert('🔻مشکل فنی در اتصال به سرور. لطفا به مدیریت اطلاع بدید',true);
@@ -2291,7 +2385,7 @@ if(preg_match('/selectCustomPlanGB(\d+)_(\d+)/',$userInfo['step'], $match) && ($
         sendMessage("لطفا عددی بزرگتر از 0 وارد کن");
         exit();
     }
-    elseif(strpos($text,".")!==FALSE){
+    elseif(strstr($text,".")){
         sendMessage(" عدد اعشاری مجاز نیست");
         exit();
     }
@@ -2327,7 +2421,7 @@ if((preg_match('/selectCustomPlanDay(\d+)_(\d+)_(\d+)/',$userInfo['step'], $matc
         sendMessage("لطفا عددی بزرگتر از 0 وارد کن");
         exit();
     }
-    elseif(strpos($text,".")!==FALSE){
+    elseif(strstr($text,".")){
         sendMessage("عدد اعشاری مجاز نیست");
         exit();
     }
@@ -2800,7 +2894,10 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
     $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
-    $portType = $stmt->get_result()->fetch_assoc()['port_type'];
+    $serverConfig = $stmt->get_result()->fetch_assoc();
+    $serverType = $serverConfig['type'];
+    $portType = $serverConfig['port_type'];
+    $panelUrl = $serverConfig['panel_url'];
     $stmt->close();
 
     // $rnd = rand(1111,99999);
@@ -2814,13 +2911,28 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
     }
     
     if($inbound_id == 0){    
-        $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
-        if(!$response->success){
-            $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
-        } 
+        if($serverType == "marzban"){
+            $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+            if(!$response->success){
+                if($response->msg == "User already exists"){
+                    $remark .= rand(1111,99999);
+                    $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+                }
+            }
+        }else{
+            $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
+            if(!$response->success){
+                if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+                elseif(strstr($response->msg, "Port already exists")) $port = rand(1111,65000);
+                
+                $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
+            }
+        }
     }else {
         $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
         if(!$response->success){
+            if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+
             $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
         } 
     }
@@ -2844,10 +2956,18 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
     $stmt->bind_param("ii", $price, $uid);
     $stmt->execute();
     include 'phpqrcode/qrlib.php';
-    $token = RandomString(30);
-    $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
-
-    $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+    
+    if($serverType == "marzban"){
+        $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
+        $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
+        $vraylink = $response->vray_links;
+    }
+    else{
+        $token = RandomString(30);
+        $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+    
+        $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+    }
     delMessage();
     define('IMAGE_WIDTH',540);
     define('IMAGE_HEIGHT',540);
@@ -3181,7 +3301,10 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
     $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
-    $portType = $stmt->get_result()->fetch_assoc()['port_type'];
+    $serverConfig = $stmt->get_result()->fetch_assoc();
+    $serverType = $serverConfig['type'];
+    $portType = $serverConfig['port_type'];
+    $panelUrl = $serverConfig['panel_url'];
     $stmt->close();
 
     // $rnd = rand(1111,99999);
@@ -3195,13 +3318,28 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
     }
     
     if($inbound_id == 0){    
-        $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
-        if(!$response->success){
-            $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
-        } 
+        if($serverType == "marzban"){
+            $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+            if(!$response->success){
+                if($response->msg == "User already exists"){
+                    $remark .= rand(1111,99999);
+                    $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+                }
+            }
+        }else{
+            $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
+            if(!$response->success){
+                if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+                elseif(strstr($response->msg, "Port already exists")) $port = rand(1111,65000);
+
+                $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
+            }
+        }
     }else {
         $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
         if(!$response->success){
+            if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+
             $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
         } 
     }
@@ -3222,10 +3360,18 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
     alert($mainValues['sending_config_to_user']);
     
     include 'phpqrcode/qrlib.php';
-    $token = RandomString(30);
-    $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
-
-    $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id);
+    
+    if($serverType == "marzban"){
+        $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
+        $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
+        $vraylink = $response->vray_links;
+    }
+    else{
+        $token = RandomString(30);
+        $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+    
+        $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id);
+    }
     define('IMAGE_WIDTH',540);
     define('IMAGE_HEIGHT',540);
 
@@ -3391,13 +3537,18 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         $configInfo = json_decode($payInfo['description'],true);
         $uuid = $configInfo['uuid'];
         $remark = $configInfo['remark'];
+        $isMarzban = $configInfo['marzban'];
         
         $inbound_id = $payInfo['volume']; 
         
-        if($inbound_id > 0)
-            $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
-        else
-            $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+        if($isMarzban){
+            $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'days'=>$days, 'volume' => $volume]);
+        }else{
+            if($inbound_id > 0)
+                $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
+            else
+                $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+        }
         
     	if(is_null($response)){
     		alert('🔻مشکل فنی در اتصال به سرور. لطفا به مدیریت اطلاع بدید',true);
@@ -3444,7 +3595,10 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
         $stmt->bind_param("i", $server_id);
         $stmt->execute();
-        $portType = $stmt->get_result()->fetch_assoc()['port_type'];
+        $serverConfig = $stmt->get_result()->fetch_assoc();
+        $portType = $serverConfig['port_type'];
+        $serverType = $serverConfig['type'];
+        $panelUrl = $serverConfig['panel_url'];
         $stmt->close();
 
         include 'phpqrcode/qrlib.php';
@@ -3485,17 +3639,32 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
             }
         
             if($inbound_id == 0){    
-                $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
-                if(!$response->success){
-                    $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
-                } 
+                if($serverType == "marzban"){
+                    $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+                    if(!$response->success){
+                        if($response->msg == "User already exists"){
+                            $remark .= rand(1111,99999);
+                            $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+                        }
+                    }
+                }
+                else{
+                    $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
+                    if(!$response->success){
+                        if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+                        elseif(strstr($response->msg, "Port already exists")) $port = rand(1111,65000);
+
+                        $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
+                    }
+                }
             }else {
                 $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
                 if(!$response->success){
+                    if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+
                     $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
                 } 
             }
-        
             if(is_null($response)){
                 sendMessage('❌ | 🥺 گلم ، اتصال به سرور برقرار نیست لطفا مدیر رو در جریان بزار ...');
                 exit;
@@ -3511,10 +3680,17 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
             }
         
         
-            $token = RandomString(30);
-            $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+            if($serverType == "marzban"){
+                $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
+                $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
+                $vraylink = $response->vray_links;
+            }
+            else{
+                $token = RandomString(30);
+                $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+                $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+            }
 
-            $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
             foreach($vraylink as $vray_link){
                 $acc_text = "
 😍 سفارش جدید شما
@@ -3900,13 +4076,18 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
         $configInfo = json_decode($payInfo['description'],true);
         $uuid = $configInfo['uuid'];
         $remark = $configInfo['remark'];
+        $isMarzban = $configInfo['marzban'];
         
         $inbound_id = $payInfo['volume']; 
         
-        if($inbound_id > 0)
-            $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
-        else
-            $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+        if($isMarzban){
+            $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'days'=>$days, 'volume' => $volume]);
+        }else{
+            if($inbound_id > 0)
+                $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
+            else
+                $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+        }
         
     	if(is_null($response)){
     		alert('🔻مشکل فنی در اتصال به سرور. لطفا به مدیریت اطلاع بدید',true);
@@ -3949,7 +4130,10 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
         $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
         $stmt->bind_param("i", $server_id);
         $stmt->execute();
-        $portType = $stmt->get_result()->fetch_assoc()['port_type'];
+        $serverConfig = $stmt->get_result()->fetch_assoc();
+        $serverType = $serverConfig['type'];
+        $portType = $serverConfig['port_type'];
+        $panelUrl = $serverConfig['panel_url'];
         $stmt->close();
     
     
@@ -3984,14 +4168,30 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
                 $port = rand(1111,65000);
             }
         
-            if($inbound_id == 0){    
-                $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
-                if(!$response->success){
-                    $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
-                } 
+            if($inbound_id == 0){   
+                if($serverType == "marzban"){
+                    $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+                    if(!$response->success){
+                        if($response->msg == "User already exists"){
+                            $remark .= rand(1111,99999);
+                            $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+                        }
+                    }
+                }
+                else{
+                    $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
+                    if(!$response->success){
+                        if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+                        elseif(strstr($response->msg, "Port already exists")) $port = rand(1111,65000);
+
+                        $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
+                    }
+                }
             }else {
                 $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
                 if(!$response->success){
+                    if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+
                     $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
                 } 
             }
@@ -4009,10 +4209,17 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
                 exit;
             }
                 
-            $token = RandomString(30);
-            $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
-    
-            $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+            if($serverType == "marzban"){
+                $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
+                $subLink = $botState['subLinkState'] == "on"?$panelUrl .$response->sub_link:"";
+                $vraylink = $response->vray_links;
+            }
+            else{
+                $token = RandomString(30);
+                $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+        
+                $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+            }
             foreach($vraylink as $vray_link){
                 $acc_text = "
 😍 سفارش جدید شما
@@ -5401,7 +5608,10 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
     $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
-    $portType = $stmt->get_result()->fetch_assoc()['port_type'];
+    $serverConfig = $stmt->get_result()->fetch_assoc();
+    $serverType = $serverConfig['type'];
+    $portType = $serverConfig['port_type'];
+    $panelUrl = $serverConfig['panel_url'];
     $stmt->close();
 
     if($from_id == $admin && !empty($userInfo['temp'])){
@@ -5423,13 +5633,28 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
         $port = rand(1111,65000);
     }
     if($inbound_id == 0){    
-        $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $id); 
-        if(!$response->success){
-            $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $id);
-        } 
+        if($serverType == "marzban"){
+            $response = addMarzbanUser($server_id, $remark, $volume, $days, $id);
+            if(!$response->success){
+                if($response->msg == "User already exists"){
+                    $remark .= rand(1111,99999);
+                    $response = addMarzbanUser($server_id, $remark, $volume, $days, $id);
+                }
+            }
+        }else{
+            $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $id); 
+            if(!$response->success){
+                if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+                elseif(strstr($response->msg, "Port already exists")) $port = rand(1111,65000);
+
+                $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $id);
+            }
+        }
     }else {
         $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $id); 
         if(!$response->success){
+            if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+
             $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $id);
         }
     }
@@ -5447,10 +5672,17 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
         exit;
     }
     alert($mainValues['sending_config_to_user']);
-    $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
 	include 'phpqrcode/qrlib.php';
-    $token = RandomString(30);
-    $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+	
+    if($serverType == "marzban"){
+        $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
+        $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
+        $vraylink = $response->vray_links;
+    }else{
+        $token = RandomString(30);
+        $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+        $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+    }
     define('IMAGE_WIDTH',540);
     define('IMAGE_HEIGHT',540);
     foreach($vraylink as $vray_link){
@@ -5549,37 +5781,115 @@ if($userInfo['step'] == "showAccount" and $text != $buttonValues['cancel']){
     if(preg_match('/^vmess:\/\/(.*)/',$text,$match)){
         $jsonDecode = json_decode(base64_decode($match[1]),true);
         $text = $jsonDecode['id'];
+        $marzbanText = $match[1];
     }elseif(preg_match('/^vless:\/\/(.*?)\@/',$text,$match)){
-        $text = $match[1];
+        $marzbanText = $text = $match[1];
     }elseif(preg_match('/^trojan:\/\/(.*?)\@/',$text,$match)){
-        $text = $match[1];
+        $marzbanText = $text = $match[1];
     }elseif(!preg_match('/[a-f0-9]{8}\-[a-f0-9]{4}\-4[a-f0-9]{3}\-(8|9|a|b)[a-f0-9]{3}\-[a-f0-9]{12}/', $text)){
         sendMessage($mainValues['not_correct_text']);
         exit();
     }
-    
+    $text = htmlspecialchars(stripslashes(trim($text)));
     sendMessage($mainValues['please_wait_message'], $removeKeyboard);
+    
     $stmt = $connection->prepare("SELECT * FROM `server_config`");
     $stmt->execute();
     $serversList = $stmt->get_result();
     $stmt->close();
-    $found = false;
+    $found = false; 
+    $isMarzban = false;
     while($row = $serversList->fetch_assoc()){
         $serverId = $row['id'];
-
-        $response = getJson($serverId);
-        if($response->success){
-            
-            $list = json_encode($response->obj);
-            
-            if(strpos($list, $text)){
-                setUser();
+        $serverType = $row['type'];
+        
+        if($serverType == "marzban"){
+            $usersList = getMarzbanJson($serverId)->users;
+            if(strstr(json_encode($usersList, JSON_UNESCAPED_UNICODE), $marzbanText) && !empty($marzbanText)){
                 $found = true;
-                $list = $response->obj;
-                if(!isset($list[0]->clientStats)){
-                    foreach($list as $keys=>$packageInfo){
-                    	if(strpos($packageInfo->settings, $text)!=false){
-                    	    $configLocation = ["remark"=> $packageInfo->remark, "uuid" =>$text];
+                $isMarzban = true;
+                foreach($usersList as $key => $config){
+                    if(strstr(json_encode($config->links, JSON_UNESCAPED_UNICODE), $marzbanText)){
+                	    $remark = $config->username;
+                        $total = $config->data_limit!=0?sumerize($config->data_limit):"نامحدود";
+                        $totalUsed = sumerize($config->used_traffic);
+                        $state = $config->status == "active"?$buttonValues['active']:$buttonValues['deactive'];
+                        $expiryTime = $config->expire != 0?jdate("Y-m-d H:i:s",$config->expire):"نامحدود";
+                        $leftMb = $config->data_limit!=0?$config->data_limit - $config->used_traffic:"نامحدود";
+                        
+                        if(is_numeric($leftMb)){
+                            if($leftMb<0) $leftMb = 0;
+                            else $leftMb = sumerize($leftMb);
+                        }
+                        
+                        $expiryDay = $config->expire != 0?
+                            floor(
+                                ($config->expire - time())/(60 * 60 * 24)
+                                ):
+                                "نامحدود";    
+                        if(is_numeric($expiryDay)){
+                            if($expiryDay<0) $expiryDay = 0;
+                        }
+                	    $configLocation = ["remark" => $remark ,"uuid" =>$text, "marzban"=>true];
+                        break;
+                    }
+                }
+                break;
+            }
+        }else{
+            $response = getJson($serverId);
+            if($response->success){
+                if(strstr(json_encode($response->obj), $text)){
+                    $found = true;
+                    $list = $response->obj;
+                    if(!isset($list[0]->clientStats)){
+                        foreach($list as $keys=>$packageInfo){
+                        	if(strstr($packageInfo->settings, $text)){
+                        	    $configLocation = ["remark"=> $packageInfo->remark, "uuid" =>$text];
+                        	    $remark = $packageInfo->remark;
+                                $upload = sumerize($packageInfo->up);
+                                $download = sumerize($packageInfo->down);
+                                $state = $packageInfo->enable == true?$buttonValues['active']:$buttonValues['deactive'];
+                                $totalUsed = sumerize($packageInfo->up + $packageInfo->down);
+                                $total = $packageInfo->total!=0?sumerize($packageInfo->total):"نامحدود";
+                                $expiryTime = $packageInfo->expiryTime != 0?jdate("Y-m-d H:i:s",substr($packageInfo->expiryTime,0,-3)):"نامحدود";
+                                $leftMb = $packageInfo->total!=0?sumerize($packageInfo->total - $packageInfo->up - $packageInfo->down):"نامحدود";
+                                $expiryDay = $packageInfo->expiryTime != 0?
+                                    floor(
+                                        (substr($packageInfo->expiryTime,0,-3)-time())/(60 * 60 * 24))
+                                        :
+                                        "نامحدود";
+                                if(is_numeric($expiryDay)){
+                                    if($expiryDay<0) $expiryDay = 0;
+                                }
+                                break;
+                        	}
+                        }
+                    }
+                    else{
+                        $keys = -1;
+                        $settings = array_column($list,'settings');
+                        foreach($settings as $key => $value){
+                        	if(strstr($value, $text)){
+                        		$keys = $key;
+                        		break;
+                        	}
+                        }
+                        if($keys == -1){
+                            $found = false;
+                            break;
+                        }
+                        $clientsSettings = json_decode($list[$keys]->settings,true)['clients'];
+                        if(!is_array($clientsSettings)){
+                            sendMessage("با عرض پوزش، متأسفانه مشکلی رخ داده است، لطفا مجدد اقدام کنید");
+                            exit();
+                        }
+                        $settingsId = array_column($clientsSettings,'id');
+                        $settingKey = array_search($text,$settingsId);
+                        
+                        if(!isset($clientsSettings[$settingKey]['email'])){
+                            $packageInfo = $list[$keys];
+                    	    $configLocation = ["remark" => $packageInfo->remark ,"uuid" =>$text];
                     	    $remark = $packageInfo->remark;
                             $upload = sumerize($packageInfo->up);
                             $download = sumerize($packageInfo->down);
@@ -5588,211 +5898,171 @@ if($userInfo['step'] == "showAccount" and $text != $buttonValues['cancel']){
                             $total = $packageInfo->total!=0?sumerize($packageInfo->total):"نامحدود";
                             $expiryTime = $packageInfo->expiryTime != 0?jdate("Y-m-d H:i:s",substr($packageInfo->expiryTime,0,-3)):"نامحدود";
                             $leftMb = $packageInfo->total!=0?sumerize($packageInfo->total - $packageInfo->up - $packageInfo->down):"نامحدود";
+                            if(is_numeric($leftMb)){
+                                if($leftMb<0){
+                                    $leftMb = 0;
+                                }else{
+                                    $leftMb = sumerize($packageInfo->total - $packageInfo->up - $packageInfo->down);
+                                }
+                            }
+    
+                            
                             $expiryDay = $packageInfo->expiryTime != 0?
                                 floor(
-                                    (substr($packageInfo->expiryTime,0,-3)-time())/(60 * 60 * 24))
-                                    :
-                                    "نامحدود";
-                            if(is_numeric($expiryDay)){
-                                if($expiryDay<0) $expiryDay = 0;
-                            }
-                            break;
-                    	}
-                    }
-                }
-                else{
-                    $keys = -1;
-                    $settings = array_column($list,'settings');
-                    foreach($settings as $key => $value){
-                    	if(strpos($value, $text)!= false){
-                    		$keys = $key;
-                    		break;
-                    	}
-                    }
-                    if($keys == -1){
-                        $found = false;
-                        break;
-                    }
-                    $clientsSettings = json_decode($list[$keys]->settings,true)['clients'];
-                    if(!is_array($clientsSettings)){
-                        sendMessage("با عرض پوزش، متأسفانه مشکلی رخ داده است، لطفا مجدد اقدام کنید");
-                        exit();
-                    }
-                    $settingsId = array_column($clientsSettings,'id');
-                    $settingKey = array_search($text,$settingsId);
-                    
-                    if(!isset($clientsSettings[$settingKey]['email'])){
-                        $packageInfo = $list[$keys];
-                	    $configLocation = ["remark" => $packageInfo->remark ,"uuid" =>$text];
-                	    $remark = $packageInfo->remark;
-                        $upload = sumerize($packageInfo->up);
-                        $download = sumerize($packageInfo->down);
-                        $state = $packageInfo->enable == true?$buttonValues['active']:$buttonValues['deactive'];
-                        $totalUsed = sumerize($packageInfo->up + $packageInfo->down);
-                        $total = $packageInfo->total!=0?sumerize($packageInfo->total):"نامحدود";
-                        $expiryTime = $packageInfo->expiryTime != 0?jdate("Y-m-d H:i:s",substr($packageInfo->expiryTime,0,-3)):"نامحدود";
-                        $leftMb = $packageInfo->total!=0?sumerize($packageInfo->total - $packageInfo->up - $packageInfo->down):"نامحدود";
-                        if(is_numeric($leftMb)){
-                            if($leftMb<0){
-                                $leftMb = 0;
-                            }else{
-                                $leftMb = sumerize($packageInfo->total - $packageInfo->up - $packageInfo->down);
-                            }
-                        }
-
-                        
-                        $expiryDay = $packageInfo->expiryTime != 0?
-                            floor(
-                                (substr($packageInfo->expiryTime,0,-3)-time())/(60 * 60 * 24)
-                                ):
-                                "نامحدود";    
-                        if(is_numeric($expiryDay)){
-                            if($expiryDay<0) $expiryDay = 0;
-                        }
-                    }else{
-                        $email = $clientsSettings[$settingKey]['email'];
-                        $clientState = $list[$keys]->clientStats;
-                        $emails = array_column($clientState,'email');
-                        $emailKey = array_search($email,$emails);                    
-             
-                        // if($clientState[$emailKey]->total != 0 || $clientState[$emailKey]->up != 0  ||  $clientState[$emailKey]->down != 0 || $clientState[$emailKey]->expiryTime != 0){
-                        if(count($clientState) > 1){
-                    	    $configLocation = ["id" => $list[$keys]->id, "remark"=>$email, "uuid"=>$text];
-                            $upload = sumerize($clientState[$emailKey]->up);
-                            $download = sumerize($clientState[$emailKey]->down);
-                            $total = $clientState[$emailKey]->total==0 && $list[$keys]->total !=0?$list[$keys]->total:$clientState[$emailKey]->total;
-                            $leftMb = $total!=0?($total - $clientState[$emailKey]->up - $clientState[$emailKey]->down):"نامحدود";
-                            if(is_numeric($leftMb)){
-                                if($leftMb<0){
-                                    $leftMb = 0;
-                                }else{
-                                    $leftMb = sumerize($total - $clientState[$emailKey]->up - $clientState[$emailKey]->down);
-                                }
-                            }
-                            $totalUsed = sumerize($clientState[$emailKey]->up + $clientState[$emailKey]->down);
-                            $total = $total!=0?sumerize($total):"نامحدود";
-                            $expTime = $clientState[$emailKey]->expiryTime == 0 && $list[$keys]->expiryTime?$list[$keys]->expiryTime:$clientState[$emailKey]->expiryTime;
-                            $expiryTime = $expTime != 0?jdate("Y-m-d H:i:s",substr($expTime,0,-3)):"نامحدود";
-                            $expiryDay = $expTime != 0?
-                                floor(
-                                    ((substr($expTime,0,-3)-time())/(60 * 60 * 24))
+                                    (substr($packageInfo->expiryTime,0,-3)-time())/(60 * 60 * 24)
                                     ):
-                                    "نامحدود";
+                                    "نامحدود";    
                             if(is_numeric($expiryDay)){
                                 if($expiryDay<0) $expiryDay = 0;
                             }
-                            $state = $clientState[$emailKey]->enable == true?$buttonValues['active']:$buttonValues['deactive'];
-                            $remark = $email;
-                        }
-                        else{
-                            $clientUpload = $clientState[$emailKey]->up;
-                            $clientDownload = $clientState[$emailKey]->down;
-                            $clientTotal = $clientState[$emailKey]->total;
-                            $clientExpTime = $clientState[$emailKey]->expiryTime;
-                            
-                            $up = $list[$keys]->up;
-                            $down = $list[$keys]->down;
-                            $total = $list[$keys]->total;
-                            $expiry = $list[$keys]->expiryTime;
-                            
-                            if(($clientTotal != 0 || $clientTotal != null) && ($clientExpTime != 0 || $clientExpTime != null)){
-                                $up = $clientUpload;
-                                $down = $clientDownload;
-                                $total = $clientTotal;
-                                $expiry = $clientExpTime;
-                            }
-
-                            $upload = sumerize($up);
-                            $download = sumerize($down);
-                            $configLocation = ["uuid" => $text, "remark"=>$list[$keys]->remark];
-                            $leftMb = $total!=0?($total - $up - $down):"نامحدود";
-                            if(is_numeric($leftMb)){
-                                if($leftMb<0){
-                                    $leftMb = 0;
-                                }else{
-                                    $leftMb = sumerize($total - $up - $down);
+                        }else{
+                            $email = $clientsSettings[$settingKey]['email'];
+                            $clientState = $list[$keys]->clientStats;
+                            $emails = array_column($clientState,'email');
+                            $emailKey = array_search($email,$emails);                    
+                 
+                            // if($clientState[$emailKey]->total != 0 || $clientState[$emailKey]->up != 0  ||  $clientState[$emailKey]->down != 0 || $clientState[$emailKey]->expiryTime != 0){
+                            if(count($clientState) > 1){
+                        	    $configLocation = ["id" => $list[$keys]->id, "remark"=>$email, "uuid"=>$text];
+                                $upload = sumerize($clientState[$emailKey]->up);
+                                $download = sumerize($clientState[$emailKey]->down);
+                                $total = $clientState[$emailKey]->total==0 && $list[$keys]->total !=0?$list[$keys]->total:$clientState[$emailKey]->total;
+                                $leftMb = $total!=0?($total - $clientState[$emailKey]->up - $clientState[$emailKey]->down):"نامحدود";
+                                if(is_numeric($leftMb)){
+                                    if($leftMb<0){
+                                        $leftMb = 0;
+                                    }else{
+                                        $leftMb = sumerize($total - $clientState[$emailKey]->up - $clientState[$emailKey]->down);
+                                    }
                                 }
+                                $totalUsed = sumerize($clientState[$emailKey]->up + $clientState[$emailKey]->down);
+                                $total = $total!=0?sumerize($total):"نامحدود";
+                                $expTime = $clientState[$emailKey]->expiryTime == 0 && $list[$keys]->expiryTime?$list[$keys]->expiryTime:$clientState[$emailKey]->expiryTime;
+                                $expiryTime = $expTime != 0?jdate("Y-m-d H:i:s",substr($expTime,0,-3)):"نامحدود";
+                                $expiryDay = $expTime != 0?
+                                    floor(
+                                        ((substr($expTime,0,-3)-time())/(60 * 60 * 24))
+                                        ):
+                                        "نامحدود";
+                                if(is_numeric($expiryDay)){
+                                    if($expiryDay<0) $expiryDay = 0;
+                                }
+                                $state = $clientState[$emailKey]->enable == true?$buttonValues['active']:$buttonValues['deactive'];
+                                $remark = $email;
                             }
-                            $totalUsed = sumerize($up + $down);
-                            $total = $total!=0?sumerize($total):"نامحدود";
-                            
-                            
-                            $expiryTime = $expiry != 0?jdate("Y-m-d H:i:s",substr($expiry,0,-3)):"نامحدود";
-                            $expiryDay = $expiry != 0?
-                                floor(
-                                    ((substr($expiry,0,-3)-time())/(60 * 60 * 24))
-                                    ):
-                                    "نامحدود";
-                            if(is_numeric($expiryDay)){
-                                if($expiryDay<0) $expiryDay = 0;
+                            else{
+                                $clientUpload = $clientState[$emailKey]->up;
+                                $clientDownload = $clientState[$emailKey]->down;
+                                $clientTotal = $clientState[$emailKey]->total;
+                                $clientExpTime = $clientState[$emailKey]->expiryTime;
+                                
+                                $up = $list[$keys]->up;
+                                $down = $list[$keys]->down;
+                                $total = $list[$keys]->total;
+                                $expiry = $list[$keys]->expiryTime;
+                                
+                                if(($clientTotal != 0 || $clientTotal != null) && ($clientExpTime != 0 || $clientExpTime != null)){
+                                    $up = $clientUpload;
+                                    $down = $clientDownload;
+                                    $total = $clientTotal;
+                                    $expiry = $clientExpTime;
+                                }
+    
+                                $upload = sumerize($up);
+                                $download = sumerize($down);
+                                $configLocation = ["uuid" => $text, "remark"=>$list[$keys]->remark];
+                                $leftMb = $total!=0?($total - $up - $down):"نامحدود";
+                                if(is_numeric($leftMb)){
+                                    if($leftMb<0){
+                                        $leftMb = 0;
+                                    }else{
+                                        $leftMb = sumerize($total - $up - $down);
+                                    }
+                                }
+                                $totalUsed = sumerize($up + $down);
+                                $total = $total!=0?sumerize($total):"نامحدود";
+                                
+                                
+                                $expiryTime = $expiry != 0?jdate("Y-m-d H:i:s",substr($expiry,0,-3)):"نامحدود";
+                                $expiryDay = $expiry != 0?
+                                    floor(
+                                        ((substr($expiry,0,-3)-time())/(60 * 60 * 24))
+                                        ):
+                                        "نامحدود";
+                                if(is_numeric($expiryDay)){
+                                    if($expiryDay<0) $expiryDay = 0;
+                                }
+                                $state = $list[$keys]->enable == true?$buttonValues['active']:$buttonValues['deactive'];
+                                $remark = $list[$keys]->remark;
                             }
-                            $state = $list[$keys]->enable == true?$buttonValues['active']:$buttonValues['deactive'];
-                            $remark = $list[$keys]->remark;
                         }
                     }
+                    break;
                 }
-
-                $keys = json_encode(['inline_keyboard'=>[
-                [
-                    ['text'=>$state??" ",'callback_data'=>"wizwizch"],
-                    ['text'=>"🔘 وضعیت اکانت 🔘",'callback_data'=>"wizwizch"],
-                    ],
-                [
-					['text'=>$remark??" ",'callback_data'=>"wizwizch"],
-                    ['text'=>"« نام اکانت »",'callback_data'=>"wizwizch"],
-                    ],
-                [
-                    ['text'=>$upload?? " ",'callback_data'=>"wizwizch"],
-                    ['text'=>"√ آپلود √",'callback_data'=>"wizwizch"],
-                    ],
-                [
-                    ['text'=>$download??" ",'callback_data'=>"wizwizch"],
-                    ['text'=>"√ دانلود √",'callback_data'=>"wizwizch"],
-                    ],
-                [
-                    ['text'=>$total??" ",'callback_data'=>"wizwizch"],
-                    ['text'=>"† حجم کلی †",'callback_data'=>"wizwizch"],
-                    ],
-                [
-                    ['text'=>$leftMb??" ",'callback_data'=>"wizwizch"],
-                    ['text'=>"~ حجم باقیمانده ~",'callback_data'=>"wizwizch"],
-                    ],
-                [
-                    ['text'=>$expiryTime??" ",'callback_data'=>"wizwizch"],
-                    ['text'=>"تاریخ اتمام",'callback_data'=>"wizwizch"],
-                    ],
-                [
-                    ['text'=>$expiryDay??" ",'callback_data'=>"wizwizch"],
-                    ['text'=>"تعداد روز باقیمانده",'callback_data'=>"wizwizch"],
-                    ],
-                (($botState['renewAccountState'] == "on" && $botState['updateConfigLinkState'] == "on")?
-                    [
-                        ['text'=>$buttonValues['renew_config'],'callback_data'=>"sConfigRenew" . $serverId],
-                        ['text'=>$buttonValues['update_config_connection'],'callback_data'=>"sConfigUpdate" . $serverId],
-                        ]:[]
-                        ),
-                (($botState['renewAccountState'] != "on" && $botState['updateConfigLinkState'] == "on")?
-                    [
-                        ['text'=>$buttonValues['update_config_connection'],'callback_data'=>"sConfigUpdate" . $serverId]
-                        ]:[]
-                        ),
-                (($botState['renewAccountState'] == "on" && $botState['updateConfigLinkState'] != "on")?
-                    [
-                        ['text'=>$buttonValues['renew_config'],'callback_data'=>"sConfigRenew" . $serverId]
-                        ]:[]
-                        ),
-                [['text'=>"صفحه اصلی",'callback_data'=>"mainMenu"]]
-                ]]);
-                setUser(json_encode($configLocation,488), "temp");
-                sendMessage("🔰مشخصات حسابت:",$keys,"MarkDown");
-                break;
-                
-
             }
         }
     }
     if(!$found){
          sendMessage("ای وای ، اطلاعاتت اشتباهه 😔",$cancelKey);
+    }else{
+        setUser();
+        $keys = json_encode(['inline_keyboard'=>array_merge([
+        [
+            ['text'=>$state??" ",'callback_data'=>"wizwizch"],
+            ['text'=>"🔘 وضعیت اکانت 🔘",'callback_data'=>"wizwizch"],
+            ],
+        [
+    		['text'=>$remark??" ",'callback_data'=>"wizwizch"],
+            ['text'=>"« نام اکانت »",'callback_data'=>"wizwizch"],
+            ]],(!$isMarzban?[
+        [
+            ['text'=>$upload?? " ",'callback_data'=>"wizwizch"],
+            ['text'=>"√ آپلود √",'callback_data'=>"wizwizch"],
+            ],
+        [
+            ['text'=>$download??" ",'callback_data'=>"wizwizch"],
+            ['text'=>"√ دانلود √",'callback_data'=>"wizwizch"],
+            ]]:[
+        [
+            ['text'=>$totalUsed?? " ",'callback_data'=>"wizwizch"],
+            ['text'=>"√ آپلود + دانلود √",'callback_data'=>"wizwizch"],
+            ]]),[
+        [
+            ['text'=>$total??" ",'callback_data'=>"wizwizch"],
+            ['text'=>"† حجم کلی †",'callback_data'=>"wizwizch"],
+            ],
+        [
+            ['text'=>$leftMb??" ",'callback_data'=>"wizwizch"],
+            ['text'=>"~ حجم باقیمانده ~",'callback_data'=>"wizwizch"],
+            ],
+        [
+            ['text'=>$expiryTime??" ",'callback_data'=>"wizwizch"],
+            ['text'=>"تاریخ اتمام",'callback_data'=>"wizwizch"],
+            ],
+        [
+            ['text'=>$expiryDay??" ",'callback_data'=>"wizwizch"],
+            ['text'=>"تعداد روز باقیمانده",'callback_data'=>"wizwizch"],
+            ],
+        (($botState['renewAccountState'] == "on" && $botState['updateConfigLinkState'] == "on")?
+            [
+                ['text'=>$buttonValues['renew_config'],'callback_data'=>"sConfigRenew" . $serverId],
+                ['text'=>$buttonValues['update_config_connection'],'callback_data'=>"sConfigUpdate" . $serverId],
+                ]:[]
+                ),
+        (($botState['renewAccountState'] != "on" && $botState['updateConfigLinkState'] == "on")?
+            [
+                ['text'=>$buttonValues['update_config_connection'],'callback_data'=>"sConfigUpdate" . $serverId]
+                ]:[]
+                ),
+        (($botState['renewAccountState'] == "on" && $botState['updateConfigLinkState'] != "on")?
+            [
+                ['text'=>$buttonValues['renew_config'],'callback_data'=>"sConfigRenew" . $serverId]
+                ]:[]
+                ),
+        [['text'=>"صفحه اصلی",'callback_data'=>"mainMenu"]]
+        ])]);
+        setUser(json_encode($configLocation,488), "temp");
+        sendMessage("🔰مشخصات حسابت:",$keys,"MarkDown");
     }
 }
 
@@ -5808,45 +6078,57 @@ if(preg_match('/sConfigRenew(\d+)/', $data,$match)){
     $uuid = $configInfo['uuid'];
     $remark = $configInfo['remark'];
 
-    $response = getJson($server_id)->obj;
-    if($response == null){delMessage(); exit();}
-    if($inboundId == 0){
-        foreach($response as $row){
-            $clients = json_decode($row->settings)->clients;
-            if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
-                $port = $row->port;
-                $protocol = $row->protocol;
-                $configReality = json_decode($row->streamSettings)->security == "reality"?"true":"false";
-                break;
-            }
-        }
-        $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `server_id` = ? AND `inbound_id` = 0 AND `protocol` = ? AND `active` = 1 AND `price` != 0 AND `rahgozar` = 0");
+    if(isset($configInfo['marzban'])){
+        $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `server_id` = ? AND `custom_sni` LIKE '%inbounds%' AND `active` = 1 AND `price` != 0");
+        $stmt->bind_param("i", $server_id);
     }else{
-        foreach($response as $row){
-            if($row->id == $inboundId) {
-                $port = $row->port;
-                $protocol = $row->protocol;
-                $configReality = json_decode($row->streamSettings)->security == "reality"?"true":"false";
-                break;
+        $response = getJson($server_id)->obj;
+        if($response == null){delMessage(); exit();}
+        if($inboundId == 0){
+            foreach($response as $row){
+                $clients = json_decode($row->settings)->clients;
+                if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
+                    $port = $row->port;
+                    $protocol = $row->protocol;
+                    $configReality = json_decode($row->streamSettings)->security == "reality"?"true":"false";
+                    break;
+                }
             }
+            $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `server_id` = ? AND `inbound_id` = 0 AND `protocol` = ? AND `active` = 1 AND `price` != 0 AND `rahgozar` = 0");
+        }else{
+            foreach($response as $row){
+                if($row->id == $inboundId) {
+                    $port = $row->port;
+                    $protocol = $row->protocol;
+                    $configReality = json_decode($row->streamSettings)->security == "reality"?"true":"false";
+                    break;
+                }
+            }
+            $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `server_id` = ? AND `inbound_id` != 0 AND `protocol` = ? AND `active` = 1 AND `price` != 0 AND `rahgozar` = 0");
         }
-        $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `server_id` = ? AND `inbound_id` != 0 AND `protocol` = ? AND `active` = 1 AND `price` != 0 AND `rahgozar` = 0");
+        $stmt->bind_param("is", $server_id, $protocol);
     }
     
-    $stmt->bind_param("is", $server_id, $protocol);
     $stmt->execute();
     $plans = $stmt->get_result();
     $stmt->close();
     if($plans->num_rows > 0){
         $keyboard = [];
         while($file = $plans->fetch_assoc()){ 
-            $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id` = ?");
-            $stmt->bind_param("i", $server_id);
-            $stmt->execute();
-            $isReality = $stmt->get_result()->fetch_assoc()['reality'];
-            $stmt->close();
+            $add = false;
             
-            if($isReality == $configReality){
+            if(isset($configInfo['marzban'])) $add = true;
+            else{
+                $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id` = ?");
+                $stmt->bind_param("i", $server_id);
+                $stmt->execute();
+                $isReality = $stmt->get_result()->fetch_assoc()['reality'];
+                $stmt->close();
+                
+                if($isReality == $configReality) $add = true;
+            }
+            
+            if($add){
                 $id = $file['id'];
                 $name = $file['title'];
                 $price = $file['price'];
@@ -5900,7 +6182,7 @@ if(preg_match('/sConfigRenewPlan(\d+)_(\d+)/',$data, $match) && ($botState['sell
     $stmt->close();
 
     setUser('', 'temp');
-    $description = json_encode(["uuid"=>$uuid, "remark"=>$remark],488);
+    $description = json_encode(["uuid"=>$uuid, "remark"=>$remark, 'marzban' => isset($configInfo['marzban'])],488);
     $time = time();
     $stmt = $connection->prepare("INSERT INTO `pays` (`hash_id`, `description`, `user_id`, `type`, `plan_id`, `volume`, `day`, `price`, `request_date`, `state`)
                                 VALUES (?, ?, ?, 'RENEW_SCONFIG', ?, ?, '0', ?, ?, 'pending')");
@@ -5931,32 +6213,38 @@ if(preg_match('/sConfigUpdate(\d+)/', $data,$match)){
     $uuid = $configInfo['uuid'];
     $remark = $configInfo['remark'];
 
-    $response = getJson($server_id)->obj;
-    if($response == null){delMessage(); exit();}
-    
-    if($inboundId == 0){
-        foreach($response as $row){
-            $clients = json_decode($row->settings)->clients;
-            if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
-                $port = $row->port;
-                $protocol = $row->protocol;
-                $netType = json_decode($row->streamSettings)->network;
-                break;
-            }
-        }
+
+    if(isset($configInfo['marzban'])){
+        $info = getMarzbanUserInfo($server_id, $remark);
+        $vraylink = $info->links;
     }else{
-        foreach($response as $row){
-            if($row->id == $inboundId) {
-                $port = $row->port;
-                $protocol = $row->protocol;
-                $netType = json_decode($row->streamSettings)->network;
-                break;
+        $response = getJson($server_id)->obj;
+        if($response == null){delMessage(); exit();}
+        
+        if($inboundId == 0){
+            foreach($response as $row){
+                $clients = json_decode($row->settings)->clients;
+                if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
+                    $port = $row->port;
+                    $protocol = $row->protocol;
+                    $netType = json_decode($row->streamSettings)->network;
+                    break;
+                }
+            }
+        }else{
+            foreach($response as $row){
+                if($row->id == $inboundId) {
+                    $port = $row->port;
+                    $protocol = $row->protocol;
+                    $netType = json_decode($row->streamSettings)->network;
+                    break;
+                }
             }
         }
+        
+        if($uuid == null){delMessage(); exit();}
+        $vraylink = getConnectionLink($server_id, $uuid, $protocol, $remark, $port, $netType, $inboundId);
     }
-    
-    if($uuid == null){delMessage(); exit();}
-    $vraylink = getConnectionLink($server_id, $uuid, $protocol, $remark, $port, $netType, $inboundId);
     
     if($vraylink == null){delMessage(); exit();}
     include 'phpqrcode/qrlib.php';  
@@ -5987,12 +6275,12 @@ if(preg_match('/sConfigUpdate(\d+)/', $data,$match)){
     }
 }
 
-if (($data == 'addNewPlan' || $data=="addNewRahgozarPlan") and (($from_id == $admin || $userInfo['isAdmin'] == true))){
+if (($data == 'addNewPlan' || $data=="addNewRahgozarPlan" || $data == "addNewMarzbanPlan") and (($from_id == $admin || $userInfo['isAdmin'] == true))){
     setUser($data);
     $stmt = $connection->prepare("DELETE FROM `server_plans` WHERE `active`=0");
     $stmt->execute();
     $stmt->close();
-    if($data=="addNewPlan"){
+    if($data=="addNewPlan" || $data == "addNewMarzbanPlan"){
         $sql = "INSERT INTO `server_plans` (`fileid`, `catid`, `server_id`, `inbound_id`, `acount`, `limitip`, `title`, `protocol`, `days`, `volume`, `type`, `price`, `descr`, `pic`, `active`, `step`, `date`)
                                             VALUES ('', 0,0,0,0, 1, '', '', 0, 0, '', 0, '', '',0,1, ?);";
     }elseif($data=="addNewRahgozarPlan"){
@@ -6008,7 +6296,7 @@ if (($data == 'addNewPlan' || $data=="addNewRahgozarPlan") and (($from_id == $ad
     sendMessage($msg,$cancelKey);
     exit;
 }
-if(preg_match('/(addNewRahgozarPlan|addNewPlan)/',$userInfo['step']) and $text!=$buttonValues['cancel'] && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+if(preg_match('/(addNewRahgozarPlan|addNewPlan|addNewMarzbanPlan)/',$userInfo['step']) and $text!=$buttonValues['cancel'] && ($from_id == $admin || $userInfo['isAdmin'] == true)){
     $catkey = [];
     $stmt = $connection->prepare("SELECT * FROM `server_categories` WHERE `parent` =0 and `active`=1");
     $stmt->execute();
@@ -6041,7 +6329,7 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan)/',$userInfo['step']) and $text!=
             $stmt->bind_param("s", $text);
             $stmt->execute();
             $stmt->close();
-            sendMessage($msg,json_encode(['keyboard'=>$catkey]));
+            sendMessage($msg,json_encode(['keyboard'=>$catkey,'resize_keyboard'=>true]));
         }else{
             $msg = '‼️ لطفا یک مقدار عددی وارد کنید';
             sendMessage($msg,$cancelKey);
@@ -6049,8 +6337,22 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan)/',$userInfo['step']) and $text!=
     } 
     if($step==3 and $text!=$buttonValues['cancel']){
         $srvkey = [];
-        $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `active`=1");
+
+        $stmt = $connection->prepare("SELECT `id` FROM `server_config` WHERE `type` = 'marzban'");
         $stmt->execute();
+        $info = $stmt->get_result()->fetch_all();
+        $stmt->close();
+        
+        
+        
+        $marzbanList = array_column($info, 0); 
+        if(count($marzbanList) > 0) $condition  = " AND `id` " .($userInfo['step'] == "addNewMarzbanPlan"?"IN":"NOT IN") . " (" . (str_repeat('?,', count($marzbanList) - 1) . '?') . ")";
+        else $condition = "";
+
+        $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `active`=1 $condition");
+        if(!empty($condition)) $stmt->execute($marzbanList);
+        else $stmt->execute();
+        
         $srvs = $stmt->get_result();
         $stmt->close();
         sendMessage($mainValues['please_wait_message'],$cancelKey);
@@ -6083,8 +6385,10 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan)/',$userInfo['step']) and $text!=
         }
     } 
     if($step==50 and $text!=$buttonValues['cancel'] and preg_match('/selectNewPlanServer(\d+)/', $data,$match)){
-        $stmt = $connection->prepare("UPDATE `server_plans` SET `server_id`=?,`step`=51 WHERE `active`=0");
-        $stmt->bind_param("i", $match[1]);
+        $newStep = $userInfo['step'] == "addNewMarzbanPlan"?53:51;
+        
+        $stmt = $connection->prepare("UPDATE `server_plans` SET `server_id`=?,`step`=? WHERE `active`=0");
+        $stmt->bind_param("ii", $match[1], $newStep);
         $stmt->execute();
         $stmt->close();
 
@@ -6092,7 +6396,8 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan)/',$userInfo['step']) and $text!=
             [['text'=>"🎖پورت اختصاصی",'callback_data'=>"withSpecificPort"]],
             [['text'=>"🎗پورت اشتراکی",'callback_data'=>"withSharedPort"]]
             ]]);
-        editText($message_id, "لطفا نوعیت پورت پنل رو انتخاب کنید", $keys);
+        if($userInfo['step'] != "addNewMarzbanPlan") editText($message_id, "لطفا نوعیت پورت پنل رو انتخاب کنید", $keys);
+        else editText($message_id, "📅 | لطفا تعداد روز های اعتبار این پلن را وارد کنید:");
     }
     if($step==51 and $text!=$buttonValues['cancel'] and preg_match('/^with(Specific|Shared)Port/',$data,$match)){
         if($userInfo['step'] == "addNewRahgozarPlan") $msg =  "📡 | لطفا پروتکل پلن مورد نظر را وارد کنید (vless | vmess)";
@@ -6244,7 +6549,7 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan)/',$userInfo['step']) and $text!=
         if($userInfo['step'] == "addNewPlan"){
             $sql = ("UPDATE `server_plans` SET `volume`=?,`step`=55 WHERE `active`=0");
             $msg = "🔉 | لطفا نوع شبکه این پلن را در انتخاب کنید  (ws | tcp | grpc) :";
-        }elseif($userInfo['step'] == "addNewRahgozarPlan"){
+        }elseif($userInfo['step'] == "addNewRahgozarPlan" || $userInfo['step'] == "addNewMarzbanPlan"){
             $sql = ("UPDATE `server_plans` SET `volume`=?, `type`='ws', `step`=4 WHERE `active`=0");
             $msg = '🔻یه توضیح برای پلن مورد نظرت بنویس:';
         }
@@ -6271,16 +6576,86 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan)/',$userInfo['step']) and $text!=
     }
     
     if($step==4 and $text!=$buttonValues['cancel']){
-        $imgtxt = '☑️ | پنل با موفقیت ثبت و ایجاد شد ( لذت ببرید ) ';
-        $stmt = $connection->prepare("UPDATE `server_plans` SET `descr`=?, `active`=1,`step`=10 WHERE `step`=4");
+        
+        if($userInfo['step'] == "addNewMarzbanPlan"){
+            $networkTypeKeys = json_encode(['inline_keyboard'=>[
+                [['text'=>"VMess TCP", 'callback_data'=>'planNetworkTypeVMess TCP']],
+                [['text'=>"VMess Websocket", 'callback_data'=>'planNetworkTypeVMess Websocket']],
+                [['text'=>"VLESS TCP REALITY", 'callback_data'=>'planNetworkTypeVLESS TCP REALITY']],
+                [['text'=>"VLESS GRPC REALITY", 'callback_data'=>'planNetworkTypeVLESS GRPC REALITY']],
+                [['text'=>"Trojan Websocket TLS", 'callback_data'=>'planNetworkTypeTrojan Websocket TLS']],
+                [['text'=>"Shadowsocks TCP", 'callback_data'=>'planNetworkTypeShadowsocks TCP']]
+                ]]);
+            $stmt = $connection->prepare("UPDATE `server_plans` SET `descr`=?, `step` = 5 WHERE `step` = 4");
+            sendMessage("لطفا نوع شبکه های این پلن را انتخاب کنید",$networkTypeKeys);
+        }
+        else{
+            $stmt = $connection->prepare("UPDATE `server_plans` SET `descr`=?, `active`=1,`step`=10 WHERE `step`=4");
+            $imgtxt = '☑️ | پنل با موفقیت ثبت و ایجاد شد ( لذت ببرید ) ';
+            
+            sendMessage($imgtxt,$removeKeyboard);
+            sendMessage($mainValues['reached_main_menu'],getAdminKeys());
+            setUser();
+        }
         $stmt->bind_param("s", $text);
         $stmt->execute();
         $stmt->close();
 
+    } 
+    elseif($step == 5 and $text != $buttonValues['cancel'] && preg_match('/^planNetworkType(.*)/',$data,$match)){
+        $saveBtn = "ذخیره ✅";
+        if($markup[count($markup)-1][0]['text'] == $saveBtn) unset($markup[count($markup)-1]);
+
+        if(strstr(json_encode($markup, JSON_UNESCAPED_UNICODE), '"' . $match[1] . ' ✅"')){
+            $markup = str_replace('"' . $match[1] . ' ✅"','"' . $match[1] . '"',json_encode(['inline_keyboard'=>$markup], JSON_UNESCAPED_UNICODE));
+        }
+        else $markup = str_replace('"' . $match[1] . '"','"' . $match[1] . ' ✅"',json_encode(['inline_keyboard'=>$markup], JSON_UNESCAPED_UNICODE));
+        
+        if(strstr($markup, "✅") && !strstr($markup, $saveBtn)){
+            $markup = json_decode($markup, true);
+            $markup['inline_keyboard'][] = [['text'=>$saveBtn,'callback_data'=>"savePlanNetworkType"]];
+            $markup = json_encode($markup);
+        }
+        
+        editKeys($markup);
+    }
+    elseif($step == 5 && $text != $buttonValues['cancel'] && $data == "savePlanNetworkType"){
+        delMessage();
+        $inbounds = array();
+        $proxies = array();
+        
+        foreach($markup as $key=>$value){
+            $netType = trim(str_replace("✅", "", $value[0]['text'], $state));
+            if($state > 0){
+                if(strstr($netType, "VMess")){
+                    $inbounds["vmess"][] = $netType;
+                    $proxies["vmess"] = array();
+                }
+                elseif(strstr($netType, "VLESS")){
+                    $inbounds["vless"][] = $netType;
+                    $proxies["vless"] = ["flow" => ""];
+                }
+                elseif(strstr($netType, "Trojan")){
+                    $inbounds["trojan"][] = $netType;
+                    $proxies["trojan"] = array();
+                }
+                elseif(strstr($netType, "Shadowsocks")){
+                    $inbounds["shadowsocks"][] = $netType;
+                    $proxies["shadowsocks"] = ['method' => "chacha20-ietf-poly1305"];
+                }
+            }
+        }
+        $info = json_encode(['inbounds'=>$inbounds, 'proxies'=>$proxies]);
+        $stmt = $connection->prepare("UPDATE `server_plans` SET `custom_sni`=?, `active`=1,`step`=10 WHERE `step`=5");
+        $stmt->bind_param("s", $info);
+        $stmt->execute();
+        $stmt->close();
+        
+        $imgtxt = '☑️ | پنل با موفقیت ثبت و ایجاد شد ( لذت ببرید ) ';
         sendMessage($imgtxt,$removeKeyboard);
         sendMessage($mainValues['reached_main_menu'],getAdminKeys());
         setUser();
-    } 
+    }
 }
 if($data == 'backplan' and ($from_id == $admin || $userInfo['isAdmin'] == true)){
     $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `active`=1");
@@ -6297,7 +6672,10 @@ if($data == 'backplan' and ($from_id == $admin || $userInfo['isAdmin'] == true))
     $keyboard = array_chunk($keyboard,2);
     $keyboard[] = [['text'=>"➖➖➖",'callback_data'=>"wizwizch"]];
     $keyboard[] = [['text'=>'➕ افزودن پلن اختصاصی و اشتراکی','callback_data'=>"addNewPlan"]];
-    $keyboard[] = [['text'=>'➕ افزودن پلن رهگذر','callback_data'=>"addNewRahgozarPlan"]];
+    $keyboard[] = [
+        ['text'=>'➕ افزودن پلن رهگذر','callback_data'=>"addNewRahgozarPlan"],
+        ['text'=>"افزودن پلن مرزبان",'callback_data'=>"addNewMarzbanPlan"]
+                    ];
     $keyboard[] = [['text'=>'➕ افزودن پلن حجمی','callback_data'=>"volumePlanSettings"],['text'=>'➕ افزودن پلن زمانی','callback_data'=>"dayPlanSettings"]];
     $keyboard[] = [['text' => "➕ افزودن پلن دلخواه", 'callback_data' => "editCustomPlan"]];
     $keyboard[] = [['text' => $buttonValues['back_button'], 'callback_data' => "managePanel"]];
@@ -6886,46 +7264,51 @@ if(preg_match('/updateConfigConnectionLink(\d+)/', $data,$match)){
     $customPort = $file_detail['custom_port'];
     $customSni = $file_detail['custom_sni'];
     
-    $response = getJson($server_id)->obj;
-    if($inboundId == 0){
-        foreach($response as $row){
-            $clients = json_decode($row->settings)->clients;
-            if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
-                $inboundRemark = $row->remark;
-                $iId = $row->id;
-                $port = $row->port;
-                $protocol = $row->protocol;
-                $netType = json_decode($row->streamSettings)->network;
-                break;
-            }
-        }
-    }else{
-        foreach($response as $row){
-            if($row->id == $inboundId) {
-                $iId = $row->id;
-                $inboundRemark = $row->remark;
-                $port = $row->port;
-                $protocol = $row->protocol;
-                $netType = json_decode($row->streamSettings)->network;
-                break;
-            }
-        }
-    }
-
-    if($botState['updateConnectionState'] == "robot"){
-        $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
-        $stmt->bind_param("i", $file_id);
-        $stmt->execute();
-        $server_config = $stmt->get_result()->fetch_assoc();
-        
-        $netType = $file_detail['type'];
-        $protocol = $file_detail['protocol'];
-        $security = $server_config['security'];
-
-        updateConfig($server_id, $iId, $protocol, $netType, $security, $rahgozar);
-    }
-    $vraylink = getConnectionLink($server_id, $uuid, $protocol, $remark, $port, $netType, $inboundId, $rahgozar, $customPath, $customPort, $customSni);
+    $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_config = $stmt->get_result()->fetch_assoc();
+    $serverType = $server_config['type'];
+    $netType = $file_detail['type'];
+    $protocol = $file_detail['protocol'];
+    $security = $server_config['security'];
     
+    if($serverType == "marzban"){
+        $info = getMarzbanUser($server_id, $remark);
+        $vraylink = $info->links;
+    }else{
+        $response = getJson($server_id)->obj;
+        if($inboundId == 0){
+            foreach($response as $row){
+                $clients = json_decode($row->settings)->clients;
+                if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
+                    $inboundRemark = $row->remark;
+                    $iId = $row->id;
+                    $port = $row->port;
+                    $protocol = $row->protocol;
+                    $netType = json_decode($row->streamSettings)->network;
+                    break;
+                }
+            }
+        }else{
+            foreach($response as $row){
+                if($row->id == $inboundId) {
+                    $iId = $row->id;
+                    $inboundRemark = $row->remark;
+                    $port = $row->port;
+                    $protocol = $row->protocol;
+                    $netType = json_decode($row->streamSettings)->network;
+                    break;
+                }
+            }
+        }
+    
+        if($botState['updateConnectionState'] == "robot"){
+            updateConfig($server_id, $iId, $protocol, $netType, $security, $rahgozar);
+        }
+        $vraylink = getConnectionLink($server_id, $uuid, $protocol, $remark, $port, $netType, $inboundId, $rahgozar, $customPath, $customPort, $customSni);
+        
+    }
     $vray_link = json_encode($vraylink);
     $stmt = $connection->prepare("UPDATE `orders_list` SET `link`=? WHERE `id`=?");
     $stmt->bind_param("si", $vray_link, $oid);
@@ -6964,34 +7347,49 @@ if(preg_match('/changAccountConnectionLink(\d+)/', $data,$match)){
     $customPort = $file_detail['custom_port'];
     $customSni = $file_detail['custom_sni'];
     
-    $response = getJson($server_id)->obj;
-    if($inboundId == 0){
-        foreach($response as $row){
-            $clients = json_decode($row->settings)->clients;
-            if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
-                $port = $row->port;
-                $protocol = $row->protocol;
-                $netType = json_decode($row->streamSettings)->network;
-                break;
-            }
-        }
-        
-        $update_response = renewInboundUuid($server_id, $uuid);
+    
+    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    
+    $serverType = $server_info['type'];
+
+    if($serverType == "marzban"){
+        $res = renewMarzbanUUID($server_id, $remark);
+        $vraylink = $res->links;
+        $newUuid = $newToken = str_replace("/sub/", "", $res->subscription_url);
     }else{
-        foreach($response as $row){
-            if($row->id == $inboundId) {
-                $port = $row->port; 
-                $protocol = $row->protocol;
-                $netType = json_decode($row->streamSettings)->network;
-                break;
+        $response = getJson($server_id)->obj;
+        if($inboundId == 0){
+            foreach($response as $row){
+                $clients = json_decode($row->settings)->clients;
+                if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
+                    $port = $row->port;
+                    $protocol = $row->protocol;
+                    $netType = json_decode($row->streamSettings)->network;
+                    break;
+                }
             }
+            
+            $update_response = renewInboundUuid($server_id, $uuid);
+        }else{
+            foreach($response as $row){
+                if($row->id == $inboundId) {
+                    $port = $row->port; 
+                    $protocol = $row->protocol;
+                    $netType = json_decode($row->streamSettings)->network;
+                    break;
+                }
+            }
+            $update_response = renewClientUuid($server_id, $inboundId, $uuid);
         }
-        $update_response = renewClientUuid($server_id, $inboundId, $uuid);
+        $newUuid = $update_response->newUuid;
+        $vraylink = getConnectionLink($server_id, $newUuid, $protocol, $remark, $port, $netType, $inboundId, $rahgozar, $customPath, $customPort, $customSni);
+        $newToken = RandomString(30);
     }
 
-    $newToken = RandomString(30);
-    $newUuid = $update_response->newUuid;
-    $vraylink = getConnectionLink($server_id, $newUuid, $protocol, $remark, $port, $netType, $inboundId, $rahgozar, $customPath, $customPort, $customSni);
     
     $vray_link = json_encode($vraylink);
     $stmt = $connection->prepare("UPDATE `orders_list` SET `link`=?, `uuid` = ?, `token` = ? WHERE `id`=?");
@@ -7015,9 +7413,19 @@ if(preg_match('/changeUserConfigState(\d+)/', $data,$match)){
     $uuid = $order['uuid']??"0";
     $inboundId = $order['inbound_id'];
     $server_id = $order['server_id'];
+    $remark = $order['remark'];
+    
+    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $serverType = $server_info['type'];
+
     
     if($inboundId == 0){
-        $update_response = changeInboundState($server_id, $uuid);
+        if($serverType == "marzban") $update_response = changeMarzbanState($server_id, $remark);
+        else $update_response = changeInboundState($server_id, $uuid);
     }else{
         $update_response = changeClientState($server_id, $inboundId, $uuid);
     }
@@ -7027,7 +7435,7 @@ if(preg_match('/changeUserConfigState(\d+)/', $data,$match)){
     
         $keys = getUserOrderDetailKeys($oid);
         editText($message_id, $keys['msg'], $keys['keyboard'], "HTML");
-    }else sendMessage("عملیه مورد نظر با مشکل روبرو شد");
+    }else sendMessage("عملیه مورد نظر با مشکل روبرو شد\n" . $update_response->msg);
 }
 
 if(preg_match('/changeAccProtocol(\d+)_(\d+)_(.*)/', $data,$match)){
@@ -7372,14 +7780,24 @@ if(preg_match('/approveRenewAcc(.*)/',$data,$match) && ($from_id == $admin || $u
     $markup[] = [['text'=>"✅",'callback_data'=>"wizwizch"]];
     $keys = json_encode(['inline_keyboard'=>array_values($markup)],488);
 
+    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $serverType = $server_info['type'];
+
 
     editKeys($keys);
 
-    
-    if($inbound_id > 0)
-        $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
-    else
-        $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+    if($serverType == "marzban"){
+        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'days'=>$days, 'volume' => $volume]);
+    }else{
+        if($inbound_id > 0)
+            $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
+        else
+            $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+    }
     
 	if(is_null($response)){
 		alert('🔻مشکل فنی در اتصال به سرور. لطفا به مدیریت اطلاع بدید',true);
@@ -7493,10 +7911,22 @@ if(preg_match('/payRenewWithWallet(.*)/', $data,$match)){
         exit;
     }
 
-    if($inbound_id > 0)
-        $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
-    else
-        $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+
+    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $serverType = $server_info['type'];
+
+    if($serverType == "marzban"){
+        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'days'=>$days, 'volume' => $volume]);
+    }else{
+        if($inbound_id > 0)
+            $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
+        else
+            $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+    }
 
 	if(is_null($response)){
 		alert('🔻مشکل فنی در اتصال به سرور. لطفا به مدیریت اطلاع بدید',true);
@@ -7665,6 +8095,7 @@ if(preg_match('/switchServer(.+)_(.+)/',$data,$match)){
     $stmt->close();
     $reality = $server_info['reality'];
     $serverType = $server_info['type'];
+    $panelUrl = $server_info['panel_url'];
 
     $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
     $stmt->bind_param("i", $sid);
@@ -7763,8 +8194,27 @@ if(preg_match('/switchServer(.+)_(.+)/',$data,$match)){
 			exit;
 		}
         if($response){
-            $res = addUser($sid, $response['uniqid'], $response['protocol'], $response['port'], $response['expiryTime'], $newRemark, $response['volume'] / 1073741824, $response['netType'], $response['security']);
-            $vray_link = getConnectionLink($sid, $response['uniqid'], $response['protocol'], $newRemark, $response['port'], $response['netType'], $inbound_id);
+            if($serverType == "marzban"){
+                $response = addMarzbanUser($server_id, $newRemark, $volume, $days, $fid);
+                if(!$response->success){
+                    if($response->msg == "User already exists"){
+                        $newRemark .= rand(1111,99999);
+                        $response = addMarzbanUser($server_id, $newRemark, $volume, $days, $fid);
+                    }
+                }
+                $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
+                $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
+                $vraylink = $response->vray_links;
+
+                $stmt = $connection->prepare("UPDATE `orders_list` SET `token` = ?, `uuid` =? WHERE `id` = ?");
+                $stmt->bind_param("ssi", $token, $uniqid, $oid);
+                $stmt->execute();
+                $stmt->close();
+
+            }else{
+                $res = addUser($sid, $response['uniqid'], $response['protocol'], $response['port'], $response['expiryTime'], $newRemark, $response['volume'] / 1073741824, $response['netType'], $response['security']);
+                $vray_link = getConnectionLink($sid, $response['uniqid'], $response['protocol'], $newRemark, $response['port'], $response['netType'], $inbound_id);
+            }
             deleteInbound($server_id, $uuid, 1);
         }
     }
@@ -7854,16 +8304,33 @@ elseif(preg_match('/^yesDeleteConfig(\d+)/',$data,$match)){
 	$volume = $planDetail['volume'];
 	$days = $planDetail['days'];
 	
+    $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id` = ?");
+    $stmt->bind_param('i', $server_id);
+    $stmt->execute();
+    $serverConfig = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $serverType = $serverConfig['type'];
+
 	
-    if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $uuid, 1);
-    else $res = deleteInbound($server_id, $uuid, 1);
+	if($serverType != "marzban"){
+        if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $uuid, 1);
+        else $res = deleteInbound($server_id, $uuid, 1);
+        
+        $leftMb = sumerize($res['total'] - $res['up'] - $res['down']);
+        $expiryDay = $res['expiryTime'] != 0?
+            floor(
+                (substr($res['expiryTime'],0,-3)-time())/(60 * 60 * 24))
+                :
+                "نامحدود";
+	}else{
+	    $configInfo = getMarzbanUser($server_id, $remark);
+	    deleteMarzban($server_id, $remark);
+	    $leftMb = sumerize($configInfo->data_limit - $configInfo->used_traffic);
+	    $expiryDay = $configInfo->expire != 0?
+	        floor(($configInfo->expire - time())/ 86400):"نامحدود";
+	}
+
     
-    $leftMb = sumerize($res['total'] - $res['up'] - $res['down']);
-    $expiryDay = $res['expiryTime'] != 0?
-        floor(
-            (substr($res['expiryTime'],0,-3)-time())/(60 * 60 * 24))
-            :
-            "نامحدود";
     if(is_numeric($expiryDay)){
         if($expiryDay<0) $expiryDay = 0;
     }
@@ -7927,9 +8394,20 @@ elseif(preg_match('/^yesDeleteUserConfig(\d+)/',$data,$match) && ($from_id == $a
     $remark = $order['remark'];
     $uuid = $order['uuid']??"0";
     
+    $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id` = ?");
+    $stmt->bind_param('i', $server_id);
+    $stmt->execute();
+    $serverConfig = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $serverType = $serverConfig['type'];
+    
 	
-    if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $uuid, 1);
-    else $res = deleteInbound($server_id, $uuid, 1);
+	if($serverType != "marzban"){
+        if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $uuid, 1);
+        else $res = deleteInbound($server_id, $uuid, 1);
+	}else{
+	    $res = deleteMarzban($server_id, $remark);
+	}
     
 
     $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` + 1 WHERE `id` = ?");
@@ -8159,12 +8637,21 @@ if(preg_match('/approveIncreaseDay(.*)/',$data,$match) && ($from_id == $admin ||
 
     $acctxt = '';
     
+    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $serverType = $server_info['type'];
     
     unset($markup[count($markup)-1]);
 
-    
-    if($inbound_id > 0) $response = editClientTraffic($server_id, $inbound_id, $uuid, 0, $volume);
-    else $response = editInboundTraffic($server_id, $uuid, 0, $volume);
+    if($serverType == "marzban"){
+        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'plus_day'=>$volume]);
+    }else{
+        if($inbound_id > 0) $response = editClientTraffic($server_id, $inbound_id, $uuid, 0, $volume);
+        else $response = editInboundTraffic($server_id, $uuid, 0, $volume);
+    }
     
     if($response->success){
         $stmt = $connection->prepare("UPDATE `orders_list` SET `expire_date` = `expire_date` + ?, `notif` = 0 WHERE `uuid` = ?");
@@ -8219,7 +8706,12 @@ if(preg_match('/payIncraseDayWithWallet(.*)/', $data,$match)){
     
     $planid = $increaseInfo[2];
 
-
+    $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id` = ?");
+    $stmt->bind_param('i', $server_id);
+    $stmt->execute();
+    $serverConfig = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $serverType = $serverConfig['type'];
 
     
     $stmt = $connection->prepare("SELECT * FROM `increase_day` WHERE `id` = ?");
@@ -8239,11 +8731,15 @@ if(preg_match('/payIncraseDayWithWallet(.*)/', $data,$match)){
     }
 
     
-
-    if($inbound_id > 0)
-        $response = editClientTraffic($server_id, $inbound_id, $uuid, 0, $volume);
-    else
-        $response = editInboundTraffic($server_id, $uuid, 0, $volume);
+    
+    if($serverType == "marzban"){
+        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'plus_day'=>$volume]);
+    }else{
+        if($inbound_id > 0)
+            $response = editClientTraffic($server_id, $inbound_id, $uuid, 0, $volume);
+        else
+            $response = editInboundTraffic($server_id, $uuid, 0, $volume);
+    }
         
     if($response->success){
         $stmt = $connection->prepare("UPDATE `orders_list` SET `expire_date` = `expire_date` + ?, `notif` = 0 WHERE `uuid` = ?");
@@ -8493,9 +8989,19 @@ if(preg_match('/approveIncreaseVolume(.*)/',$data,$match) && ($from_id == $admin
 
     $acctxt = '';
     
-    
-    if($inbound_id > 0) $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, 0);
-    else $response = editInboundTraffic($server_id, $uuid, $volume, 0);
+    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $serverType = $server_info['type'];
+
+    if($serverType == "marzban"){
+        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'plus_volume'=>$volume]);
+    }else{
+        if($inbound_id > 0) $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, 0);
+        else $response = editInboundTraffic($server_id, $uuid, $volume, 0);
+    }
     
     if($response->success){
         $stmt = $connection->prepare("UPDATE `orders_list` SET `notif` = 0 WHERE `uuid` = ?");
@@ -8647,11 +9153,22 @@ if(preg_match('/payIncraseWithWallet(.*)/', $data,$match)){
         alert("💡موجودی کیف پول (".number_format($userwallet)." تومان) کافی نیست لطفا به مقدار ".number_format($needamount)." تومان شارژ کنید ",true);
         exit;
     }
+    
+    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $serverType = $server_info['type'];
 
-    if($inbound_id > 0)
-        $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, 0);
-    else
-        $response = editInboundTraffic($server_id, $uuid, $volume, 0);
+    if($serverType == "marzban"){
+        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'plus_volume'=>$volume]);
+    }else{
+        if($inbound_id > 0)
+            $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, 0);
+        else
+            $response = editInboundTraffic($server_id, $uuid, $volume, 0);
+    }
         
     if($response->success){
         $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` - ? WHERE `userid` = ?");
@@ -8859,8 +9376,9 @@ if(preg_match('/^chhangeServerType(\w+)_(\d+)/',$data,$match) && ($from_id == $a
     $keys = getServerConfigKeys($match[2]);
     editText($message_id, "☑️ مدیریت سرور ها: $cname",$keys);
 }
-if($data=='addNewServer' and (($from_id == $admin || $userInfo['isAdmin'] == true))){
+if(($data == "addNewMarzbanPanel" || $data=='addNewServer') and ($from_id == $admin || $userInfo['isAdmin'] == true)){
     delMessage();
+    setUser($data, 'temp');
     setUser('addserverName');
     sendMessage("مرحله اول: 
 ▪️یه اسم برا سرورت انتخاب کن:",$cancelKey);
@@ -8898,7 +9416,6 @@ if(preg_match('/^addServerRemark(.*)/',$userInfo['step'], $match) and $text != $
 if(preg_match('/^addServerFlag(.*)/',$userInfo['step'], $match) and $text != $buttonValues['cancel'] && ($from_id == $admin || $userInfo['isAdmin'] == true)) {
     $data = json_decode($match[1],true);
     $data['flag'] = $text;
-
     sendMessage("مرحله پنجم:
 
 ▪️لطفا آدرس پنل x-ui رو به صورت مثال زیر وارد کن:
@@ -8918,15 +9435,31 @@ if(preg_match('/^addServerFlag(.*)/',$userInfo['step'], $match) and $text != $bu
 if(preg_match('/^addServerPanelUrl(.*)/',$userInfo['step'],$match) and $text != $buttonValues['cancel'] && ($from_id == $admin || $userInfo['isAdmin'] == true)) {
     $data = json_decode($match[1],true);
     $data['panel_url'] = $text;
-    setUser('addServerIp' . json_encode($data,JSON_UNESCAPED_UNICODE));
-    sendMessage( "🔅 لطفا ip یا دامنه تانل شده پنل را وارد کنید:
-
-نمونه: 
-91.257.142.14
-sub.domain.com
-❗️در صورتی که میخواید چند دامنه یا ip کانفیگ بگیرید باید زیر هم بنویسید و برای ربات بفرستین:
-    \n\n🔻برای خالی گذاشتن متن /empty را وارد کنید");
-    exit();
+    if($userInfo['temp'] == "addNewMarzbanPanel"){
+        $data['panel_ip'] = "/empty";
+        $data['sni'] = "/empty";
+        $data['header_type'] = "/empty";
+        $data['response_header'] = "/empty";
+        $data['request_header'] = "/empty";
+        $data['security'] = "/empty";
+        $data['tls_setting'] = "/empty";
+        
+        setUser('addServerPanelUser' . json_encode($data, JSON_UNESCAPED_UNICODE));
+        sendMessage( "مرحله ششم: 
+    ▪️لطفا یوزر پنل را وارد کنید:");
+    
+        exit();
+    }else{
+        setUser('addServerIp' . json_encode($data,JSON_UNESCAPED_UNICODE));
+        sendMessage( "🔅 لطفا ip یا دامنه تانل شده پنل را وارد کنید:
+    
+    نمونه: 
+    91.257.142.14
+    sub.domain.com
+    ❗️در صورتی که میخواید چند دامنه یا ip کانفیگ بگیرید باید زیر هم بنویسید و برای ربات بفرستین:
+        \n\n🔻برای خالی گذاشتن متن /empty را وارد کنید");
+        exit();
+    }
 }
 if(preg_match('/^addServerIp(.*)/',$userInfo['step'],$match) and $text != $buttonValues['cancel'] && ($from_id == $admin || $userInfo['isAdmin'] == true)) {
     $data = json_decode($match[1],true);
@@ -9019,21 +9552,56 @@ if(preg_match('/^addServerPanePassword(.*)/',$userInfo['step'],$match) and $text
     $tlsSettings = $data['tls_setting']!="/empty"?$data['tls_setting']:"";
     $serverName = $data['panel_user'];
     $serverPass = $text;
-    $loginUrl = $panel_url . '/login';
-    $postFields = array(
-        "username" => $serverName,
-        "password" => $serverPass
+    
+    
+    $loginResponse['success'] = false;
+    if($userInfo['temp'] == "addNewMarzbanPanel"){
+        $loginUrl = $panel_url .'/api/admin/token';
+        $postFields = array(
+            'username' => $serverName,
+            'password' => $serverPass
         );
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $loginUrl);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 15); 
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    $loginResponse = json_decode(curl_exec($ch),true);
-    curl_close($ch);
+        
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $loginUrl);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/x-www-form-urlencoded',
+                'accept: application/json'
+            ));
+        $response = json_decode(curl_exec($curl),true);
+        
+        if(curl_error($curl)){
+            $loginResponse = ['success' => false, 'error'=>curl_error($curl)];
+        }
+        curl_close($curl);
+    
+        if(isset($response['access_token'])){
+            $loginResponse['success'] = true;
+        }
+    }else{
+        $loginUrl = $panel_url . '/login';
+        $postFields = array(
+            "username" => $serverName,
+            "password" => $serverPass
+            );
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $loginUrl);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15); 
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postFields));
+        $loginResponse = json_decode(curl_exec($ch),true);
+        curl_close($ch);
+        
+    }
     if(!$loginResponse['success']){
         setUser('addServerPanelUser' . json_encode($data, JSON_UNESCAPED_UNICODE));
         sendMessage( "
@@ -9063,7 +9631,15 @@ if(preg_match('/^addServerPanePassword(.*)/',$userInfo['step'],$match) and $text
     $stmt->close();
 
     sendMessage(" تبریک ; سرورت رو ثبت کردی 🥹",$removeKeyboard);
-
+    if($userInfo['temp'] == "addNewMarzbanPanel"){
+        $stmt = $connection->prepare("UPDATE `server_config` SET `type` = 'marzban' WHERE `id`=?");
+        $stmt->bind_param("i",$rowId);
+        $stmt->execute();
+        $stmt->close();
+        
+        $keys = getServerListKeys();
+        sendMessage("☑️ مدیریت سرور ها",$keys);
+    }else{
         sendMessage("
     
 🔰 نکته مهم: ( پنل x-ui خود را به آخرین نسخه آپدیت کنید ) 
@@ -9079,6 +9655,7 @@ if(preg_match('/^addServerPanePassword(.*)/',$userInfo['step'],$match) and $text
             [['text'=>"ساده",'callback_data'=>"chhangeServerTypenormal_" . $rowId],['text'=>"سنایی",'callback_data'=>"chhangeServerTypesanaei_" . $rowId]],
             [['text'=>"علیرضا",'callback_data'=>"chhangeServerTypealireza_" . $rowId]]
             ]]));
+    }
     setUser();
     exit();
 }
@@ -9110,22 +9687,64 @@ if(preg_match('/^editServerPanePassword(.*)/',$userInfo['step'],$match) and $tex
     $panel_url = $data['panel_url'];
     $serverName = $data['panel_user'];
     $serverPass = $text;
-    $loginUrl = $panel_url . '/login';
-    $postFields = array(
-        "username" => $serverName,
-        "password" => $serverPass
+    
+    
+    $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id` = ?");
+    $stmt->bind_param('i', $rowId);
+    $stmt->execute();
+    $serverInfo = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+    $serverType = $serverInfo['type'];
+    $loginResponse['success'] = false;
+    
+    if($serverType == "marzban"){
+        $loginUrl = $panel_url .'/api/admin/token';
+        $postFields = array(
+            'username' => $serverName,
+            'password' => $serverPass
         );
-
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $loginUrl);
-    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_POST, 1);
-    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 15); 
-    curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postFields));
-    $loginResponse = json_decode(curl_exec($ch),true);
-    curl_close($ch);
+        
+        $curl = curl_init();
+        curl_setopt($curl, CURLOPT_URL, $loginUrl);
+        curl_setopt($curl, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($curl, CURLOPT_POST, 1);
+        curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
+        curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
+        curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
+        curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+                'Content-Type: application/x-www-form-urlencoded',
+                'accept: application/json'
+            ));
+        $response = json_decode(curl_exec($curl),true);
+        
+        if(curl_error($curl)){
+            $loginResponse = ['success' => false, 'error'=>curl_error($curl)];
+        }
+        curl_close($curl);
+    
+        if(isset($response['access_token'])){
+            $loginResponse['success'] = true;
+        }
+    }else{
+        $loginUrl = $panel_url . '/login';
+        $postFields = array(
+            "username" => $serverName,
+            "password" => $serverPass
+            );
+    
+        $ch = curl_init();
+        curl_setopt($ch, CURLOPT_URL, $loginUrl);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, 1);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+        curl_setopt($ch, CURLOPT_POST, 1);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15); 
+        curl_setopt($ch, CURLOPT_POSTFIELDS, http_build_query($postFields));
+        $loginResponse = json_decode(curl_exec($ch),true);
+        curl_close($ch);
+    }
+    
     if(!$loginResponse['success']) sendMessage( "اطلاعاتی که وارد کردی اشتباهه 😂");
     else{
         $stmt = $connection->prepare("UPDATE `server_config` SET `panel_url` = ?, `username` = ?, `password` = ? WHERE `id` = ?");
@@ -9318,7 +9937,7 @@ if($data=="addDiscountCode" && ($from_id == $admin || $userInfo['isAdmin'] == tr
 if($userInfo['step'] == "addDiscountCode" && $text != $buttonValues['cancel'] && ($from_id == $admin || $userInfo['isAdmin'] == true)){
     $dInfo = array();
     $dInfo['type'] = 'amount';
-    if(strpos($text, "%")) $dInfo['type'] = 'percent';
+    if(strstr($text, "%")) $dInfo['type'] = 'percent';
     $text = trim(str_replace("%", "", $text));
     if(is_numeric($text)){
         $dInfo['amount'] = $text;
