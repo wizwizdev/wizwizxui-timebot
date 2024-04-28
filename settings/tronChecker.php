@@ -110,7 +110,10 @@ while($payParam = $paysList->fetch_assoc()){
                     $stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id`=?");
                     $stmt->bind_param("i", $server_id);
                     $stmt->execute();
-                    $portType = $stmt->get_result()->fetch_assoc()['port_type'];
+                    $serverConfig = $stmt->get_result()->fetch_assoc();
+                    $serverType = $serverConfig['type'];
+                    $portType = $serverConfig['port_type'];
+                    $panelUrl = $serverConfig['panel_url'];
                     $stmt->close();
                     include '../phpqrcode/qrlib.php';
                     define('IMAGE_WIDTH',540);
@@ -146,13 +149,28 @@ while($payParam = $paysList->fetch_assoc()){
                         if(!empty($description)) $remark = $description;
                         
                         if($inbound_id == 0){    
-                            $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
-                            if(! $response->success){
-                                $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
-                            } 
+                            if($serverType == "marzban"){
+                                $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+                                if(!$response->success){
+                                    if($response->msg == "User already exists"){
+                                        $remark .= rand(1111,99999);
+                                        $response = addMarzbanUser($server_id, $remark, $volume, $days, $fid);
+                                    }
+                                }
+                            }else{
+                                $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid); 
+                                if(! $response->success){
+                                    if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+                                    elseif(strstr($response->msg, "Port already exists")) $port = rand(1111,65000);
+
+                                    $response = addUser($server_id, $uniqid, $protocol, $port, $expire_microdate, $remark, $volume, $netType, 'none', $rahgozar, $fid);
+                                }
+                            }
                         }else {
                             $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid); 
                             if(! $response->success){
+                                if(strstr($response->msg, "Duplicate email")) $remark .= RandomString();
+
                                 $response = addInboundAccount($server_id, $uniqid, $inbound_id, $expire_microdate, $remark, $volume, $limitip, null, $fid);
                             } 
                         }
@@ -188,9 +206,16 @@ while($payParam = $paysList->fetch_assoc()){
                             exit;
                         }
                     
-                        $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
-                        $token = RandomString(30);
-                        $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+                        if($serverType == "marzban"){
+                            $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
+                            $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
+                            $vraylink = $response->vray_links;
+                        }
+                        else{
+                            $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+                            $token = RandomString(30);
+                            $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+                        }
                 
                         foreach($vraylink as $vray_link){
                             $acc_text = "
@@ -336,12 +361,24 @@ while($payParam = $paysList->fetch_assoc()){
                     $name = $respd['title'];
                     $days = $respd['days'];
                     $volume = $respd['volume'];
-                
-                    if($inbound_id > 0)
-                        $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
-                    else
-                        $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
-                
+                    global $connection;
+    
+                    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+                    $stmt->bind_param("i", $server_id);
+                    $stmt->execute();
+                    $server_info = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
+                    $serverType = $server_info['type'];
+
+                    if($serverType == "marzban"){
+                        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'days'=>$days, 'volume' => $volume]);
+                    }else{
+                        if($inbound_id > 0)
+                            $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
+                        else
+                            $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+                    }
+                    
                 	if(is_null($response)){
                         $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` + ? WHERE `userid` = ?");
                         $stmt->bind_param("ii", $price, $user_id);
@@ -408,10 +445,22 @@ while($payParam = $paysList->fetch_assoc()){
                     $stmt->close();
                     $volume = $res['volume'];
                 
-                    if($inbound_id > 0)
-                        $response = editClientTraffic($server_id, $inbound_id, $uuid, 0, $volume);
-                    else
-                        $response = editInboundTraffic($server_id, $uuid, 0, $volume);
+                
+                    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+                    $stmt->bind_param("i", $server_id);
+                    $stmt->execute();
+                    $server_info = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
+                    $serverType = $server_info['type'];
+                    
+                    if($serverType == "marzban"){
+                        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'plus_day'=>$volume]);
+                    }else{
+                        if($inbound_id > 0)
+                            $response = editClientTraffic($server_id, $inbound_id, $uuid, 0, $volume);
+                        else
+                            $response = editInboundTraffic($server_id, $uuid, 0, $volume);
+                    }
                         
                     if($response->success){
                         $stmt = $connection->prepare("UPDATE `orders_list` SET `expire_date` = `expire_date` + ?, `notif` = 0 WHERE `uuid` = ?");
@@ -482,11 +531,21 @@ while($payParam = $paysList->fetch_assoc()){
                 
                     $acctxt = '';
                 
-                    
-                    if($inbound_id > 0)
-                        $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, 0);
-                    else
-                        $response = editInboundTraffic($server_id, $uuid, $volume, 0);
+                    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+                    $stmt->bind_param("i", $server_id);
+                    $stmt->execute();
+                    $server_info = $stmt->get_result()->fetch_assoc();
+                    $stmt->close();
+                    $serverType = $server_info['type'];
+
+                    if($serverType == "marzban"){
+                        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'plus_day'=>$volume]);
+                    }else{
+                        if($inbound_id > 0)
+                            $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, 0);
+                        else
+                            $response = editInboundTraffic($server_id, $uuid, $volume, 0);
+                    }
                     if($response->success){
                         $stmt = $connection->prepare("UPDATE `orders_list` SET `notif` = 0 WHERE `uuid` = ?");
                         $stmt->bind_param("s", $uuid);
@@ -549,14 +608,19 @@ while($payParam = $paysList->fetch_assoc()){
                     $configInfo = json_decode($payParam['description'],true);
                     $uuid = $configInfo['uuid'];
                     $remark = $configInfo['remark'];
-                
+                    $isMarzban = $configInfo['marzban'];
+                    
                     $uuid = $payParam['description'];
                     $inbound_id = $payParam['volume']; 
                     
-                    if($inbound_id > 0)
-                        $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
-                    else
-                        $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+                    if($isMarzban){
+                        $response = editMarzbanConfig($server_id, ['remark'=>$remark, 'days'=>$days, 'volume' => $volume]);
+                    }else{
+                        if($inbound_id > 0)
+                            $response = editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, "renew");
+                        else
+                            $response = editInboundTraffic($server_id, $uuid, $volume, $days, "renew");
+                    }
                     
                 	if(is_null($response)){
                 		sendMessage('🔻مشکل فنی در اتصال به سرور. لطفا به مدیریت اطلاع بدید',null,null,$user_id);
