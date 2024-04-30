@@ -27,6 +27,7 @@ echo -e "\e[92mThe server was successfully updated ...\033[0m\n"
 
 
 PKG=(
+    php8.1
     lamp-server^
     libapache2-mod-php 
     mysql-server 
