@@ -1297,23 +1297,25 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
         if($serverType == "marzban"){
             $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
             $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
-            $vraylink = $response->vray_links;
+            $vraylink = [$subLink];
+            $vray_link = json_encode($response->vray_links);
         }
         else{
             $token = RandomString(30);
             $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
             $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+            $vray_link = json_encode($vraylink);
         }
-        foreach($vraylink as $vray_link){
+        foreach($vraylink as $link){
             $acc_text = "
     
-        🔮 $remark \n " . ($botState['configLinkState'] != "off"?"<code>$vray_link</code>":"");
+        🔮 $remark \n " . ($botState['configLinkState'] != "off" && $serverType != "marzban"?"<code>$link</code>":"");
             if($botState['subLinkState'] == "on") $acc_text .= 
             " \n🌐 subscription : <code>$subLink</code>";
         
             $file = RandomString() .".png";
             
-            QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
+            QRcode::png($link, $file, $ecc, $pixel_Size, $frame_Size);
         	addBorderImage($file);
         	
         	
@@ -1330,7 +1332,6 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
         	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
             unlink($file);
         }
-        $vray_link = json_encode($vraylink);
         $stmt->bind_param("ssiiisssisiii", $uid, $token, $fid, $server_id, $inbound_id, $remark, $uniqid, $protocol, $expire_date, $vray_link, $price, $date, $rahgozar);
         $stmt->execute();
     }
@@ -1727,14 +1728,16 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
         if($serverType == "marzban"){
             $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
             $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
-            $vraylink = $response->vray_links;
+            $vraylink = [$subLink];
+            $vray_link = json_encode($response->vray_links);
         }else{
             $token = RandomString(30);
             $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
     
             $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+            $vray_link = json_encode($vraylink);
         }
-        foreach($vraylink as $vray_link){
+        foreach($vraylink as $link){
         $acc_text = "
         
 😍 سفارش جدید شما
@@ -1742,8 +1745,8 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز⁮⁮ ⁮⁮
-" . ($botState['configLinkState'] != "off"?"
-💝 config : <code>$vray_link</code>":"");
+" . ($botState['configLinkState'] != "off" && $serverType != "marzban"?"
+💝 config : <code>$link</code>":"");
 
 if($botState['subLinkState'] == "on") $acc_text .= "
 
@@ -1759,7 +1762,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
             $pixel_Size = 11;
             $frame_Size = 0;
             
-            QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
+            QRcode::png($link, $file, $ecc, $pixel_Size, $frame_Size);
         	addBorderImage($file);
         	
         	$backgroundImage = imagecreatefromjpeg("settings/QRCode.jpg");
@@ -1775,7 +1778,6 @@ if($botState['subLinkState'] == "on") $acc_text .= "
             unlink($file);
         }
         
-        $vray_link = json_encode($vraylink);
         $agentBought = $payInfo['agent_bought'];
         
         $stmt = $connection->prepare("INSERT INTO `orders_list` 
@@ -2960,26 +2962,28 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
     if($serverType == "marzban"){
         $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
         $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
-        $vraylink = $response->vray_links;
+        $vraylink = [$subLink];
+        $vray_link = json_encode($response->vray_links);
     }
     else{
         $token = RandomString(30);
         $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
     
         $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+        $vray_link = json_encode($vraylink);
     }
     delMessage();
     define('IMAGE_WIDTH',540);
     define('IMAGE_HEIGHT',540);
-    foreach($vraylink as $vray_link){
+    foreach($vraylink as $link){
         $acc_text = "
 😍 سفارش جدید شما
 📡 پروتکل: $protocol
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز⁮⁮ ⁮⁮
-" . ($botState['configLinkState'] != "off"?"
-💝 config : <code>$vray_link</code>":"");
+" . ($botState['configLinkState'] != "off" && $serverType != "marzban"?"
+💝 config : <code>$link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
 🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
@@ -2992,7 +2996,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
         $pixel_Size = 11;
         $frame_Size = 0;
         
-        QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
+        QRcode::png($link, $file, $ecc, $pixel_Size, $frame_Size);
     	addBorderImage($file);
     	
         $backgroundImage = imagecreatefromjpeg("settings/QRCode.jpg");
@@ -3023,7 +3027,6 @@ if($botState['subLinkState'] == "on") $acc_text .= "
          
         sendMessage("تبریک یکی از زیر مجموعه های شما خرید انجام داد شما مبلغ " . number_format($inviteAmount) . " تومان جایزه دریافت کردید",null,null,$inviterId);
     }
-    $vray_link = json_encode($vraylink);
 
 	$stmt = $connection->prepare("INSERT INTO `orders_list` 
 	    (`userid`, `token`, `transid`, `fileid`, `server_id`, `inbound_id`, `remark`, `uuid`, `protocol`, `expire_date`, `link`, `amount`, `status`, `date`, `notif`, `rahgozar`)
@@ -3364,13 +3367,15 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
     if($serverType == "marzban"){
         $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
         $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
-        $vraylink = $response->vray_links;
+        $vraylink = [$subLink];
+        $vray_link= json_encode($response->vray_links);
     }
     else{
         $token = RandomString(30);
         $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
     
         $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id);
+        $vray_link= json_encode($vraylink);
     }
     define('IMAGE_WIDTH',540);
     define('IMAGE_HEIGHT',540);
@@ -3382,7 +3387,7 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز⁮⁮ ⁮⁮
-" . ($botState['configLinkState'] != "off"?"
+" . ($botState['configLinkState'] != "off" && $serverType != "marzban"?"
 💝 config : <code>$vray_link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
@@ -3412,7 +3417,6 @@ if($botState['subLinkState'] == "on") $acc_text .= "
     }
     sendMessage('✅ کانفیگ و براش ارسال کردم', getMainKeys());
     
-    $vray_link= json_encode($vraylink);
 	$stmt = $connection->prepare("INSERT INTO `orders_list` 
 	    (`userid`, `token`, `transid`, `fileid`, `server_id`, `inbound_id`, `remark`, `uuid`, `protocol`, `expire_date`, `link`, `amount`, `status`, `date`, `notif`, `rahgozar`)
 	    VALUES (?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?,1, ?, 0, ?);");
@@ -3683,23 +3687,25 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
             if($serverType == "marzban"){
                 $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
                 $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
-                $vraylink = $response->vray_links;
+                $vraylink = [$subLink];
+                $vray_link= json_encode($response->vray_links);
             }
             else{
                 $token = RandomString(30);
                 $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+                $vray_link= json_encode($vraylink);
                 $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
             }
 
-            foreach($vraylink as $vray_link){
+            foreach($vraylink as $link){
                 $acc_text = "
 😍 سفارش جدید شما
 📡 پروتکل: $protocol
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز⁮⁮ ⁮⁮
-" . ($botState['configLinkState'] != "off"?"
-💝 config : <code>$vray_link</code>":"");
+" . ($botState['configLinkState'] != "off" && $serverType != "marzban"?"
+💝 config : <code>$link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
 🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
@@ -3711,7 +3717,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
                 $pixel_Size = 11;
                 $frame_Size = 0;
                 
-                QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
+                QRcode::png($link, $file, $ecc, $pixel_Size, $frame_Size);
             	addBorderImage($file);
             	
 	        	$backgroundImage = imagecreatefromjpeg("settings/QRCode.jpg");
@@ -3726,8 +3732,6 @@ if($botState['subLinkState'] == "on") $acc_text .= "
             	sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML", $uid);
                 unlink($file);
             }
-    
-            $vray_link= json_encode($vraylink);
             
         	$stmt = $connection->prepare("INSERT INTO `orders_list` 
         	    (`userid`, `token`, `transid`, `fileid`, `server_id`, `inbound_id`, `remark`, `uuid`, `protocol`, `expire_date`, `link`, `amount`, `status`, `date`, `notif`, `rahgozar`, `agent_bought`)
@@ -4212,23 +4216,25 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
             if($serverType == "marzban"){
                 $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
                 $subLink = $botState['subLinkState'] == "on"?$panelUrl .$response->sub_link:"";
-                $vraylink = $response->vray_links;
+                $vraylink = [$subLink];
+                $vray_link = json_encode($response->vray_links);
             }
             else{
                 $token = RandomString(30);
                 $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
         
                 $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+                $vray_link = json_encode($vraylink);
             }
-            foreach($vraylink as $vray_link){
+            foreach($vraylink as $link){
                 $acc_text = "
 😍 سفارش جدید شما
 📡 پروتکل: $protocol
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز
-" . ($botState['configLinkState'] != "off"?"
-💝 config : <code>$vray_link</code>":"");
+" . ($botState['configLinkState'] != "off" && $serverType != "marzban"?"
+💝 config : <code>$link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
 🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
@@ -4240,7 +4246,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
                 $pixel_Size = 11;
                 $frame_Size = 0;
             
-                QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
+                QRcode::png($link, $file, $ecc, $pixel_Size, $frame_Size);
             	addBorderImage($file);
             	
             	
@@ -4258,7 +4264,6 @@ if($botState['subLinkState'] == "on") $acc_text .= "
             }
             $agent_bought = $payInfo['agent_bought'];
     
-            $vray_link = json_encode($vraylink);
         	$stmt = $connection->prepare("INSERT INTO `orders_list` 
         	    (`userid`, `token`, `transid`, `fileid`, `server_id`, `inbound_id`, `remark`, `uuid`, `protocol`, `expire_date`, `link`, `amount`, `status`, `date`, `notif`, `rahgozar`, `agent_bought`)
         	    VALUES (?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?,1, ?, 0, ?, ?);");
@@ -5677,23 +5682,25 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
     if($serverType == "marzban"){
         $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
         $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
-        $vraylink = $response->vray_links;
+        $vraylink = [$subLink];
+        $vray_link = json_encode($response->vray_links);
     }else{
         $token = RandomString(30);
         $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
         $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
+        $vray_link = json_encode($vraylink);
     }
     define('IMAGE_WIDTH',540);
     define('IMAGE_HEIGHT',540);
-    foreach($vraylink as $vray_link){
+    foreach($vraylink as $link){
         $acc_text = "
 😍 سفارش جدید شما
 📡 پروتکل: $protocol
 🔮 نام سرویس: $remark
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز
-" . ($botState['configLinkState'] != "off"?"
-💝 config : <code>$vray_link</code>":"");
+" . ($botState['configLinkState'] != "off" && $serverType != "marzban"?"
+💝 config : <code>$link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
 🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
@@ -5704,7 +5711,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
         $ecc = 'L'; 
         $pixel_Size = 11;
         $frame_Size = 0;
-        QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_size);
+        QRcode::png($link, $file, $ecc, $pixel_Size, $frame_size);
     	addBorderImage($file);
     	
     	
@@ -5720,7 +5727,6 @@ if($botState['subLinkState'] == "on") $acc_text .= "
         sendPhoto($botUrl . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),"HTML");
         unlink($file);
     }
-    $vray_link = json_encode($vraylink);
 	$stmt = $connection->prepare("INSERT INTO `orders_list` 
 	    (`userid`, `token`, `transid`, `fileid`, `server_id`, `inbound_id`, `remark`, `uuid`, `protocol`, `expire_date`, `link`, `amount`, `status`, `date`, `notif`, `rahgozar`, `agent_bought`)
 	    VALUES (?, ?, '', ?, ?, ?, ?, ?, ?, ?, ?, ?,1, ?, 0, ?, ?)");
@@ -5753,6 +5759,67 @@ if(preg_match('/^showMainButtonAns(\d+)/',$data,$match)){
     editText($message_id,$info['value'],json_encode(['inline_keyboard'=>[
         [['text'=>$buttonValues['back_button'],'callback_data'=>"mainMenu"]]
         ]]));
+}
+if(preg_match('/^marzbanHostSettings(\d+)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+    $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `id` = ?");
+    $stmt->bind_param('i', $match[1]);
+    $stmt->execute();
+    $serverId = $stmt->get_result()->fetch_assoc()['server_id'];
+    $stmt->close();
+    
+    $hosts = getMarzbanHosts($serverId)->inbounds;
+    $networkType = array();
+    foreach($hosts as $key => $inbound){
+        $networkType[] = [['text'=>$inbound->tag, 'callback_data'=>"selectHost{$match[1]}_{$inbound->protocol}_{$inbound->tag}"]];
+    }
+    $networkType[] = [['text'=>$buttonValues['cancel'], 'callback_data'=>"planDetails" . $match[1]]];
+    $networkType = json_encode(['inline_keyboard'=>$networkType]);
+    editText($message_id, "لطفا نوع شبکه های این پلن را انتخاب کنید",$networkType);
+}
+if(preg_match('/^selectHost(?<planId>\d+)_(?<protocol>.+)_(?<tag>.*)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+    $saveBtn = "ذخیره ✅";
+    unset($markup[count($markup)-1]);
+    if($markup[count($markup)-1][0]['text'] == $saveBtn) unset($markup[count($markup)-1]);
+    foreach($markup as $key => $keyboard){
+        if($keyboard[0]['callback_data'] == $data) $markup[$key][0]['text'] = $keyboard['0']['text'] == $match['tag'] . " ✅" ? $match['tag']:$match['tag'] . " ✅";
+    }
+        
+    if(strstr(json_encode($markup,JSON_UNESCAPED_UNICODE), "✅") && !strstr(json_encode($markup,JSON_UNESCAPED_UNICODE), $saveBtn)){
+        $markup[] = [['text'=>$saveBtn,'callback_data'=>"saveServerHost" . $match['planId']]];
+    }
+    $markup[] = [['text'=>$buttonValues['cancel'], 'callback_data'=>"planDetails" . $match['planId']]];
+    $markup = json_encode(['inline_keyboard'=>array_values($markup)]);
+    editKeys($markup);
+}
+if(preg_match('/^saveServerHost(\d+)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+    $inbounds = array();
+    $proxies = array();
+    unset($markup[count($markup)-1]);
+    unset($markup[count($markup)-1]);
+    
+    foreach($markup as $key=>$value){
+        $tag = trim(str_replace("✅", "", $value[0]['text'], $state));
+        if($state > 0){
+            preg_match('/^selectHost(?<serverId>\d+)_(?<protocol>.+)_(?<tag>.*)/',$value[0]['callback_data'],$info);
+            $inbounds[$info['protocol']][] = $tag;
+            $proxies[$info['protocol']] = array();
+
+            if($info['protocol'] == "vless"){
+                $proxies["vless"] = ["flow" => ""];
+            }
+            elseif($info['protocol'] == "shadowsocks"){
+                $proxies["shadowsocks"] = ['method' => "chacha20-ietf-poly1305"];
+            }
+        }
+    }
+    $info = json_encode(['inbounds'=>$inbounds, 'proxies'=>$proxies]);
+    $stmt = $connection->prepare("UPDATE `server_plans` SET `custom_sni`=? WHERE `id`=?");
+    $stmt->bind_param("si", $info, $match[1]);
+    $stmt->execute();
+    $stmt->close();
+    
+    editText($message_id, "با موفقیت ذخیره شد",getPlanDetailsKeys($match[1]));
+    setUser();
 }
 if($data=="rejectedAgentList" && ($from_id == $admin || $userInfo['isAdmin'] == true)){
     $keys = getRejectedAgentList();
@@ -6578,16 +6645,20 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan|addNewMarzbanPlan)/',$userInfo['s
     if($step==4 and $text!=$buttonValues['cancel']){
         
         if($userInfo['step'] == "addNewMarzbanPlan"){
-            $networkTypeKeys = json_encode(['inline_keyboard'=>[
-                [['text'=>"VMess TCP", 'callback_data'=>'planNetworkTypeVMess TCP']],
-                [['text'=>"VMess Websocket", 'callback_data'=>'planNetworkTypeVMess Websocket']],
-                [['text'=>"VLESS TCP REALITY", 'callback_data'=>'planNetworkTypeVLESS TCP REALITY']],
-                [['text'=>"VLESS GRPC REALITY", 'callback_data'=>'planNetworkTypeVLESS GRPC REALITY']],
-                [['text'=>"Trojan Websocket TLS", 'callback_data'=>'planNetworkTypeTrojan Websocket TLS']],
-                [['text'=>"Shadowsocks TCP", 'callback_data'=>'planNetworkTypeShadowsocks TCP']]
-                ]]);
+            $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `active` = 0 AND `step` = 4");
+            $stmt->execute();
+            $serverId = $stmt->get_result()->fetch_assoc()['server_id'];
+            $stmt->close();
+        
+            $hosts = getMarzbanHosts($serverId)->inbounds;
+            $networkType = array();
+            foreach($hosts as $key => $inbound){
+                $networkType[] = [['text'=>$inbound->tag, 'callback_data'=>"planNetworkType{$inbound->protocol}_{$inbound->tag}"]];
+            }
+            $networkType = json_encode(['inline_keyboard'=>$networkType]);
+
             $stmt = $connection->prepare("UPDATE `server_plans` SET `descr`=?, `step` = 5 WHERE `step` = 4");
-            sendMessage("لطفا نوع شبکه های این پلن را انتخاب کنید",$networkTypeKeys);
+            sendMessage("لطفا نوع شبکه های این پلن را انتخاب کنید",$networkType);
         }
         else{
             $stmt = $connection->prepare("UPDATE `server_plans` SET `descr`=?, `active`=1,`step`=10 WHERE `step`=4");
@@ -6602,20 +6673,18 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan|addNewMarzbanPlan)/',$userInfo['s
         $stmt->close();
 
     } 
-    elseif($step == 5 and $text != $buttonValues['cancel'] && preg_match('/^planNetworkType(.*)/',$data,$match)){
+    elseif($step == 5 and $text != $buttonValues['cancel'] && preg_match('/^planNetworkType(?<protocol>.+)_(?<tag>.*)/',$data,$match)){
         $saveBtn = "ذخیره ✅";
         if($markup[count($markup)-1][0]['text'] == $saveBtn) unset($markup[count($markup)-1]);
 
-        if(strstr(json_encode($markup, JSON_UNESCAPED_UNICODE), '"' . $match[1] . ' ✅"')){
-            $markup = str_replace('"' . $match[1] . ' ✅"','"' . $match[1] . '"',json_encode(['inline_keyboard'=>$markup], JSON_UNESCAPED_UNICODE));
+        foreach($markup as $key => $keyboard){
+            if($keyboard[0]['callback_data'] == $data) $markup[$key][0]['text'] = $keyboard['0']['text'] == $match['tag'] . " ✅" ? $match['tag']:$match['tag'] . " ✅";
         }
-        else $markup = str_replace('"' . $match[1] . '"','"' . $match[1] . ' ✅"',json_encode(['inline_keyboard'=>$markup], JSON_UNESCAPED_UNICODE));
-        
-        if(strstr($markup, "✅") && !strstr($markup, $saveBtn)){
-            $markup = json_decode($markup, true);
-            $markup['inline_keyboard'][] = [['text'=>$saveBtn,'callback_data'=>"savePlanNetworkType"]];
-            $markup = json_encode($markup);
+
+        if(strstr(json_encode($markup,JSON_UNESCAPED_UNICODE), "✅") && !strstr(json_encode($markup,JSON_UNESCAPED_UNICODE), $saveBtn)){
+            $markup[] = [['text'=>$saveBtn,'callback_data'=>"savePlanNetworkType"]];
         }
+        $markup = json_encode(['inline_keyboard'=>array_values($markup)]);
         
         editKeys($markup);
     }
@@ -6623,28 +6692,24 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan|addNewMarzbanPlan)/',$userInfo['s
         delMessage();
         $inbounds = array();
         $proxies = array();
-        
+        unset($markup[count($markup)-1]);
+
         foreach($markup as $key=>$value){
-            $netType = trim(str_replace("✅", "", $value[0]['text'], $state));
+            $tag = trim(str_replace("✅", "", $value[0]['text'], $state));
             if($state > 0){
-                if(strstr($netType, "VMess")){
-                    $inbounds["vmess"][] = $netType;
-                    $proxies["vmess"] = array();
-                }
-                elseif(strstr($netType, "VLESS")){
-                    $inbounds["vless"][] = $netType;
+                preg_match('/^selectHost(?<protocol>.+)_(?<tag>.*)/',$value[0]['callback_data'],$info);
+                $inbounds[$info['protocol']][] = $tag;
+                $proxies[$info['protocol']] = array();
+    
+                if($info['protocol'] == "vless"){
                     $proxies["vless"] = ["flow" => ""];
                 }
-                elseif(strstr($netType, "Trojan")){
-                    $inbounds["trojan"][] = $netType;
-                    $proxies["trojan"] = array();
-                }
-                elseif(strstr($netType, "Shadowsocks")){
-                    $inbounds["shadowsocks"][] = $netType;
+                elseif($info['protocol'] == "shadowsocks"){
                     $proxies["shadowsocks"] = ['method' => "chacha20-ietf-poly1305"];
                 }
             }
         }
+        
         $info = json_encode(['inbounds'=>$inbounds, 'proxies'=>$proxies]);
         $stmt = $connection->prepare("UPDATE `server_plans` SET `custom_sni`=?, `active`=1,`step`=10 WHERE `step`=5");
         $stmt->bind_param("s", $info);
