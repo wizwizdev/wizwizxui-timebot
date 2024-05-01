@@ -660,7 +660,8 @@ function getServerConfigKeys($serverId,$offset = 0){
             ['text'=>$ucount,'callback_data'=>"editServerMax$id"],
             ['text'=>"ظرفیت سرور",'callback_data'=>"wizwizch"]
             ]
-            ],($serverConfig['type'] != "marzban"?[
+            ],
+            ($serverConfig['type'] != "marzban"?[
         [
             ['text'=>$portType,'callback_data'=>"changePortType$id"],
             ['text'=>"نوعیت پورت",'callback_data'=>"wizwizch"]
@@ -1360,6 +1361,7 @@ function getPlanDetailsKeys($planId){
             [['text'=>"✏️ ویرایش توضیحات",'callback_data'=>"wizwizplaneditdes$id"]],
             [['text'=>number_format($price) . " تومان",'callback_data'=>"wizwizplanrial$id"],['text'=>"💰 قیمت پلن",'callback_data'=>"wizwizch"]],
             [['text'=>"♻️ دریافت لیست اکانت ها",'callback_data'=>"wizwizplanacclist$id"]],
+            ($server_info['type'] == "marzban"?[['text'=>"انتخاب Host",'callback_data'=>"marzbanHostSettings" . $id]]:[]),
             [['text'=>"✂️ حذف",'callback_data'=>"wizwizplandelete$id"]],
             [['text' => $buttonValues['back_button'], 'callback_data' =>"plansList$srvid"]]
             ];
@@ -5201,6 +5203,36 @@ function getMarzbanUser($server_id, $remark, $token = null){
     if(isset($token->detail)){return (object) ['success'=>false, 'msg'=>$token->detail];}
     
     $panel_url .= '/api/user/' . urlencode($remark);
+
+    $curl = curl_init();
+    curl_setopt($curl, CURLOPT_URL, $panel_url);
+    curl_setopt($curl, CURLOPT_HTTPGET, true);
+    curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($curl, CURLOPT_HTTPHEADER, array(
+        'Accept: application/json',
+        'Authorization: Bearer ' . $token->access_token
+    ));
+
+    $response = json_decode(curl_exec($curl));
+    
+    curl_close($curl);
+    return $response;
+}
+function getMarzbanHosts($server_id){
+    global $connection;
+    
+    $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
+    $stmt->bind_param("i", $server_id);
+    $stmt->execute();
+    $server_info = $stmt->get_result()->fetch_assoc();
+    $stmt->close();
+
+    $panel_url = $server_info['panel_url'];
+
+    $token = getMarzbanToken($server_id);
+    if(isset($token->detail)){return (object) ['success'=>false, 'msg'=>$token->detail];}
+
+    $panel_url .= '/api/core/config';
 
     $curl = curl_init();
     curl_setopt($curl, CURLOPT_URL, $panel_url);
