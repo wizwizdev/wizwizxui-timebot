@@ -391,15 +391,17 @@ if($payType == "BUY_SUB"){
         if($serverType == "marzban"){
             $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
             $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
-            $vraylink = $response->vray_links;
+            $vraylink = [$subLink];
+            $vray_link = json_encode($response->vray_links);
         }
         else{
             $vraylink = getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netType, $inbound_id, $rahgozar, $customPath, $customPort, $customSni);
             $token = RandomString(30);
             $subLink = $botState['subLinkState']=="on"?$botUrl . "settings/subLink.php?token=" . $token:"";
+            $vray_link = json_encode($vraylink);
         }
 
-        foreach($vraylink as $vray_link){
+        foreach($vraylink as $link){
             $acc_text = "
 😍 سفارش جدید شما
 📡 پروتکل: $protocol
@@ -407,9 +409,9 @@ if($payType == "BUY_SUB"){
 🔋حجم سرویس: $volume گیگ
 ⏰ مدت سرویس: $days روز
 ".
-($botState['configLinkState'] != "off"?
+($botState['configLinkState'] != "off" && $serverType != "marzban"?
 "
-💝 config : <code>$vray_link</code>":"").
+💝 config : <code>$link</code>":"").
 ($botState['subLinkState']=="on"?
 "
 
@@ -425,7 +427,7 @@ if($payType == "BUY_SUB"){
             $pixel_Size = 11;
             $frame_Size = 0;
             
-            QRcode::png($vray_link, $file, $ecc, $pixel_Size, $frame_Size);
+            QRcode::png($link, $file, $ecc, $pixel_Size, $frame_Size);
         	addBorderImage($file);
         	
 	        $backgroundImage = imagecreatefromjpeg("../settings/QRCode.jpg");
@@ -440,7 +442,6 @@ if($payType == "BUY_SUB"){
         	sendPhoto($botUrl . "pay/" . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>"صفحه اصلی 🏘",'callback_data'=>"mainMenu"]]]]),"HTML", $user_id);
             unlink($file);
         }
-        $vray_link = json_encode($vraylink);
         $date = time();
         
     	$stmt = $connection->prepare("INSERT INTO `orders_list` 
