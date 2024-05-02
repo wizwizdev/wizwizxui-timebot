@@ -6413,12 +6413,12 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan|addNewMarzbanPlan)/',$userInfo['s
         
         
         $marzbanList = array_column($info, 0); 
-        if(count($marzbanList) > 0) $condition  = " AND `id` " .($userInfo['step'] == "addNewMarzbanPlan"?"IN":"NOT IN") . " (" . (str_repeat('?,', count($marzbanList) - 1) . '?') . ")";
+        if(count($marzbanList) > 0) $condition  = " AND `id` " .($userInfo['step'] == "addNewMarzbanPlan"?"IN":"NOT IN") . " (" . implode(", ", $marzbanList) . ")";
         else $condition = "";
 
+
         $stmt = $connection->prepare("SELECT * FROM `server_info` WHERE `active`=1 $condition");
-        if(!empty($condition)) $stmt->execute($marzbanList);
-        else $stmt->execute();
+        $stmt->execute();
         
         $srvs = $stmt->get_result();
         $stmt->close();
