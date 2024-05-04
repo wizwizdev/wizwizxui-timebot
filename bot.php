@@ -5770,13 +5770,13 @@ if(preg_match('/^marzbanHostSettings(\d+)/',$data,$match) && ($from_id == $admin
     $hosts = getMarzbanHosts($serverId)->inbounds;
     $networkType = array();
     foreach($hosts as $key => $inbound){
-        $networkType[] = [['text'=>$inbound->tag, 'callback_data'=>"selectHost{$match[1]}_{$inbound->protocol}_{$inbound->tag}"]];
+        $networkType[] = [['text'=>$inbound->tag, 'callback_data'=>"selectHost{$match[1]}*_*{$inbound->protocol}*_*{$inbound->tag}"]];
     }
     $networkType[] = [['text'=>$buttonValues['cancel'], 'callback_data'=>"planDetails" . $match[1]]];
     $networkType = json_encode(['inline_keyboard'=>$networkType]);
     editText($message_id, "لطفا نوع شبکه های این پلن را انتخاب کنید",$networkType);
 }
-if(preg_match('/^selectHost(?<planId>\d+)_(?<protocol>.+)_(?<tag>.*)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
+if(preg_match('/^selectHost(?<planId>\d+)\*_\*(?<protocol>.+)\*_\*(?<tag>.*)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true)){
     $saveBtn = "ذخیره ✅";
     unset($markup[count($markup)-1]);
     if($markup[count($markup)-1][0]['text'] == $saveBtn) unset($markup[count($markup)-1]);
@@ -5800,7 +5800,7 @@ if(preg_match('/^saveServerHost(\d+)/',$data,$match) && ($from_id == $admin || $
     foreach($markup as $key=>$value){
         $tag = trim(str_replace("✅", "", $value[0]['text'], $state));
         if($state > 0){
-            preg_match('/^selectHost(?<serverId>\d+)_(?<protocol>.+)_(?<tag>.*)/',$value[0]['callback_data'],$info);
+            preg_match('/^selectHost(?<serverId>\d+)\*_\*(?<protocol>.+)\*_\*(?<tag>.*)/',$value[0]['callback_data'],$info);
             $inbounds[$info['protocol']][] = $tag;
             $proxies[$info['protocol']] = array();
 
@@ -6653,7 +6653,7 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan|addNewMarzbanPlan)/',$userInfo['s
             $hosts = getMarzbanHosts($serverId)->inbounds;
             $networkType = array();
             foreach($hosts as $key => $inbound){
-                $networkType[] = [['text'=>$inbound->tag, 'callback_data'=>"planNetworkType{$inbound->protocol}_{$inbound->tag}"]];
+                $networkType[] = [['text'=>$inbound->tag, 'callback_data'=>"planNetworkType{$inbound->protocol}*_*{$inbound->tag}"]];
             }
             $networkType = json_encode(['inline_keyboard'=>$networkType]);
 
@@ -6673,7 +6673,7 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan|addNewMarzbanPlan)/',$userInfo['s
         $stmt->close();
 
     } 
-    elseif($step == 5 and $text != $buttonValues['cancel'] && preg_match('/^planNetworkType(?<protocol>.+)_(?<tag>.*)/',$data,$match)){
+    elseif($step == 5 and $text != $buttonValues['cancel'] && preg_match('/^planNetworkType(?<protocol>.+)\*_\*(?<tag>.*)/',$data,$match)){
         $saveBtn = "ذخیره ✅";
         if($markup[count($markup)-1][0]['text'] == $saveBtn) unset($markup[count($markup)-1]);
 
@@ -6697,7 +6697,7 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan|addNewMarzbanPlan)/',$userInfo['s
         foreach($markup as $key=>$value){
             $tag = trim(str_replace("✅", "", $value[0]['text'], $state));
             if($state > 0){
-                preg_match('/^selectHost(?<protocol>.+)_(?<tag>.*)/',$value[0]['callback_data'],$info);
+                preg_match('/^planNetworkType(?<protocol>.+)\*_\*(?<tag>.*)/',$value[0]['callback_data'],$info);
                 $inbounds[$info['protocol']][] = $tag;
                 $proxies[$info['protocol']] = array();
     
