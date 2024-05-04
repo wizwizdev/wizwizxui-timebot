@@ -5174,7 +5174,8 @@ function getMarzbanUserInfo($server_id, $remark){
     $curl = curl_init();
     for($i = 0; $i <= 10; $i++){
         $info = getMarzbanUser($server_id, $remark);
-        
+		$subLink = "/sub/" . (explode("/sub/", $info->subscription_url)[1]);
+		$info->subscription_url = $subLink;
         curl_setopt($curl, CURLOPT_URL, $panel_url . $info->subscription_url);
         curl_setopt($curl, CURLOPT_CONNECTTIMEOUT, 3);
         curl_setopt($curl, CURLOPT_TIMEOUT, 3); 
@@ -5183,6 +5184,7 @@ function getMarzbanUserInfo($server_id, $remark){
             $configInfo = $info;
             break;
         }
+		if($i == 10) $configInfo = $info;
     }
     curl_close($curl);
 
@@ -5294,7 +5296,8 @@ function addMarzbanUser($server_id, $remark, $volume, $days, $plan_id){
     $response = json_decode(curl_exec($curl));
     curl_close($curl);
     if(isset($response->detail) || !isset($response->links)){
-        return (object) ['success'=>false, 'msg' => $response->detail];
+		$detail = $response->detail;
+        return (object) ['success'=>false, 'msg' => is_object($detail)?implode("-", (array) $detail):$detail];
     }
     $userInfo = getMarzbanUserInfo($server_id, $remark);
 
@@ -5364,7 +5367,8 @@ function editMarzbanConfig($server_id,$info){
     $response = curl_exec($curl);
     curl_close($curl);
     if(isset($response->detail)){
-        return (object) ['success'=>false, 'msg' => $response->detail];
+		$detail = $response->detail;
+        return (object) ['success'=>false, 'msg' => is_object($detail)?implode("-", (array) $detail):$detail];
     }
     return (object) ['success'=>true];
 }
@@ -5398,7 +5402,8 @@ function resetMarzbanTraffic($server_id, $remark, $token){
     $response = curl_exec($curl);
     curl_close($curl);
     if(isset($response->detail)){
-        return (object) ['success'=>false, 'msg' => $response->detail];
+		$detail = $response->detail;
+        return (object) ['success'=>false, 'msg' => is_object($detail)?implode("-", (array) $detail):$detail];
     }
     return (object) ['success'=>true];
 }
@@ -5427,7 +5432,8 @@ function renewMarzbanUUID($server_id,$remark){
     $response = json_decode(curl_exec($curl));
     curl_close($curl);
     if(isset($response->detail)){
-        return (object) ['success'=>false, 'msg' => $response->detail];
+		$detail = $response->detail;
+        return (object) ['success'=>false, 'msg' => is_object($detail)?implode("-", (array) $detail):$detail];
     }
     $response = getMarzbanUserInfo($server_id, $remark);
     return $response;
@@ -5465,7 +5471,8 @@ function deleteMarzban($server_id,$remark){
     curl_close($curl);
     
     if(isset($response->detail)){
-        return (object) ['success'=>false, 'msg' => $response->detail];
+		$detail = $response->detail;
+        return (object) ['success'=>false, 'msg' => is_object($detail)?implode("-", (array) $detail):$detail];
     }
     
     return (object) ['success'=>true];
@@ -5517,7 +5524,8 @@ function changeMarzbanState($server_id,$remark){
     curl_close($curl);
 
     if(isset($response->detail)){
-        return (object) ['success'=>false, 'msg' => $response->detail];
+		$detail = $response->detail;
+        return (object) ['success'=>false, 'msg' => is_object($detail)?implode("-", (array) $detail):$detail];
     }
     return (object) ['success'=>true];
 }
