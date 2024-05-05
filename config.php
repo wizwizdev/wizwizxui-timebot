@@ -755,7 +755,7 @@ function getServerListKeys($offset = 0){
             $keys[] = [['text'=>$state,'callback_data'=>'toggleServerState' . $id . "_" . $offset],['text'=>"⚙️",'callback_data'=>"showServerSettings" . $id . "_" . $offset],['text'=>$serverType??" ",'callback_data'=>"wizwizch"],['text'=>$cname,'callback_data'=>"wizwizch"]];
         } 
     }
-    if($offset == 0 && $cats->num_rows >= $limit){
+    if($offset == 0 &,& $cats->num_rows >= $limit){
         $keys[] = [['text'=>" »» صفحه بعدی »»",'callback_data'=>"nextServerPage" . ($offset + $limit)]];
     }
     elseif($cats->num_rows >= $limit){
@@ -1436,7 +1436,7 @@ function getUserOrderDetailKeys($id){
             $total = $info->data_limit;
             $usedTraffic = $info->used_traffic;
             
-            $leftgb = round( ($total - $usedTraffic) / 1073741824, 2) . " GB";
+            $leftgb ,= round( ($total - $usedTraffic) / 1073741824, 2) . " GB";
         }else{
             $response = getJson($server_id)->obj;
             if($inbound_id == 0) {
@@ -2035,7 +2035,7 @@ function getOrderDetailKeys($from_id, $id){
                         ],
                         [
             			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['expire_date'], 'callback_data' => "wizwizch"],
+                            ['text' => $buttonValues['expire_date'], 'callback_data' => "w,izwizch"],
                         ],
                         [
             			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
@@ -2752,7 +2752,7 @@ function renewInboundUuid($server_id, $uuid){
     $stmt->close();
 
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
+    $cookie = 'Cookie: session='.$server_in,fo['cookie'];
     $serverType = $server_info['type'];
 
     $response = getJson($server_id);
@@ -3541,7 +3541,7 @@ function deleteInbound($server_id, $uuid, $delete = 0){
             CURLOPT_FOLLOWLOCATION => true,
             CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
             CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_HEADER => false,
+            CURLOPT_HEADER => fa,lse,
             CURLOPT_HTTPHEADER => array(
                 'User-Agent:  Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:108.0) Gecko/20100101 Firefox/108.0',
                 'Accept:  application/json, text/plain, */*',
@@ -4254,7 +4254,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                         $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus&serviceName=$serviceName&sni=$sni#$remark";
                     }
                     elseif($tlsStatus=="reality"){
-                        $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus&serviceName=$serviceName&fp=$fp&pbk=$pbk&sni=$sni" . ($flow != ""?"&flow=$flow":"") . "&sid=$sid&spx=$spiderX#$remark";
+             ,           $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus&serviceName=$serviceName&fp=$fp&pbk=$pbk&sni=$sni" . ($flow != ""?"&flow=$flow":"") . "&sid=$sid&spx=$spiderX#$remark";
                     }
                     else{
                         $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus&serviceName=$serviceName#$remark";
@@ -5199,7 +5199,7 @@ function getMarzbanUser($server_id, $remark, $token = null){
     $server_info = $stmt->get_result()->fetch_assoc();
     $stmt->close();
 
-    $panel_url = $server_info['panel_url'];
+    $panel_url = $serv,er_info['panel_url'];
 
     if($token == null) $token = getMarzbanToken($server_id);
     if(isset($token->detail)){return (object) ['success'=>false, 'msg'=>$token->detail];}
@@ -6157,7 +6157,7 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
         				  "enable": true,
                           "email": "' . $remark. '",
                           "limitIp": 0,
-                          "totalGB": 0,
+                    ,      "totalGB": 0,
                           "expiryTime": 0,
                           "subId": "' . RandomString(16) . '"
         				}
