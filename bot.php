@@ -714,7 +714,7 @@ if(preg_match('/^tranfserUserAmount(\d+)/',$userInfo['step'],$match) && $text !=
             if($userInfo['wallet'] >= $text){
                 $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` + ? WHERE `userid` = ?");
                 $stmt->bind_param("ii", $text, $match[1]);
-                $stmt->execut,e();
+                $stmt->execute();
                 $stmt->close();
                 
                 $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` - ? WHERE `userid` = ?");
@@ -1450,7 +1450,7 @@ if(preg_match('/^payWithTronWallet(.*)/',$userInfo['step'], $match) && $text != 
     }
 
 }
-if(preg_m,atch('/payWithWeSwap(.*)/',$data,$match)) {
+if(preg_match('/payWithWeSwap(.*)/',$data,$match)) {
     $stmt = $connection->prepare("SELECT * FROM `pays` WHERE `hash_id` = ?");
     $stmt->bind_param("s", $match[1]);
     $stmt->execute();
@@ -2275,7 +2275,7 @@ if(preg_match('/selectServer(\d+)/',$data, $match) && ($botState['sellState']=="
         
     $stmt = $connection->prepare("SELECT * FROM `server_categories` WHERE `parent`=0 order by `id` asc");
     $stmt->execute();
-    $respd = $stmt->,get_result();
+    $respd = $stmt->get_result();
     $stmt->close();
     if($respd->num_rows == 0){
         alert($mainValues['category_not_avilable']);
@@ -2961,7 +2961,7 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
     
     if($serverType == "marzban"){
         $uniqid = $token = str_replace("/sub/", "", $response->sub_link);
-        $subLink = $botS,tate['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
+        $subLink = $botState['subLinkState'] == "on"?$panelUrl . $response->sub_link:"";
         $vraylink = [$subLink];
         $vray_link = json_encode($response->vray_links);
     }
@@ -3755,7 +3755,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
             $stmt->execute();
             $stmt->close();
              
-            sendMessage("تبریک یکی از زی�,� مجموعه های شما خرید انجام داد شما مبلغ " . number_format($inviteAmount) . " تومان جایزه دریافت کردید",null,null,$inviterId);
+            sendMessage("تبریک یکی از زیر مجموعه های شما خرید انجام داد شما مبلغ " . number_format($inviteAmount) . " تومان جایزه دریافت کردید",null,null,$inviterId);
         }
         if($inbound_id == 0) {
             $stmt = $connection->prepare("UPDATE `server_info` SET `ucount` = `ucount` - ? WHERE `id`=?");
@@ -4485,7 +4485,7 @@ if(preg_match('/^deleteDayPlan(\d+)/',$data,$match) and ($from_id == $admin || $
     $msg = ' 📍 برای دیدن جزییات پلن زمانی روی آن بزنید👇';
     
     editText($message_id,$msg,json_encode([
-            'inline_keyboard' => $keyboa,rd
+            'inline_keyboard' => $keyboard
         ]));
 
     exit;
@@ -5219,7 +5219,7 @@ if(($data=="openTickets" or $data=="newTickets" or $data == "allTickets")  and  
 			if($current>=$cont){
 			    break;
 			}
-       , }
+        }
         
 		if($allList > $cont){
 		    $keys = json_encode(['inline_keyboard'=>[
@@ -5948,7 +5948,7 @@ if($userInfo['step'] == "showAccount" and $text != $buttonValues['cancel']){
                         }
                         $clientsSettings = json_decode($list[$keys]->settings,true)['clients'];
                         if(!is_array($clientsSettings)){
-                            sendMessage("با عرض پوزش، متأس�,�انه مشکلی رخ داده است، لطفا مجدد اقدام کنید");
+                            sendMessage("با عرض پوزش، متأسفانه مشکلی رخ داده است، لطفا مجدد اقدام کنید");
                             exit();
                         }
                         $settingsId = array_column($clientsSettings,'id');
@@ -6617,7 +6617,7 @@ if(preg_match('/(addNewRahgozarPlan|addNewPlan|addNewMarzbanPlan)/',$userInfo['s
             $sql = ("UPDATE `server_plans` SET `volume`=?,`step`=55 WHERE `active`=0");
             $msg = "🔉 | لطفا نوع شبکه این پلن را در انتخاب کنید  (ws | tcp | grpc) :";
         }elseif($userInfo['step'] == "addNewRahgozarPlan" || $userInfo['step'] == "addNewMarzbanPlan"){
-            $sql = ("UP,DATE `server_plans` SET `volume`=?, `type`='ws', `step`=4 WHERE `active`=0");
+            $sql = ("UPDATE `server_plans` SET `volume`=?, `type`='ws', `step`=4 WHERE `active`=0");
             $msg = '🔻یه توضیح برای پلن مورد نظرت بنویس:';
         }
         $stmt = $connection->prepare($sql);
@@ -7368,7 +7368,7 @@ if(preg_match('/updateConfigConnectionLink(\d+)/', $data,$match)){
             }
         }
     
-        if,($botState['updateConnectionState'] == "robot"){
+        if($botState['updateConnectionState'] == "robot"){
             updateConfig($server_id, $iId, $protocol, $netType, $security, $rahgozar);
         }
         $vraylink = getConnectionLink($server_id, $uuid, $protocol, $remark, $port, $netType, $inboundId, $rahgozar, $customPath, $customPort, $customSni);
@@ -8142,7 +8142,7 @@ if(preg_match('/switchServer(.+)_(.+)/',$data,$match)){
     $remark = $order['remark'];
     $uuid = $order['uuid']??"0";
     $fid = $order['fileid'];
-    $protocol = $,order['protocol'];
+    $protocol = $order['protocol'];
 	$link = json_decode($order['link'])[0];
 	
     $stmt = $connection->prepare("SELECT * FROM `server_plans` WHERE `id`=?");
@@ -8934,7 +8934,7 @@ if(preg_match('/increaseVolumePlan(?<orderId>.+)_(?<volumeId>.+)/',$data,$match)
     
     if($botState['cartToCartState'] == "on") $keyboard[] = [['text' => $buttonValues['cart_to_cart'] . $planprice,  'callback_data' => "payIncreaseWithCartToCart$hash_id"]];
     if($botState['nowPaymentOther'] == "on") $keyboard[] = [['text' => $buttonValues['now_payment_gateway'],  'url' => $botUrl . "pay/?nowpayment&hash_id=" . $hash_id]];
-    if($botState['zarinpal'] == "on") $keyboard[] = [['text' => $buttonVal,ues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
+    if($botState['zarinpal'] == "on") $keyboard[] = [['text' => $buttonValues['zarinpal_gateway'],  'url' => $botUrl . "pay/?zarinpal&hash_id=" . $hash_id]];
     if($botState['nextpay'] == "on") $keyboard[] = [['text' => $buttonValues['nextpay_gateway'],  'url' => $botUrl . "pay/?nextpay&hash_id=" . $hash_id]];
     if($botState['weSwapState'] == "on") $keyboard[] = [['text' => $buttonValues['weswap_gateway'],  'callback_data' => "payWithWeSwap" . $hash_id]];
     if($botState['walletState'] == "on") $keyboard[] = [['text' => "💰پرداخت با موجودی  " . $planprice,  'callback_data' => "payIncraseWithWallet$hash_id"]];
@@ -9668,7 +9668,7 @@ if(preg_match('/^addServerPanePassword(.*)/',$userInfo['step'],$match) and $text
         
     }
     if(!$loginResponse['success']){
-        setUser('addServerPanelUser' . json_encode($data, JSON_UNESCAPE,D_UNICODE));
+        setUser('addServerPanelUser' . json_encode($data, JSON_UNESCAPED_UNICODE));
         sendMessage( "
 ⚠️ با خطا مواجه شدی ! 
 
