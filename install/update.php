@@ -115,7 +115,9 @@ $arrays = [
       `id` int(255) NOT NULL AUTO_INCREMENT,
       `info` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
       PRIMARY KEY (`id`)
-      );"
+      );",
+    "ALTER TABLE `orders_list` CHANGE `token` `token` VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_persian_ci NOT NULL;",
+    "ALTER TABLE `orders_list` CHANGE `uuid` `uuid` VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_persian_ci NOT NULL;"
     ];
 function updateBot(){
     global $arrays, $connection, $walletwizwiz, $nowPaymentKey, $zarinpalId;
