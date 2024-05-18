@@ -642,7 +642,7 @@ if($data=="inviteFriends"){
         
         $link = "t.me/$botId?start=" . $from_id;
         if($inviteText['type'] == "text"){
-            $txt = str_replace('LINK',"<code>$link</code>",$inviteText['text']);
+            $txt = str_replace('LINK',$link,$inviteText['text']);
             $res = sendMessage($txt,null,"HTML");
         } 
         else{
