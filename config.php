@@ -1772,7 +1772,7 @@ function getUserOrderDetailKeys($id){
 
         
         $enable = $enable == true? $buttonValues['active']:$buttonValues['deactive'];
-        $msg = str_replace(['STATE', 'NAME','CONNECT-LINK', 'SUB-LINK'], [$enable, $remark, $configLinks, $subLink], $mainValues['config_details_message']);
+        $msg = str_replace(['NAME','CONNECT-LINK', 'SUB-LINK'], [$remark, $configLinks, $subLink], $mainValues['config_details_message']);
     
         $keyboard[] = [['text' => $buttonValues['back_button'], 'callback_data' => "managePanel"]];
         return ["keyboard"=>json_encode([
@@ -1921,6 +1921,10 @@ function getOrderDetailKeys($from_id, $id){
                 if($security == "xtls"){
                     $keyboard = [
                         [
+                            ['text' => "$link_status", 'callback_data' => "wizwizch"],
+                            ['text' => $buttonValues['account_status'], 'callback_data' => "wizwizch"],
+                        ],
+                        [
             			    ['text' => "$name", 'callback_data' => "wizwizch"],
                             ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
                         ],
@@ -1953,6 +1957,10 @@ function getOrderDetailKeys($from_id, $id){
                     if(count($temp)>0) array_push($keyboard, $temp);
                 }else{
                     $keyboard = [
+                        [
+                            ['text' => "$link_status", 'callback_data' => "wizwizch"],
+                            ['text' => $buttonValues['account_status'], 'callback_data' => "wizwizch"],
+                        ],
                         [
             			    ['text' => "$name", 'callback_data' => "wizwizch"],
                             ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
@@ -1991,6 +1999,10 @@ function getOrderDetailKeys($from_id, $id){
                 if($netType == "grpc"){
                     $keyboard = [
                         [
+                            ['text' => "$link_status", 'callback_data' => "wizwizch"],
+                            ['text' => $buttonValues['account_status'], 'callback_data' => "wizwizch"],
+                        ],
+                        [
             			    ['text' => "$name", 'callback_data' => "wizwizch"],
                             ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
                         ],
@@ -2026,6 +2038,10 @@ function getOrderDetailKeys($from_id, $id){
                 elseif($netType == "tcp" && $security == "xtls"){
                     $keyboard = [
                         [
+                            ['text' => "$link_status", 'callback_data' => "wizwizch"],
+                            ['text' => $buttonValues['account_status'], 'callback_data' => "wizwizch"],
+                        ],
+                        [
             			    ['text' => "$name", 'callback_data' => "wizwizch"],
                             ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
                         ],
@@ -2060,6 +2076,10 @@ function getOrderDetailKeys($from_id, $id){
                 }
                 else{
                     $keyboard = [
+                        [
+                            ['text' => "$link_status", 'callback_data' => "wizwizch"],
+                            ['text' => $buttonValues['account_status'], 'callback_data' => "wizwizch"],
+                        ],
                         [
             			    ['text' => "$name", 'callback_data' => "wizwizch"],
                             ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
@@ -2102,6 +2122,10 @@ function getOrderDetailKeys($from_id, $id){
             }
         }else{
             $keyboard = [
+                [
+    			    ['text' => "$link_status", 'callback_data' => "wizwizch"],
+                    ['text' => $buttonValues['account_status'], 'callback_data' => "wizwizch"],
+                ],
                 [
     			    ['text' => "$name", 'callback_data' => "wizwizch"],
                     ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
@@ -2146,7 +2170,7 @@ function getOrderDetailKeys($from_id, $id){
         else $subLink = $botState['subLinkState']=="on"?"<code>" . $botUrl . "settings/subLink.php?token=" . $token . "</code>":"";
 
         $enable = $enable == true? $buttonValues['active']:$buttonValues['deactive'];
-        $msg = str_replace(['STATE', 'NAME','CONNECT-LINK', 'SUB-LINK'], [$enable, $remark, $configLinks, $subLink], $mainValues['config_details_message']);
+        $msg = str_replace(['NAME','CONNECT-LINK', 'SUB-LINK'], [$remark, $configLinks, $subLink], $mainValues['config_details_message']);
         
         
         $extrakey = [];
