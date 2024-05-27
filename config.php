@@ -4073,6 +4073,12 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                     $header_type = json_decode($row->streamSettings)->wsSettings->header->type;
                     $path = json_decode($row->streamSettings)->wsSettings->path;
                     $host = json_decode($row->streamSettings)->wsSettings->headers->Host;
+                    if (isset(json_decode($row->streamSettings)->tlsSettings)){
+                        $alpn = json_decode($row->streamSettings)->tlsSettings->alpn;
+                        $alpn = implode(",", $alpn);
+                        $fp = json_decode($row->streamSettings)->tlsSettings->settings->fingerprint;
+                        $allowInsecure = json_decode($row->streamSettings)->tlsSettings->settings->allowInsecure;
+                    }
                 }elseif($netType == 'grpc') {
                     if($tlsStatus == 'tls'){
                         $alpn = $tlsSetting->alpn;
@@ -4245,7 +4251,7 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
                     $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus{$psting}#$remark";
                 }elseif($netType == 'ws'){
                     if($rahgozar == true)$outputlink = "$protocol://$uniqid@$server_ip:" . ($customPort!=0?$customPort:"443") . "?type=$netType&security=tls&path=" . rawurlencode($path . ($customPath == true?"?ed=2048":"")) . "&encryption=none&host=$host{$psting}#$remark";
-                    else $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus&path=/&host=$host{$psting}#$remark";
+                    else $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus&alpn=$alpn&allowInsecure=$allowInsecure&fp=$fp&path=" . rawurlencode($path) . "&host=$host{$psting}#$remark";
                 }
                 elseif($netType == 'kcp')
                     $outputlink = "$protocol://$uniqid@$server_ip:$port?type=$netType&security=$tlsStatus&headerType=$kcpType&seed=$kcpSeed#$remark";
