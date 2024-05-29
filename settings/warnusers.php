@@ -26,50 +26,70 @@ if($orders){
             $links_list = $order['link']; 
             $notif = $order['notif'];
             $expiryTime = "";
-            $response = getJson($server_id)->obj; 
             $found = false;
-            foreach($response as $row){
-                if($inbound_id == 0) { 
-                    $clients = json_decode($row->settings)->clients;
-                    if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
-                        $found = true;
-                        $total = $row->total;
-                        $up = $row->up;
-                        $down = $row->down;
-                        $expiryTime = $row->expiryTime;
-                        break;
-                    }
-                }else{
-                    if($row->id == $inbound_id) {
-                        $settings = json_decode($row->settings, true); 
-                        $clients = $settings['clients'];
-                        
-                        $clientsStates = $row->clientStats;
-                        foreach($clients as $key => $client){
-                            if($client['id'] == $uuid || $client['password'] == $uuid){
-                                $found = true;
-                                $email = $client['email'];
-                                $emails = array_column($clientsStates,'email');
-                                $emailKey = array_search($email,$emails);
-                                
-                                $total = $client['totalGB'];
-                                $up = $clientsStates[$emailKey]->up;
-                                $enable = $clientsStates[$emailKey]->enable;
-                                $down = $clientsStates[$emailKey]->down; 
-                                $expiryTime = $clientsStates[$emailKey]->expiryTime;
-                                break;
+            
+        	$stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id` = ?");
+        	$stmt->bind_param('i', $server_id);
+        	$stmt->execute();
+        	$serverConfig = $stmt->get_result()->fetch_assoc();
+        	$stmt->close();
+        	$serverType = $serverConfig['type'];
+            $panel_url = $serverConfig['panel_url'];
+
+            if($serverType == "marzban"){
+                $info = getMarzbanUser($server_id, $remark);
+                if(isset($info->username)){
+                    $found = true;
+                    $total = $info->data_limit;
+                    $totalLeft = $total - $info->used_traffic;
+                    $expiryTime = $info->expire;
+                    $enable = $info->status == "active"?true:false;
+                }
+            }else{
+                $response = getJson($server_id)->obj; 
+                foreach($response as $row){
+                    if($inbound_id == 0) { 
+                        $clients = json_decode($row->settings)->clients;
+                        if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
+                            $found = true;
+                            $total = $row->total;
+                            $up = $row->up;
+                            $down = $row->down;
+                            $expiryTime = substr($row->expiryTime, 0, -3);
+                            break;
+                        }
+                    }else{
+                        if($row->id == $inbound_id) {
+                            $settings = json_decode($row->settings, true); 
+                            $clients = $settings['clients'];
+                            
+                            $clientsStates = $row->clientStats;
+                            foreach($clients as $key => $client){
+                                if($client['id'] == $uuid || $client['password'] == $uuid){
+                                    $found = true;
+                                    $email = $client['email'];
+                                    $emails = array_column($clientsStates,'email');
+                                    $emailKey = array_search($email,$emails);
+                                    
+                                    $total = $client['totalGB'];
+                                    $up = $clientsStates[$emailKey]->up;
+                                    $enable = $clientsStates[$emailKey]->enable;
+                                    $down = $clientsStates[$emailKey]->down; 
+                                    $expiryTime = substr($clientsStates[$emailKey]->expiryTime, 0, -3);
+                                    break;
+                                }
                             }
                         }
                     }
                 }
+                $totalLeft = $total - $up - $down;
             }
             if(!$found) continue;
             
-            $leftgb = round( ($total - $up - $down) / 1073741824, 2);
-            $now_microdate = floor(microtime(true) * 1000);
+            $leftgb = round( () / 1073741824, 2);
             if($expiryTime != null && $total != null){
                 $send = "";
-                if($expiryTime < $now_microdate + 86400000) $send = "روز"; elseif($leftgb < 1) $send = "گیگ";
+                if($expiryTime < time() + 86400000) $send = "روز"; elseif($leftgb < 1) $send = "گیگ";
                 if($send != ""){  
                     $msg = "💡 کاربر گرامی، 
         از سرویس اشتراک $remark تنها (۱ $send) باقی مانده است. میتواند از قسمت خرید های من سرویس فعلی خود را تمدید کنید یا سرویس جدید خریداری کنید.";
@@ -105,51 +125,72 @@ if($orders){
             $inbound_id = $order['inbound_id'];
             $links_list = $order['link']; 
             $notif = $order['notif'];
-            
-            $response = getJson($server_id)->obj;  
             $found = false;
-            foreach($response as $row){
-                if($inbound_id == 0) {
-                    $clients = json_decode($row->settings)->clients;
-                    if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
-                        $total = $row->total;
-                        $up = $row->up;
-                        $down = $row->down;
-                        $expiryTime = $row->expiryTime;
-                        $found = true;
-                        break;
-                    }
-                }else{
-                    if($row->id == $inbound_id) {
-                        $settings = json_decode($row->settings, true); 
-                        $clients = $settings['clients'];
-                        
-                        
-                        $clientsStates = $row->clientStats;
-                        foreach($clients as $key => $client){
-                            if($client['id'] == $uuid || $client['password'] == $uuid){
-                                $email = $client['email'];
-                                $emails = array_column($clientsStates,'email');
-                                $emailKey = array_search($email,$emails);
-                                
-                                $total = $client['totalGB'];
-                                $up = $clientsStates[$emailKey]->up;
-                                $enable = $clientsStates[$emailKey]->enable;
-                                $down = $clientsStates[$emailKey]->down; 
-                                $expiryTime = $clientsStates[$emailKey]->expiryTime;
-                                $found = true;
-                                break;
+            
+        	$stmt = $connection->prepare("SELECT * FROM `server_config` WHERE `id` = ?");
+        	$stmt->bind_param('i', $server_id);
+        	$stmt->execute();
+        	$serverConfig = $stmt->get_result()->fetch_assoc();
+        	$stmt->close();
+        	$serverType = $serverConfig['type'];
+            $panel_url = $serverConfig['panel_url'];
+
+            $found = false;
+            if($serverType == "marzban"){
+                $info = getMarzbanUser($server_id, $remark);
+                if(isset($info->username)){
+                    $found = true;
+                    $total = $info->data_limit;
+                    $totalLeft = $total - $info->used_traffic;
+                    $expiryTime = $info->expire;
+                    $enable = $info->status == "active"?true:false;
+                }
+            }else{
+                $response = getJson($server_id)->obj;  
+                foreach($response as $row){
+                    if($inbound_id == 0) {
+                        $clients = json_decode($row->settings)->clients;
+                        if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
+                            $total = $row->total;
+                            $up = $row->up;
+                            $down = $row->down;
+                            $expiryTime = substr($row->expiryTime, 0, -3);
+                            $found = true;
+                            break;
+                        }
+                    }else{
+                        if($row->id == $inbound_id) {
+                            $settings = json_decode($row->settings, true); 
+                            $clients = $settings['clients'];
+                            
+                            
+                            $clientsStates = $row->clientStats;
+                            foreach($clients as $key => $client){
+                                if($client['id'] == $uuid || $client['password'] == $uuid){
+                                    $email = $client['email'];
+                                    $emails = array_column($clientsStates,'email');
+                                    $emailKey = array_search($email,$emails);
+                                    
+                                    $total = $client['totalGB'];
+                                    $up = $clientsStates[$emailKey]->up;
+                                    $enable = $clientsStates[$emailKey]->enable;
+                                    $down = $clientsStates[$emailKey]->down; 
+                                    $expiryTime = substr($clientsStates[$emailKey]->expiryTime, 0, -3);
+                                    $found = true;
+                                    break;
+                                }
                             }
                         }
                     }
-                }
-            } 
+                } 
+                $totalLeft = $total - $up - $down;
+            }
+            $leftgb = round( ($totalLeft) / 1073741824, 2);
             if(!$found) continue;
-            $leftgb = round( ($total - $up - $down) / 1073741824, 2);
-            $now_microdate = floor(microtime(true) * 1000);
-            if($expiryTime <= $now_microdate) $send = true; elseif($leftgb <= 0) $send = true;
-            if($send){  
-                if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $uuid, 1); else $res = deleteInbound($server_id, $uuid, 1); 
+            if($expiryTime <= time()) $send = true; elseif($leftgb <= 0) $send = true;
+            if($send){
+                if($serverType == "marzban") $res = deleteMarzban($server_id, $remark);
+                else{if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $uuid, 1); else $res = deleteInbound($server_id, $uuid, 1); }
         		if(!is_null($res)){
                     $msg = "💡 کاربر گرامی،
     اشتراک سرویس $remark منقضی شد و از لیست سفارش ها حذف گردید. لطفا از فروشگاه, سرویس جدید خریداری کنید.";
