@@ -644,7 +644,7 @@ if($data=="inviteFriends"){
         if($inviteText['type'] == "text"){
             $txt = str_replace('LINK',"<code>$link</code>",$inviteText['text']);
             $res = sendMessage($txt,null,"HTML");
-        } 
+        }
         else{
             $txt = str_replace('LINK',"$link",$inviteText['caption']);
             $res = sendPhoto($inviteText['file_id'],$txt,null,"HTML");
@@ -655,11 +655,65 @@ if($data=="inviteFriends"){
     else alert("این قسمت غیر فعال است");
 }
 if($data=="myInfo"){
-    $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid` = ?");
+    $stmt = $connection->prepare("SELECT COUNT(amount) as count, SUM(amount) as total FROM `orders_list` WHERE `userid` = ?");
     $stmt->bind_param("i", $from_id);
     $stmt->execute();
-    $totalBuys = $stmt->get_result()->num_rows;
+    $info = $stmt->get_result()->fetch_assoc();
+    
+    $stmt = $connection->prepare("SELECT COUNT(amount) as count, SUM(amount) as total FROM `increase_order` WHERE `userid` = ?");
+    $stmt->bind_param("i", $from_id);
+    $stmt->execute();
+    $increase_info = $stmt->get_result()->fetch_assoc();
+
+    $stmt = $connection->prepare("SELECT remark, amount FROM `orders_list` WHERE `userid` = ?");
+    $stmt->bind_param("i", $from_id);
+    $stmt->execute();
+    $services_name = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    $remarks = "";
+
+    foreach ($services_name as $service) {
+        $remark = $service['remark'];
+        if (strpos($remark, '(') !== false) {
+            $remark = strstr($remark, '(', true);
+        }
+        $remarks .= "\n" . $remark . " - " . " اکانت جدید:" . "<code>" . " تومان ". number_format($service['amount']) ."</code>";
+    }
+    
+    $stmt = $connection->prepare("SELECT remark, amount, date FROM `increase_order` WHERE `userid` = ?");
+    $stmt->bind_param("i", $from_id);
+    $stmt->execute();
+    $increase_order = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    foreach ($increase_order as $service) {
+        $remark = $service['remark'];
+
+        if (strpos($remark, '(') !== false && strpos($remark, ')') !== false) {
+            $name = strstr($remark, '(', true);
+            $suffix = substr(strstr($remark, ')'), 1);
+            $remark = trim($name) . $suffix;
+        } elseif (strpos($remark, '(') !== false) {
+            $remark = strstr($remark, '(', true);
+        }
+
+        if (strpos($remark, '-') !== false) {
+            list($name, $day) = explode('-', $remark);
+            $remark = trim($name);
+            $day = trim($day);
+        }
+
+        $date_or_volume = $service['date'];
+
+        if (strlen($date_or_volume) == 10) {
+            $type = 'افزایش زمان: ' . "(" . $day . " روز)";
+        } else {
+            $type = "افزایش حجم: " . "(". $date_or_volume / 86400 . " گیگ)" ;
+        } 
+        $remarks .= "\n" . "\n" . $remark . " - " . $type . " \n<code>" . " تومان ". number_format($service['amount']) ."</code>";
+    }
+
     $stmt->close();
+    
+    $total_services = $increase_info['count'] + $info['count'];    
+    $total‌Bought =  number_format($increase_info['total'] + $info['total']) . " تومان";
     
     $myWallet = number_format($userInfo['wallet']) . " تومان";
     
@@ -680,7 +734,9 @@ if($data=="myInfo"){
 👤 اسم:  <code> $first_name </code>
 💰 موجودی: <code> $myWallet </code>
 
-☑️ کل سرویس ها : <code> $totalBuys </code> عدد
+🏷 کل سرویس ها : <code> $total_services </code> عدد
+💸 محموع خریدها : <code> $total‌Bought </code>
+💵 اکانت های خریداری شده : 👇 \n $remarks
 ⁮⁮ ⁮⁮ ⁮⁮ ⁮⁮
 ",
             $keys,"html");
@@ -8152,7 +8208,7 @@ if(preg_match('/switchServer(.+)_(.+)/',$data,$match)){
     $stmt->close();
     
     $flow = $file_detail['flow'] == "None"?"":$file_detail['flow'];
-	
+
     $stmt = $connection->prepare("SELECT * FROM server_config WHERE id=?");
     $stmt->bind_param("i", $server_id);
     $stmt->execute();
@@ -8727,7 +8783,8 @@ if(preg_match('/approveIncreaseDay(.*)/',$data,$match) && ($from_id == $admin ||
         
         $stmt = $connection->prepare("INSERT INTO `increase_order` VALUES (NULL, ?, ?, ?, ?, ?, ?);");
         $newVolume = $volume * 86400;
-        $stmt->bind_param("iiisii", $uid, $server_id, $inbound_id, $remark, $price, $time);
+        $remark_and_volume = $remark . "-" . $volume;
+        $stmt->bind_param("iiisii", $uid, $server_id, $inbound_id, $remark_and_volume, $price, $time);
         $stmt->execute();
         $stmt->close();
         $markup[] = [['text' => '✅', 'callback_data' => "dontsendanymore"]];
@@ -8815,7 +8872,9 @@ if(preg_match('/payIncraseDayWithWallet(.*)/', $data,$match)){
         
         $stmt = $connection->prepare("INSERT INTO `increase_order` VALUES (NULL, ?, ?, ?, ?, ?, ?);");
         $newVolume = $volume * 86400;
-        $stmt->bind_param("iiisii", $from_id, $server_id, $inbound_id, $remark, $price, $time);
+        $remark_and_volume = $remark . "-" . $volume;
+
+        $stmt->bind_param("iiisii", $from_id, $server_id, $inbound_id, $remark_and_volume, $price, $time);
         $stmt->execute();
         $stmt->close();
         
@@ -9073,6 +9132,13 @@ if(preg_match('/approveIncreaseVolume(.*)/',$data,$match) && ($from_id == $admin
         $stmt->bind_param("s", $uuid);
         $stmt->execute();
         $stmt->close();
+
+        $stmt = $connection->prepare("INSERT INTO `increase_order` VALUES (NULL, ?, ?, ?, ?, ?, ?);");
+        $newVolume = $volume * 86400;
+        $stmt->bind_param("iiisii", $uid, $server_id, $inbound_id, $remark, $price, $newVolume);
+        $stmt->execute();
+        $stmt->close();
+
         unset($markup[count($markup)-1]);
         $markup[] = [['text' => '✅', 'callback_data' => "dontsendanymore"]];
         $keys = json_encode(['inline_keyboard'=>array_values($markup)],488);
@@ -9240,6 +9306,13 @@ if(preg_match('/payIncraseWithWallet(.*)/', $data,$match)){
         $stmt->bind_param("ii", $price, $from_id);
         $stmt->execute();
         $stmt->close();
+
+        $stmt = $connection->prepare("INSERT INTO `increase_order` VALUES (NULL, ?, ?, ?, ?, ?, ?);");
+        $newVolume = $volume * 86400;
+        $stmt->bind_param("iiisii", $from_id, $server_id, $inbound_id, $remark, $price, $newVolume);
+        $stmt->execute();
+        $stmt->close();
+
         $stmt = $connection->prepare("UPDATE `orders_list` SET `notif` = 0 WHERE `uuid` = ?");
         $stmt->bind_param("s", $uuid);
         $stmt->execute();
