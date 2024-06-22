@@ -105,7 +105,7 @@ $arrays = [
     "ALTER TABLE `users` ADD `spam_info` VARCHAR(500) NULL AFTER `agent_date`;",
     "ALTER TABLE `server_info` CHANGE `title` `title` VARCHAR(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL;",
     "UPDATE `orders_list` SET `status` = 1",
-    "ALTER TABLE `orders_list` ADD `uuid` VARCHAR(100) NULL AFTER `remark`;",
+    "ALTER TABLE `orders_list` ADD `uuid` VARCHAR(1000) NULL AFTER `remark`;",
     "ALTER TABLE `pays` ADD `tron_price` DOUBLE(255,2) NOT NULL DEFAULT '0' AFTER `price`;",
     "ALTER TABLE `gift_list` CHANGE `id` `id` INT(255) NOT NULL AUTO_INCREMENT;",
     "ALTER TABLE `users` CHANGE `discount_percent` `discount_percent` VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NULL DEFAULT NULL;",
@@ -117,7 +117,7 @@ $arrays = [
       PRIMARY KEY (`id`)
       );",
     "ALTER TABLE `orders_list` CHANGE `token` `token` VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_persian_ci NOT NULL;",
-    "ALTER TABLE `orders_list` CHANGE `uuid` `uuid` VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_persian_ci NOT NULL;"
+    "ALTER TABLE `orders_list` CHANGE `uuid` `uuid` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_persian_ci NULL DEFAULT NULL;"
     ];
 function updateBot(){
     global $arrays, $connection, $walletwizwiz, $nowPaymentKey, $zarinpalId;
