@@ -5,9 +5,9 @@ include_once 'jdf.php';
 
 $rateLimit = $botState['rateLimit']??0;
 if(time() > $rateLimit){
-    $rate = json_decode(file_get_contents("https://api.changeto.technology/api/rate"),true)['result'];
-    if(!empty($rate['USD'])) $botState['USDRate'] = $rate['USD'];
-    if(!empty($rate['TRX'])) $botState['TRXRate'] = $rate['TRX'];
+    $rate = json_decode(curl_get_file_contents("https://api.pooleno.ir/v1/currency/short-name/trx?type=buy"),true);
+    $botState['USDRate'] = round($rate['priceUsdt'],2);
+    $botState['TRXRate'] = round($rate['priceFiat'] / 10,2);
     $botState['rateLimit'] = strtotime("+1 hour");
     
     $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = 'BOT_STATES'");
