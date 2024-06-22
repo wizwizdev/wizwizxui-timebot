@@ -132,6 +132,17 @@ function check($return = false){
     die('You do not have access');
 
 }
+function curl_get_file_contents($URL){
+    $c = curl_init();
+    curl_setopt($c, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($c, CURLOPT_URL, $URL);
+    $contents = curl_exec($c);
+    curl_close($c);
+
+    if ($contents) return $contents;
+    else return FALSE;
+}
+
 function ip_in_range($ip, $range){
     if (strpos($range, '/') == false) {
         $range .= '/32';
