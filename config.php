@@ -1490,7 +1490,11 @@ function getUserOrderDetailKeys($id){
             $leftgb = round( ($total - $up - $down) / 1073741824, 2) . " GB";
         }
         $configLinks = "";
-        foreach($acc_link as $acc_link){
+        foreach($acc_link as $acc_link_key => $acc_link){
+	    if($acc_link_key == 10){
+              $configLinks .= ($botState['configLinkState'] != "off"?"\n\n❗️برای مشاهده سایر کانفیگ‌ها از لینک سابسکریپشن استفاده کنید":"");
+              break;
+            }
             $configLinks .= $botState['configLinkState'] != "off"?"\n <code>$acc_link</code>":"";
         }
         $keyboard = array();
@@ -1923,7 +1927,11 @@ function getOrderDetailKeys($from_id, $id){
             }else $leftgb = "⚠️";
         }
         $configLinks = "";
-        foreach($acc_link as $acc_link){
+        foreach($acc_link as $acc_link_key => $acc_link){
+	    if($acc_link_key == 10){
+              $configLinks .= ($botState['configLinkState'] != "off"?"\n\n❗️برای مشاهده سایر کانفیگ‌ها از لینک سابسکریپشن استفاده کنید":"");
+              break;
+            }
             $configLinks .= ($botState['configLinkState'] != "off"?"\n <code>$acc_link</code>":"");
         }
         $keyboard = array();
