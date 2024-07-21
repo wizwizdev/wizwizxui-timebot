@@ -1,5 +1,4 @@
 
-```markdown
 # Simple Wiz Version
 
 <div id="language-toggle">
