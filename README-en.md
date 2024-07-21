@@ -14,7 +14,9 @@
 </p>
 
 
-<h1 align="center">Welcome to SimpleWiz</h1>
+Amount of edited codes: <h1 align="center">Welcome to SimpleWiz</h1>
+
+![60%](https://progress-bar.dev/70/) 
 
 # Installation
 
