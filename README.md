@@ -23,19 +23,11 @@ This is a version of the WizWiz Bot (https://github.com/wizwizdev/wizwizxui-time
 
 
 <div align=center>
-
+Wizwiz Telegram:
 [![Wizwiz Telegram Channel](https://img.shields.io/endpoint?label=Channel&style=flat-square&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Fwizwizch&color=blue)](https://telegram.dog/wizwizch)
-
+My Telegram:
 [![My Telegram Channel](https://img.shields.io/endpoint?label=Channel&style=flat-square&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Fwizwizch&color=blue)](https://telegram.dog/ItsOrv)
 </div>
-
-<br>
-<br>
-    <a align="center">
-        <img src="https://github.com/wizwizdev/wizwizxui-timebot/assets/27927279/f6635ea5-ab26-4c64-a7b8-952203f79763" />
-    </a>     
-<br>
-<br>
 
 # Installation Ubuntu-20.4 
 
