@@ -15,7 +15,7 @@
 
 <h1 align="center">به SimpleWiz خوش آمدید</h1>
 
-![60%](https://progress-bar.dev/60/)
+![60%](https://progress-bar.dev/70/) مقدار کد های ویرایش شده:
 
 
 
