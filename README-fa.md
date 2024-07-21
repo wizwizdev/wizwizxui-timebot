@@ -10,7 +10,7 @@
 
 # نصب
 
-1. ابتدا، WizWiz اصلی را طبق راهنمای صفحه اصلی WizWiz نصب کنید: [WizWiz](https://github.com/wizwizdev/wizwizxui-timebot)
+1. ابتدا، نسخه اصلی را طبق راهنمای صفحه اصلی ویزویز نصب کنید: [WizWiz](https://github.com/wizwizdev/wizwizxui-timebot)
 
 2. سپس، دستورات زیر را روی سرور خود اجرا کنید تا فایل‌ها را با فایل‌های حاوی متن به‌روز شده جایگزین کنید:
 
