@@ -15,6 +15,11 @@
 
 <h1 align="center">به SimpleWiz خوش آمدید</h1>
 
+### تکمیل پروژه
+
+درصد ادیت شده: ![60%](https://img.shields.io/badge/Progress-60%25-yellowgreen)
+
+
 # نصب
 
 ۱. ابتدا، نسخه اصلی را طبق راهنمای صفحه اصلی ویزویز نصب کنید: [WizWiz](https://github.com/wizwizdev/wizwizxui-timebot)
