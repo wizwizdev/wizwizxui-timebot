@@ -1311,7 +1311,7 @@ if(preg_match('/^createAccAmount(\d+)_(\d+)_(\d+)/',$userInfo['step'], $match) &
     
         • $remark \n " . ($botState['configLinkState'] != "off" && $serverType != "marzban"?"<code>$link</code>":"");
             if($botState['subLinkState'] == "on") $acc_text .= 
-            " \n• subscription : $subLink";
+            " \n• subscription : <code>$subLink</code>";
         
             $file = RandomString() .".png";
             
@@ -1749,8 +1749,11 @@ if(preg_match('/havePaiedWeSwap(.*)/',$data,$match)) {
 • config : <code>$link</code>":"");
 
 if($botState['subLinkState'] == "on") $acc_text .= "
-لینک زیر را در مرورگر باز کنید یا به صورت مستقیم به عنوان لینک اشتراک استفاده کنید
-• subscription : $subLink
+
+• Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
+
+
+• subscription : <code>$subLink</code>
         
         ";
               
@@ -1802,7 +1805,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
     }
     $keys = json_encode(['inline_keyboard'=>[
         [
-            ['text'=>" خرید جدید ",'callback_data'=>"wizwizch"]
+            ['text'=>"بنازم خرید جدید ",'callback_data'=>"wizwizch"]
         ],
         ]]);
         
@@ -2982,9 +2985,11 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
 " . ($botState['configLinkState'] != "off" && $serverType != "marzban"?"
 • config : <code>$link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
-لینک زیر را در مرورگر باز کنید یا به صورت مستقیم به عنوان لینک اشتراک استفاده کنید
 
-• subscription : $subLink"; 
+• Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
+
+
+• subscription : <code>$subLink</code>"; 
     
         $file = RandomString() .".png";
         $ecc = 'L';
@@ -3046,7 +3051,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
 
     $keys = json_encode(['inline_keyboard'=>[
         [
-            ['text'=>" خرید جدید ",'callback_data'=>"wizwizch"]
+            ['text'=>"بنازم خرید جدید ",'callback_data'=>"wizwizch"]
         ],
         ]]);
     $msg = str_replace(['TYPE', 'USER-ID', 'USERNAME', 'NAME', 'PRICE', 'REMARK', 'VOLUME', 'DAYS'],
@@ -3387,8 +3392,9 @@ if(preg_match('/accCustom(.*)/',$data, $match) and $text != $buttonValues['cance
 • config : <code>$vray_link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
-لینک زیر را در مرورگر باز کنید یا به صورت مستقیم به عنوان لینک اشتراک استفاده کنید
-\n• subscription : $subLink";
+• Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
+
+\n• subscription : <code>$subLink</code>";
     
         $file = RandomString() .".png";
         $ecc = 'L';
@@ -3698,14 +3704,15 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
 • سفارش جدید شما
 • پروتکل: $protocol
 • نام سرویس: $remark
-• حجم سرویس: $volume گیگ
+•حجم سرویس: $volume گیگ
 • مدت سرویس: $days روز⁮⁮ ⁮⁮
 " . ($botState['configLinkState'] != "off" && $serverType != "marzban"?"
 • config : <code>$link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
-لینک زیر را در مرورگر باز کنید یا به صورت مستقیم به عنوان لینک اشتراک استفاده کنید
-\n• subscription : $subLink";
+• Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
+
+\n• subscription : <code>$subLink</code>";
             
                 $file = RandomString() .".png";
                 $ecc = 'L';
@@ -3771,7 +3778,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
     
     $keys = json_encode(['inline_keyboard'=>[
         [
-            ['text'=>" خرید جدید ",'callback_data'=>"wizwizch"]
+            ['text'=>"بنازم خرید جدید ",'callback_data'=>"wizwizch"]
         ],
         ]]);
     if($payInfo['type'] == "RENEW_SCONFIG"){$msg = str_replace(['TYPE', 'USER-ID', 'USERNAME', 'NAME', 'PRICE', 'REMARK', 'VOLUME', 'DAYS'],
@@ -4232,8 +4239,9 @@ if(preg_match('/accept(.*)/',$data, $match) and $text != $buttonValues['cancel']
 • config : <code>$link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
-لینک زیر را در مرورگر باز کنید یا به صورت مستقیم به عنوان لینک اشتراک استفاده کنید
-\n• subscription : $subLink";
+• Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
+
+\n• subscription : <code>$subLink</code>";
             
                 $file = RandomString() .".png";
                 $ecc = 'L';
@@ -5697,8 +5705,9 @@ if(preg_match('/freeTrial(\d+)/',$data,$match)) {
 • config : <code>$link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
 
-لینک زیر را در مرورگر باز کنید یا به صورت مستقیم به عنوان لینک اشتراک استفاده کنید
-\n• subscription : $subLink";
+• Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
+
+\n• subscription : <code>$subLink</code>";
     
         $file = RandomString().".png";
         $ecc = 'L'; 
