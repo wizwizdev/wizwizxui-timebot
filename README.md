@@ -23,11 +23,8 @@ This is a version of the WizWiz Bot (https://github.com/wizwizdev/wizwizxui-time
 
 
 
-Wizwiz Telegram:
 <div align=center>	
 [![Wizwiz Telegram Channel](https://img.shields.io/endpoint?label=Channel&style=flat-square&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Fwizwizch&color=blue)](https://telegram.dog/wizwizch)
-</div>
-My Telegram:
 <div align=center>	
 [![My Telegram Channel](https://img.shields.io/endpoint?label=Channel&style=flat-square&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Fwizwizch&color=blue)](https://telegram.dog/ItsOrv)
 </div>
