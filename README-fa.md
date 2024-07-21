@@ -6,13 +6,13 @@
   <a href="./README.md">English</a> / <a href="./README-fa.md">فارسی</a>
 </p>
 
-<h1 align="center">Welcome to SimpleWiz</h1>
+<h1 align="center">به SimpleWiz خوش آمدید</h1>
 
-# Installation
+# نصب
 
-1. First, install the original WizWiz according to the instructions on the main WizWiz page: [WizWiz](https://github.com/wizwizdev/wizwizxui-timebot)
+1. ابتدا، WizWiz اصلی را طبق راهنمای صفحه اصلی WizWiz نصب کنید: [WizWiz](https://github.com/wizwizdev/wizwizxui-timebot)
 
-2. Then, run the following commands on your server to replace the files with the ones containing the updated text:
+2. سپس، دستورات زیر را روی سرور خود اجرا کنید تا فایل‌ها را با فایل‌های حاوی متن به‌روز شده جایگزین کنید:
 
 ```sh
 curl -o /var/www/html/wizwizxui-timebot/settings/messagewizwiz.php https://raw.githubusercontent.com/ItsOrv/simple-wiz/main/settings/messagewizwiz.php
