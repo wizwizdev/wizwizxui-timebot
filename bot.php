@@ -1805,7 +1805,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
     }
     $keys = json_encode(['inline_keyboard'=>[
         [
-            ['text'=>"بنازم خرید جدید ",'callback_data'=>"wizwizch"]
+            ['text'=>" خرید جدید ",'callback_data'=>"wizwizch"]
         ],
         ]]);
         
@@ -2985,9 +2985,11 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
 " . ($botState['configLinkState'] != "off" && $serverType != "marzban"?"
 • config : <code>$link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
-لینک زیر را در مرورگر باز کنید یا به عنوان لینک اشتراک استفاده کنید
 
-• subscription : $subLink"; 
+• Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
+
+
+• subscription : <code>$subLink</code>"; 
     
         $file = RandomString() .".png";
         $ecc = 'L';
@@ -3049,7 +3051,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
 
     $keys = json_encode(['inline_keyboard'=>[
         [
-            ['text'=>"بنازم خرید جدید ",'callback_data'=>"wizwizch"]
+            ['text'=>" خرید جدید ",'callback_data'=>"wizwizch"]
         ],
         ]]);
     $msg = str_replace(['TYPE', 'USER-ID', 'USERNAME', 'NAME', 'PRICE', 'REMARK', 'VOLUME', 'DAYS'],
@@ -3776,7 +3778,7 @@ if($botState['subLinkState'] == "on") $acc_text .= "
     
     $keys = json_encode(['inline_keyboard'=>[
         [
-            ['text'=>"بنازم خرید جدید ",'callback_data'=>"wizwizch"]
+            ['text'=>" خرید جدید ",'callback_data'=>"wizwizch"]
         ],
         ]]);
     if($payInfo['type'] == "RENEW_SCONFIG"){$msg = str_replace(['TYPE', 'USER-ID', 'USERNAME', 'NAME', 'PRICE', 'REMARK', 'VOLUME', 'DAYS'],
