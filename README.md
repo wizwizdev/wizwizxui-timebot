@@ -15,11 +15,8 @@
 
 <h1 align="center">به SimpleWiz خوش آمدید</h1>
 
-### وضعیت ویرایش فایل
+https://img.shields.io/badge/Progress-60%25-yellowgreen
 
-درصد ادیت شده: 60%
-
-[██████████████░░░░░░░░░░░░░░] 60%
 
 
 # نصب
