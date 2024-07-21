@@ -14,7 +14,7 @@
 
 </p>
 
-<h1 align="center"/>Welcome to simpleWiz</h1>
+<h1 align="center"/>Welcome to SimpleWiz</h1>
 
 
 <p align="center">
