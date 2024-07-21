@@ -15,7 +15,13 @@
 
 <h1 align="center">به SimpleWiz خوش آمدید</h1>
 
-https://img.shields.io/badge/Progress-60%25-yellowgreen
+### Progress
+
+<div style="border: 1px solid #000; width: 100%; background-color: #ddd;">
+  <div style="width: 60%; background-color: #4caf50; color: white; text-align: center;">
+    60%
+  </div>
+</div>
 
 
 
