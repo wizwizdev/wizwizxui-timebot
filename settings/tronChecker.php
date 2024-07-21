@@ -118,7 +118,7 @@ while($payParam = $paysList->fetch_assoc()){
                     include '../phpqrcode/qrlib.php';
                     define('IMAGE_WIDTH',540);
                     define('IMAGE_HEIGHT',540);
-                    sendMessage("پرداخت شما با تکسید آیدی $hash_id با موفقیت انجام شد 🚀 | 😍 در حال ارسال کانفیگ به تلگرام شما ...",null,null,$user_id);
+                    sendMessage("پرداخت شما با تکسید آیدی $hash_id با موفقیت انجام شد  |  در حال ارسال کانفیگ به تلگرام شما ...",null,null,$user_id);
 
                     for($i =1; $i<= $accountCount; $i++){
                         $uniqid = generateRandomString(42,$protocol); 
@@ -180,8 +180,8 @@ while($payParam = $paysList->fetch_assoc()){
                             $stmt->bind_param("ii", $price, $user_id);
                             $stmt->execute();
                             $stmt->close();
-                            sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد، ولی اتصال به سرور برقرار نیست، لطفا مدیر رو در جریان بزار\n✅ مبلغ " . number_format($price). " تومان ($tronPrice ترون) به حساب شما اضافه شد",null,null,$user_id);
-                            sendMessage("✅ مبلغ " . number_format($price) . " تومان به کیف پول کاربر $user_id توسط درگاه ترون اضافه شد میخواست کانفیگ بخره، اتصال به سرور برقرار نبود",null,null,$admin);                
+                            sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد، ولی اتصال به سرور برقرار نیست، لطفا مدیر رو در جریان بزار\n مبلغ " . number_format($price). " تومان ($tronPrice ترون) به حساب شما اضافه شد",null,null,$user_id);
+                            sendMessage(" مبلغ " . number_format($price) . " تومان به کیف پول کاربر $user_id کاربر موقع خرید با مشکل روبرو شد، اتصال به سرور برقرار نبود",null,null,$admin);                
                     
                             exit;
                         }
@@ -190,8 +190,8 @@ while($payParam = $paysList->fetch_assoc()){
                             $stmt->bind_param("ii", $price, $user_id);
                             $stmt->execute();
                             $stmt->close();
-                            sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد، ولی سطری با آیدی $inbound_id تو سرور وجود نداره، مدیر رو در جریان بزار\n✅ مبلغ " . number_format($price). " تومان ($tronPrice ترون) به حساب شما اضافه شد",null,null,$user_id);
-                            sendMessage("✅ مبلغ " . number_format($price) . " تومان به کیف پول کاربر $user_id توسط درگاه ترون اضافه شد میخواست کانفیگ بخره، ولی انباند پیدا نشد",null,null,$admin);                
+                            sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد، ولی سطری با آیدی $inbound_id در سرور وجود نداره، مدیر رو در جریان بزار\n مبلغ " . number_format($price). " تومان ($tronPrice ترون) به حساب شما اضافه شد",null,null,$user_id);
+                            sendMessage(" مبلغ " . number_format($price) . " تومان به کیف پول کاربر $user_id توسط درگاه ترون اضافه شد کاربر با مشکل روبرو شد، ولی اینباند پیدا نشد",null,null,$admin);                
                     
                     		exit;
                     	}
@@ -201,8 +201,8 @@ while($payParam = $paysList->fetch_assoc()){
                             $stmt->bind_param("ii", $price, $user_id);
                             $stmt->execute();
                             $stmt->close();
-                            sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد، ولی خطا داد، لطفا سریع به مدیر بگو\n✅ مبلغ " . number_format($price). " تومان ($tronPrice ترون) به حساب شما اضافه شد",null,null,$user_id);
-                            sendMessage("✅ مبلغ " . number_format($price) . " تومان به کیف پول کاربر $user_id توسط درگاه اضافه شد میخواست کانفیگ بخره، ولی خطا داد",null,null,$admin);                
+                            sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد، ولی خطا داد، لطفا سریع به مدیر بگو\n مبلغ " . number_format($price). " تومان ($tronPrice ترون) به حساب شما اضافه شد",null,null,$user_id);
+                            sendMessage(" مبلغ " . number_format($price) . " تومان به کیف پول کاربر $user_id توسط درگاه اضافه شد میخواست کانفیگ بخره، ولی خطا داد",null,null,$admin);                
                             exit;
                         }
                     
@@ -221,22 +221,22 @@ while($payParam = $paysList->fetch_assoc()){
 
                         foreach($vraylink as $link){
                             $acc_text = "
-                😍 سفارش جدید شما
-                📡 پروتکل: $protocol
-                🔮 نام سرویس: $remark
-                🔋حجم سرویس: $volume گیگ
-                ⏰ مدت سرویس: $days روز
+                 سفارش جدید شما
+                • پروتکل: $protocol
+                • نام سرویس: $remark
+                • حجم سرویس: $volume گیگ
+                • مدت سرویس: $days روز
                 ".
                 ($botState['configLinkState'] != "off" && $serverType != "marzban"?
                 "
-                💝 config : <code>$link</code>":"").
+                • config : <code>$link</code>":"").
                 ($botState['subLinkState']=="on"?
                 "
                 
-                🔋 Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
+                • Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
                 
                 
-                🌐 subscription : <code>$subLink</code>
+                • subscription : <code>$subLink</code>
                     
                             ":"");
                         
@@ -257,7 +257,7 @@ while($payParam = $paysList->fetch_assoc()){
                             imagedestroy($backgroundImage);
                             imagedestroy($qrImage);
                 
-                        	sendPhoto($botUrl . "settings/" . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>"صفحه اصلی 🏘",'callback_data'=>"mainMenu"]]]]),"HTML", $user_id);
+                        	sendPhoto($botUrl . "settings/" . $file, $acc_text,json_encode(['inline_keyboard'=>[[['text'=>"صفحه اصلی",'callback_data'=>"mainMenu"]]]]),"HTML", $user_id);
                             unlink($file);
                         }
                         $date = time();
@@ -304,7 +304,7 @@ while($payParam = $paysList->fetch_assoc()){
                         $stmt->execute();
                         $stmt->close();
                          
-                        sendMessage("تبریک یکی از زیر مجموعه های شما خرید انجام داد شما مبلغ " . number_format($inviteAmount) . " تومان جایزه دریافت کردید",null,null,$inviterId);
+                        sendMessage("تبریک یکی از زیر مجموعه های شما خرید انجام داد شما مبلغ " . number_format($inviteAmount) . " تومان دریافت کردید",null,null,$inviterId);
                     }
                 
                     $user_info = Bot('getChat',['chat_id'=>$user_id])->result;
@@ -313,21 +313,21 @@ while($payParam = $paysList->fetch_assoc()){
                     
                     $keys = json_encode(['inline_keyboard'=>[
                         [
-                            ['text'=>"خرید از درگاه ترون 💞",'callback_data'=>'wizwizch'],
+                            ['text'=>"خرید از درگاه ترون",'callback_data'=>'wizwizch'],
                             ],
                         ]]);
                 sendMessage("
-                👨‍👦‍👦 خرید ( درگاه ترون )
+                • خرید ( درگاه ترون )
                 
                 تکسید آیدی: $hash_id
                 
-                🧝‍♂️آیدی کاربر: $user_id
-                🛡اسم کاربر: $first_name
-                🔖 نام کاربری: $username
-                💰مبلغ پرداختی: $price تومان ($tronPrice ترون)
-                🔮 نام سرویس: $remark
-                🔋حجم سرویس: $volume گیگ
-                ⏰ مدت سرویس: $days روز
+                • آیدی کاربر: $user_id
+                • اسم کاربر: $first_name
+                • نام کاربری: $username
+                • مبلغ پرداختی: $price تومان ($tronPrice ترون)
+                • نام سرویس: $remark
+                • حجم سرویس: $volume گیگ
+                • مدت سرویس: $days روز
                 ⁮⁮ 
                 ",$keys,"html", $admin);
                 }
@@ -336,8 +336,8 @@ while($payParam = $paysList->fetch_assoc()){
                     $stmt->bind_param("ii", $price, $user_id);
                     $stmt->execute(); 
                     $stmt->close(); 
-                    sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد\n ✅ مبلغ " . number_format($price). " تومان به حساب شما اضافه شد",null,null,$user_id);
-                    sendMessage("✅ مبلغ " . number_format($price) . " تومان ($tronPrice ترون) به کیف پول کاربر $user_id توسط درگاه ترون اضافه شد",null,null,$admin);                
+                    sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد\n  مبلغ " . number_format($price). " تومان به حساب شما اضافه شد",null,null,$user_id);
+                    sendMessage(" مبلغ " . number_format($price) . " تومان ($tronPrice ترون) به کیف پول کاربر $user_id توسط درگاه ترون اضافه شد",null,null,$admin);                
                 }
                 elseif($payType == "RENEW_ACCOUNT"){
                     $oid = $plan_id;
@@ -385,8 +385,8 @@ while($payParam = $paysList->fetch_assoc()){
                         $stmt->bind_param("ii", $price, $user_id);
                         $stmt->execute();
                         $stmt->close();
-                        sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد ولی مشکل فنی در اتصال به سرور پیش اومده\n✅ مبلغ " . number_format($price). " تومان به حساب شما اضافه شد",null,null,$user_id);
-                        sendMessage("✅ مبلغ " . number_format($price) . " تومان ($tronPrice ترون) به کیف پول کاربر $user_id اضافه شد، میخواست کانفیگش رو تمدید کنه، ولی اتصال به سرور برقرار نبود",null,null,$admin);
+                        sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد ولی مشکل فنی در اتصال به سرور پیش اومده\n مبلغ " . number_format($price). " تومان به حساب شما اضافه شد",null,null,$user_id);
+                        sendMessage(" مبلغ " . number_format($price) . " تومان ($tronPrice ترون) به کیف پول کاربر $user_id اضافه شد، کاربر درحال تمدید سرویس بود، ولی اتصال به سرور برقرار نبود",null,null,$admin);
                 		exit;
                 	}
                 	$stmt = $connection->prepare("UPDATE `orders_list` SET `expire_date` = ?, `notif` = 0 WHERE `id` = ?");
@@ -399,11 +399,11 @@ while($payParam = $paysList->fetch_assoc()){
                 	$stmt->execute();
                 	$stmt->close();
                 	
-                    sendMessage("✅سرویس $remark با موفقیت تمدید شد",null,null,$user_id);
+                    sendMessage("سرویس $remark با موفقیت تمدید شد",null,null,$user_id);
                     
                     $keys = json_encode(['inline_keyboard'=>[
                         [
-                            ['text'=>"خرید از درگاه ترون 💞",'callback_data'=>'wizwizch'],
+                            ['text'=>"خرید از درگاه ترون",'callback_data'=>'wizwizch'],
                             ],
                         ]]);
                     $user_info = Bot('getChat',['chat_id'=>$user_id])->result;
@@ -411,13 +411,13 @@ while($payParam = $paysList->fetch_assoc()){
                     $username = $user_info->username;
                 
                 sendMessage("
-                💚 تمدید اکانت ( با درگاه ترون )
+                • تمدید اکانت ( با درگاه ترون )
                 
-                🧝‍♂️آیدی کاربر: $user_id
-                🛡اسم کاربر: $first_name
-                🔖 نام کاربری: $username
-                💰مبلغ پرداختی: $price تومان ($tronPrice ترون)
-                🔮 نام سرویس: $remark
+                • آیدی کاربر: $user_id
+                • اسم کاربر: $first_name
+                • نام کاربری: $username
+                • مبلغ پرداختی: $price تومان ($tronPrice ترون)
+                • نام سرویس: $remark
                 ⁮⁮ ⁮⁮
                 ",$keys,"html", $admin);
                 exit;
@@ -480,7 +480,7 @@ while($payParam = $paysList->fetch_assoc()){
                         sendMessage("پرداخت شما با تکسید آیدی $hash_id با موفقیت انجام شد. $volume روز به مدت زمان سرویس شما اضافه شد",null,null,$user_id);
                         $keys = json_encode(['inline_keyboard'=>[
                         [
-                            ['text'=>"خرید از درگاه ترون 💞",'callback_data'=>'wizwizch'],
+                            ['text'=>"خرید از درگاه ترون ",'callback_data'=>'wizwizch'],
                             ],
                             ]]);
                                     $user_info = Bot('getChat',['chat_id'=>$user_id])->result;
@@ -488,13 +488,13 @@ while($payParam = $paysList->fetch_assoc()){
                     $username = $user_info->username;
                 
                 sendMessage("
-                💜 افزایش زمان سرویس (درگاه ترون)
+                • افزایش زمان سرویس (درگاه ترون)
                 
-                🧝‍♂️آیدی کاربر: $user_id
-                🛡اسم کاربر: $first_name
-                🔖 نام کاربری: $username
-                💰مبلغ پرداختی: $price تومان ($tronPrice ترون)
-                🔮 نام سرویس: $remark
+                • آیدی کاربر: $user_id
+                • اسم کاربر: $first_name
+                • نام کاربری: $username
+                • مبلغ پرداختی: $price تومان ($tronPrice ترون)
+                • نام سرویس: $remark
                 ⁮⁮ ⁮⁮
                 ",$keys,"html", $admin);
                 exit;
@@ -503,8 +503,8 @@ while($payParam = $paysList->fetch_assoc()){
                         $stmt->bind_param("ii", $price, $user_id);
                         $stmt->execute();
                         $stmt->close();
-                        sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد، ولی به دلیل مشکل فنی امکان افزایش حجم نیست، لطفا به مدیریت اطلاع بده\n✅ مبلغ " . number_format($price). " تومان به حساب شما اضافه شد",null,null,$user_id);
-                        sendMessage("✅ مبلغ " . number_format($price) . " تومان به کیف پول کاربر $user_id اضافه شد، میخواست زمان سرویسشو افزایش بده",null,null,$admin);
+                        sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد، ولی به دلیل مشکل فنی امکان افزایش حجم نیست، لطفا به مدیریت اطلاع بده\n مبلغ " . number_format($price). " تومان به حساب شما اضافه شد",null,null,$user_id);
+                        sendMessage(" مبلغ " . number_format($price) . " تومان به کیف پول کاربر $user_id اضافه شد، میخواست زمان سرویسشو افزایش بده",null,null,$admin);
                         exit;
                     }
                 }
@@ -555,7 +555,7 @@ while($payParam = $paysList->fetch_assoc()){
                         sendMessage("پرداخت شما با تکسید آیدی $hash_id تأیید شد. $volume گیگ به حجم سرویس شما اضافه شد",null,null,$user_id);
                         $keys = json_encode(['inline_keyboard'=>[
                         [
-                            ['text'=>"خرید از درگاه ترون 💞",'callback_data'=>'wizwizch'],
+                            ['text'=>"خرید از درگاه ترون ",'callback_data'=>'wizwizch'],
                             ],
                             ]]);
                                     $user_info = Bot('getChat',['chat_id'=>$user_id])->result;
@@ -563,13 +563,13 @@ while($payParam = $paysList->fetch_assoc()){
                     $username = $user_info->username;
                 
                 sendMessage("
-                🤎 افزایش حجم سرویس (درگاه ترون)
+                • افزایش حجم سرویس (درگاه ترون)
                 
-                🧝‍♂️آیدی کاربر: $user_id
-                🛡اسم کاربر: $first_name
-                🔖 نام کاربری: $username
-                💰مبلغ پرداختی: $price تومان ($tronPrice ترون)
-                🔮 نام سرویس: $remark
+                • آیدی کاربر: $user_id
+                • اسم کاربر: $first_name
+                • نام کاربری: $username
+                • مبلغ پرداختی: $price تومان ($tronPrice ترون)
+                • نام سرویس: $remark
                 ⁮⁮ ⁮⁮
                 ",$keys,"html", $admin);
                 exit;
@@ -578,8 +578,8 @@ while($payParam = $paysList->fetch_assoc()){
                         $stmt->bind_param("ii", $price, $user_id);
                         $stmt->execute();
                         $stmt->close();
-                        sendMessage("پرداخت شما با تکسید آیدی $hash_id تأیید شد ولی به دلیل مشکل فنی امکان افزایش نیست لطفا به مدیریت اطلاع بده\n✅ مبلغ " . number_format($price). " تومان به حساب شما اضافه شد",null,null,$user_id);
-                        sendMessage("✅ مبلغ " . number_format($price) . " تومان به کیف پول کاربر $user_id اضافه شد، میخواست حجم کانفیگشو افزایش بده",null,null,$admin);                
+                        sendMessage("پرداخت شما با تکسید آیدی $hash_id تأیید شد ولی به دلیل مشکل فنی امکان افزایش نیست لطفا به مدیریت اطلاع بده\n مبلغ " . number_format($price). " تومان به حساب شما اضافه شد",null,null,$user_id);
+                        sendMessage(" مبلغ " . number_format($price) . " تومان به کیف پول کاربر $user_id اضافه شد، میخواست حجم کانفیگشو افزایش بده",null,null,$admin);                
                 
                         exit;
                     }
@@ -624,14 +624,14 @@ while($payParam = $paysList->fetch_assoc()){
                     }
                     
                 	if(is_null($response)){
-                		sendMessage('🔻مشکل فنی در اتصال به سرور. لطفا به مدیریت اطلاع بدید',null,null,$user_id);
+                		sendMessage('مشکل فنی در اتصال به سرور. لطفا به مدیریت اطلاع بدید',null,null,$user_id);
                 		
                         $stmt = $connection->prepare("UPDATE `users` SET `wallet` = `wallet` + ? WHERE `userid` = ?");
                         $stmt->bind_param("ii", $price, $user_id);
                         $stmt->execute();
                         $stmt->close();
-                        sendMessage("پرداخت شما با تکسید آیدی $hash_id تأیید شد ولی مشکل فنی در اتصال به سرور پیش اومده لطفا به مدیریت اطلاع بده\n✅ مبلغ " . number_format($price). " تومان به حساب شما اضافه شد",null,null,$user_id);
-                        sendMessage("✅ مبلغ " . number_format($price) . " تومان به کیف پول کاربر $user_id اضافه شد، میخواست کانفیگشو تمدید کنه",null,null,$admin);                
+                        sendMessage("پرداخت شما با تکسید آیدی $hash_id تأیید شد ولی مشکل فنی در اتصال به سرور پیش اومده لطفا به مدیریت اطلاع بده\n مبلغ " . number_format($price). " تومان به حساب شما اضافه شد",null,null,$user_id);
+                        sendMessage(" مبلغ " . number_format($price) . " تومان به کیف پول کاربر $user_id اضافه شد، میخواست کانفیگشو تمدید کنه",null,null,$admin);                
 
                 		exit;
                 	}
@@ -639,7 +639,7 @@ while($payParam = $paysList->fetch_assoc()){
                 	$stmt->bind_param("iiisii", $user_id, $server_id, $inbound_id, $remark, $price, $time);
                 	$stmt->execute();
                 	$stmt->close();
-                    sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد\n✅سرویس $remark با موفقیت تمدید شد",null,null,$user_id);
+                    sendMessage("تراکنش شما با تکسید آیدی $hash_id تأیید شد\nسرویس $remark با موفقیت تمدید شد",null,null,$user_id);
                 
                 }
             }else{
