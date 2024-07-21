@@ -15,13 +15,8 @@
 
 <h1 align="center">به SimpleWiz خوش آمدید</h1>
 
-### Progress
+![60%](https://progress-bar.dev/60/)
 
-<div style="border: 1px solid #000; width: 100%; background-color: #ddd;">
-  <div style="width: 60%; background-color: #4caf50; color: white; text-align: center;">
-    60%
-  </div>
-</div>
 
 
 
