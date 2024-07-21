@@ -3704,7 +3704,7 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
 • سفارش جدید شما
 • پروتکل: $protocol
 • نام سرویس: $remark
-•حجم سرویس: $volume گیگ
+• حجم سرویس: $volume گیگ
 • مدت سرویس: $days روز⁮⁮ ⁮⁮
 " . ($botState['configLinkState'] != "off" && $serverType != "marzban"?"
 • config : <code>$link</code>":"");
