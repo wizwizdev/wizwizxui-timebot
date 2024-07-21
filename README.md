@@ -18,11 +18,11 @@
 
 
 <p align="center">
-This is a version of the WizWiz Bot (https://github.com/wizwizdev/wizwizxui-timebot) with simplified and more formal text, and all emojis removed.
+This is a version of the WizWiz Bot with simplified and more formal text, and all emojis removed.
 </p>
 
 
-# Installation Ubuntu-20.4 
+# Installation
 
 
 1. First, install the original WizWiz according to the instructions on the main WizWiz page:
