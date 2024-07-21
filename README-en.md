@@ -25,3 +25,26 @@
 ```sh
 bash <(curl -s https://raw.githubusercontent.com/ItsOrv/simple-wiz/main/replace.sh)
 
+```
+If you are using Marzban panel, use this command instead of the command above:
+```sh
+bash <(curl -s https://raw.githubusercontent.com/ItsOrv/simple-wiz/main/replacemarz.sh)
+```
+Marzban's version of this command causes the link configuration to be sent as follows:
+***
+• سفارش جدید شما
+
+• پروتکل: 
+
+• نام سرویس:
+
+•حجم سرویس:
+
+
+• مدت سرویس:
+
+
+لینک زیر را در مرورگر باز کنید یا به صورت مستقیم به عنوان لینک اشتراک استفاده کنید
+
+• subscription : https://link
+***
