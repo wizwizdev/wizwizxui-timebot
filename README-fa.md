@@ -30,6 +30,7 @@ bash <(curl -s https://raw.githubusercontent.com/ItsOrv/simple-wiz/main/replace.
 bash <(curl -s https://raw.githubusercontent.com/ItsOrv/simple-wiz/main/replacemarz.sh)
 ```
 نسخه مرزبان این دستور باعث میشه زمان تحویل کانفیگ لینک به این صورت ارسال بشه:
+
 • سفارش جدید شما
 • پروتکل: 
 • نام سرویس:
