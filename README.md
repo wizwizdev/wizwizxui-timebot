@@ -1,9 +1,3 @@
-To create a bilingual README with a toggle button for switching between English and Persian, you can use HTML within your Markdown file. Here's how you can set it up:
-
-1. Write the content in both languages.
-2. Use JavaScript to toggle the visibility of the language sections.
-
-Here's an example:
 
 ```markdown
 # Simple Wiz Version
