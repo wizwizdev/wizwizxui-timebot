@@ -134,12 +134,12 @@ if(preg_match('/^\/([Ss]tart)/', $text) or $text == $buttonValues['back_to_main'
     }
 }
 if(preg_match('/^sendMessageToUser(\d+)/',$data,$match) && ($from_id == $admin || $userInfo['isAdmin'] == true) && $text != $buttonValues['cancel']){
-    editText($message_id,'🔘|لطفا پیامت رو بفرست');
+    editText($message_id,'پیام خود را ارسال کنید');
     setUser($data);
 }
 if(preg_match('/^sendMessageToUser(\d+)/',$userInfo['step'],$match) && ($from_id == $admin || $userInfo['isAdmin'] == true) && $text != $buttonValues['cancel']){
     sendMessage($text,null,null,$match[1]);
-    sendMessage("پیامت به کاربر ارسال شد",$removeKeyboard);
+    sendMessage("پیام به کاربر ارسال شد",$removeKeyboard);
     sendMessage($mainValues['reached_main_menu'],getAdminKeys());
     setUser();
 }
@@ -160,7 +160,7 @@ if(preg_match('/^delAdmin(\d+)/',$data,$match) && $from_id === $admin){
 }
 if($data=="addNewAdmin" && $from_id === $admin){
     delMessage();
-    sendMessage("🧑‍💻| کسی که میخوای ادمین کنی رو آیدی عددیشو بفرست ببینم:",$cancelKey);
+    sendMessage("ایدی عددی کاربری که میخوای ادمین کنی رو بفرست:",$cancelKey);
     setUser($data);
 }
 if($userInfo['step'] == "addNewAdmin" && $from_id === $admin && $text != $buttonValues['cancel']){
@@ -170,7 +170,7 @@ if($userInfo['step'] == "addNewAdmin" && $from_id === $admin && $text != $button
         $stmt->execute();
         $stmt->close();
         
-        sendMessage("✅ | 🥳 خب کاربر الان ادمین شد تبریک میگم",$removeKeyboard);
+        sendMessage("کاربر ادمین شد",$removeKeyboard);
         setUser();
         
         sendMessage("لیست ادمین ها",getAdminsKeys());
@@ -234,7 +234,7 @@ if(preg_match('/^changePaymentKeys(\w+)/',$data,$match) && ($from_id == $admin |
             $gate = "آدرس والت ترون";
             break;
     }
-    sendMessage("🔘|لطفا $gate را وارد کنید", $cancelKey);
+    sendMessage("لطفا $gate را وارد کنید", $cancelKey);
     setUser($data);
 }
 if(preg_match('/^changePaymentKeys(\w+)/',$userInfo['step'],$match) && $text != $buttonValues['cancel'] && ($from_id == $admin || $userInfo['isAdmin'] == true)){
