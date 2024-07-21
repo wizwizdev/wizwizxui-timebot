@@ -3,11 +3,11 @@
 </p>
 
 <p align="center">
-	<a href="./README.md">
+	<a href="./README-en.md">
 	English
 	</a>
 	/
-	<a href="./README-fa.md">
+	<a href="./README.md">
 	فارسی
 	</a>
 
