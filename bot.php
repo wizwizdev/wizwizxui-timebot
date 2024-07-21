@@ -2985,11 +2985,9 @@ if(preg_match('/payCustomWithWallet(.*)/',$data, $match)){
 " . ($botState['configLinkState'] != "off" && $serverType != "marzban"?"
 • config : <code>$link</code>":"");
 if($botState['subLinkState'] == "on") $acc_text .= "
+لینک زیر را در مرورگر باز کنید یا به عنوان لینک اشتراک استفاده کنید
 
-• Volume web: <code> $botUrl"."search.php?id=".$uniqid."</code>
-
-
-• subscription : <code>$subLink</code>"; 
+• subscription : $subLink"; 
     
         $file = RandomString() .".png";
         $ecc = 'L';
