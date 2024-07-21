@@ -3,7 +3,14 @@
 </p>
 
 <p align="center">
-  <a href="./README.md">English</a> / <a href="./README-fa.md">فارسی</a>
+	<a href="./README.md">
+	English
+	</a>
+	/
+	<a href="./README-fa.md">
+	فارسی
+	</a>
+
 </p>
 
 <h1 align="center">به SimpleWiz خوش آمدید</h1>
