@@ -29,6 +29,12 @@ My Telegram:
 [![My Telegram Channel](https://img.shields.io/endpoint?label=Channel&style=flat-square&url=https%3A%2F%2Ftg.sumanjay.workers.dev%2Fwizwizch&color=blue)](https://telegram.dog/ItsOrv)
 </div>
 
+<br>
+<br>
+ 
+<br>
+<br>
+
 # Installation Ubuntu-20.4 
 
 
