@@ -16,8 +16,6 @@
 
 <h1 align="center">Welcome to SimpleWiz</h1>
 
-# Amount of edited codes: ![60%](https://progress-bar.dev/70/) 
-
 # Installation
 
 1. First, install the original WizWiz according to the instructions on the main WizWiz page: [WizWiz](https://github.com/wizwizdev/wizwizxui-timebot)
@@ -50,3 +48,6 @@ Marzban's version of this command causes the link configuration to be sent as fo
 
 • subscription : https://link
 ***
+
+# Amount of edited codes: ![60%](https://progress-bar.dev/70/) 
+
