@@ -15,9 +15,6 @@
 
 <h1 align="center">به SimpleWiz خوش آمدید</h1>
 
-# مقدار کد های ویرایش شده: ![60%](https://progress-bar.dev/70/) 
-
-
 
 
 # نصب
@@ -52,3 +49,6 @@ bash <(curl -s https://raw.githubusercontent.com/ItsOrv/simple-wiz/main/replacem
 
 • subscription : https://link
 ***
+
+# مقدار کد های ویرایش شده: ![60%](https://progress-bar.dev/70/) 
+
