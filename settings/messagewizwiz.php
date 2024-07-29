@@ -61,7 +61,7 @@ if($list->num_rows > 0){
                     [['text'=>$buttonValues['start_bot'],'callback_data'=>"mainMenu"]]
                     ]
             ]);
-    if($usersList->num_rows > 1) {
+    if($usersList->num_rows > 0) {
         while($user = $usersList->fetch_assoc()){
             if($type == 'text'){
                 sendMessage($text,$keys,null,$user['userid']);
@@ -91,7 +91,7 @@ if($list->num_rows > 0){
                     'chat_id' => $user['userid'],
                     'document' => $file_id,
                     'caption' => $text,
-                    'reply_markup'=>$kes
+                    'reply_markup'=>$keys
                 ]);
             }elseif($type == 'photo'){
                 bot('sendPhoto', [
