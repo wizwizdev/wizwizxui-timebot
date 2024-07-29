@@ -282,7 +282,8 @@ $mainValues = [
     'you_have_partially_paid'=>"تراکنش TYPE شما با تکسید آیدی: TAXID
 
 <b>به دلیل عدم مطابقت مبلغ تراکنش رد شد</b>",
-    'agent_discount_settings'=>"مدیریت تخفیف های نماینده AGENT-NAME"
+    'agent_discount_settings'=>"مدیریت تخفیف های نماینده AGENT-NAME",
+    'config_doesnt_exist'=>"کانفیگ یافت نشد"
 ];
 
 $buttonValues = [
