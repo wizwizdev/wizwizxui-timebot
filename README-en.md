@@ -26,9 +26,5 @@
 bash <(curl -s https://raw.githubusercontent.com/ItsOrv/simple-wiz/main/replace.sh)
 
 ```
-If you are using Marzban panel, use this command instead of the command above:
-```sh
-bash <(curl -s https://raw.githubusercontent.com/ItsOrv/simple-wiz/main/replacemarz.sh)
-```
 
 # Amount of edited codes: ![60%](https://progress-bar.dev/70/) 
