@@ -100,7 +100,7 @@ $token = $_GET['token'];
 
 
         
-        $newRemark = preg_replace("/\(📊.+-.+\|📆.+\)/","", $remark) . "(📊" . $totalUsed . " - " . $total . "|📆" .  $daysLeft . ")";
+        $newRemark = preg_replace("/\(حجم.+-.+\|زمان.+\)/","", $remark) . "(حجم" . $totalUsed . " - " . $total . "|زمان" .  $daysLeft . ")";
         if($inbound_id == 0) $res = editInboundRemark($server_id, $uuid, $newRemark);
         else $res = editClientRemark($server_id, $clientInbound, $uuid, $newRemark);
 

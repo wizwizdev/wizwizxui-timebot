@@ -114,7 +114,7 @@ if($orders){
                 $send = "";
                 if($expiryTime < time() + 86400) $send = "روز"; elseif($leftgb < 1) $send = "گیگ";
                 if($send != ""){  
-                    $msg = "💡 کاربر گرامی، 
+                    $msg = " 
         از سرویس اشتراک $remark تنها (۱ $send) باقی مانده است. میتواند از قسمت خرید های من سرویس فعلی خود را تمدید کنید یا سرویس جدید خریداری کنید.";
                     sendMessage( $msg, null, null, $from_id);
                     $newTIme = $time + 86400 * 2;
@@ -215,7 +215,7 @@ if($orders){
                 if($serverType == "marzban") $res = deleteMarzban($server_id, $remark);
                 else{if($inbound_id > 0) $res = deleteClient($server_id, $inbound_id, $uuid, 1); else $res = deleteInbound($server_id, $uuid, 1); }
         		if(!is_null($res)){
-                    $msg = "💡 کاربر گرامی،
+                    $msg = "
     اشتراک سرویس $remark منقضی شد و از لیست سفارش ها حذف گردید. لطفا از فروشگاه, سرویس جدید خریداری کنید.";
                     sendMessage( $msg, null, null, $from_id);
                     $stmt = $connection->prepare("DELETE FROM `orders_list` WHERE `uuid`=?");

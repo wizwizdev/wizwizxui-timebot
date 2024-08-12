@@ -123,7 +123,7 @@ if($list->num_rows > 0){
         
         bot('sendMessage',[
             'chat_id'=>$admin,
-            'text'=>$msg . "\nبه " . $offset . " نفر پیامتو فرستادم"
+            'text'=>$msg . "\nپیام شمابه  " . $offset . "نفر ارسال شد"
             ]);
             
         $stmt = $connection->prepare("DELETE FROM `send_list` WHERE `id` = ?");
