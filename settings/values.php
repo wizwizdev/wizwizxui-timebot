@@ -275,8 +275,9 @@ TYPE افزایش: INCREASE گیگ/روز
 <b>به دلیل عدم مطابقت مبلغ تراکنیدش رد شد</b>",
     'you_have_partially_paid'=>"تراکنیدش TYPE شما با تکسید آیدی: TAXID
 
-<b>به دلیل عدم مطابقت مبلغ تراکنیدش رد شد</b>",
-    'agent_discount_settings'=>"مدیریت تخفیف های نماینده AGENT-NAME"
+<b>به دلیل عدم مطابقت مبلغ تراکنش رد شد</b>",
+    'agent_discount_settings'=>"مدیریت تخفیف های نماینده AGENT-NAME",
+    'config_doesnt_exist'=>"کانفیگ یافت نشد"
 ];
 
 $buttonValues = [

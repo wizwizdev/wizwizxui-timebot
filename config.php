@@ -1379,7 +1379,7 @@ function getPlanDetailsKeys($planId){
         return json_encode(['inline_keyboard'=>$keyboard]);
     }
 }
-function getUserOrderDetailKeys($id){
+function getUserOrderDetailKeys($id, $offset = 0){
     global $connection, $botState, $mainValues, $buttonValues, $botUrl;
     $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `id`=?");
     $stmt->bind_param("i", $id);
@@ -1490,245 +1490,42 @@ function getUserOrderDetailKeys($id){
             $leftgb = round( ($total - $up - $down) / 1073741824, 2) . " GB";
         }
         $configLinks = "";
-        foreach($acc_link as $acc_link){
-            $configLinks .= $botState['configLinkState'] != "off"?"\n <code>$acc_link</code>":"";
+    
+        $limit = 5;
+        $count = 0;
+        foreach($acc_link as $accLink){
+            $count++;
+            if($count <= $offset) continue;
+            $configLinks .= ($botState['configLinkState'] != "off"?"\n <code>$accLink</code>":"");
+            
+            if($count >= $offset + $limit) break;
         }
+
         $keyboard = array();
-        if($inbound_id == 0){
-            if($protocol == 'trojan') {
-                if($security == "xtls"){
-                    $keyboard = [
-                        [
-            			    ['text' => $userId, 'callback_data' => "wizwizch"],
-                            ['text' => "آیدی کاربر", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => $firstName, 'callback_data' => "wizwizch"],
-                            ['text' => "اسم کاربر", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => $isAgentBought, 'callback_data' => "wizwizch"],
-                            ['text' => "خرید نماینده", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$name", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['buy_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['expire_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
-            			],
-                        [
-                            ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
-                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
-                        ],
-                        [
-                            ['text'=>($enable == true?$buttonValues['disable_config']:$buttonValues['enable_config']),'callback_data'=>"changeUserConfigState" . $order['id']],
-                            ['text'=>$buttonValues['delete_config'],'callback_data'=>"delUserConfig" . $order['id']],
-                            ]
+        
+        $configKeys = [];
+        
+        if(count($acc_link) > $limit){
+            if($offset == 0){
+                $configKeys = [
+                    ['text'=>"«",'callback_data'=>"userOrderDetails{$id}_" . ($offset + $limit)]
                     ];
-                    
-                }else{
-                    $keyboard = [
-                        [
-            			    ['text' => $userId, 'callback_data' => "wizwizch"],
-                            ['text' => "آیدی کاربر", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => $firstName, 'callback_data' => "wizwizch"],
-                            ['text' => "اسم کاربر", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => $isAgentBought, 'callback_data' => "wizwizch"],
-                            ['text' => "خرید نماینده", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$name", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['buy_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['expire_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
-            			],
-                        [
-                            ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
-                            ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => "wizwizch"],
-                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
-                        ],
-                        [
-                            ['text'=>($enable == true?$buttonValues['disable_config']:$buttonValues['enable_config']),'callback_data'=>"changeUserConfigState" . $order['id']],
-                            ['text'=>$buttonValues['delete_config'],'callback_data'=>"delUserConfig" . $order['id']],
-                            ]
-                    ];
-                    
-                    
-                }
-            }else {
-                if($netType == "grpc"){
-                    $keyboard = [
-                        [
-            			    ['text' => $userId, 'callback_data' => "wizwizch"],
-                            ['text' => "آیدی کاربر", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => $firstName, 'callback_data' => "wizwizch"],
-                            ['text' => "اسم کاربر", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => $isAgentBought, 'callback_data' => "wizwizch"],
-                            ['text' => "خرید نماینده", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$name", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['buy_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['expire_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
-            			],
-                        [
-                            ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-                            ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => "wizwizch"],
-                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
-                        ],
-                        [
-                            ['text'=>($enable == true?$buttonValues['disable_config']:$buttonValues['enable_config']),'callback_data'=>"changeUserConfigState" . $order['id']],
-                            ['text'=>$buttonValues['delete_config'],'callback_data'=>"delUserConfig" . $order['id']],
-                            ]
-                    ];
-                    
-                    
-                }
-                elseif($netType == "tcp" && $security == "xtls"){
-                    $keyboard = [
-                        [
-            			    ['text' => $userId, 'callback_data' => "wizwizch"],
-                            ['text' => "آیدی کاربر", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => $firstName, 'callback_data' => "wizwizch"],
-                            ['text' => "اسم کاربر", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => $isAgentBought, 'callback_data' => "wizwizch"],
-                            ['text' => "خرید نماینده", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$name", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['buy_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['expire_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
-            			],
-                        [
-                            ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
-                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
-                        ],
-                        [
-                            ['text'=>($enable == true?$buttonValues['disable_config']:$buttonValues['enable_config']),'callback_data'=>"changeUserConfigState" . $order['id']],
-                            ['text'=>$buttonValues['delete_config'],'callback_data'=>"delUserConfig" . $order['id']],
-                            ]
-                    ];
-                    
-                }
-                else{
-                    $keyboard = [
-                        [
-            			    ['text' => $userId, 'callback_data' => "wizwizch"],
-                            ['text' => "آیدی کاربر", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => $firstName, 'callback_data' => "wizwizch"],
-                            ['text' => "اسم کاربر", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => $isAgentBought, 'callback_data' => "wizwizch"],
-                            ['text' => "خرید نماینده", 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$name", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['buy_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['expire_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
-            			],
-                        [
-                            ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
-                        ],
-                        ($rahgozar == true?
-                        [
-                            ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => "wizwizch"],
-                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
-                        ]:
-                            [
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
-                            ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => "wizwizch"],
-                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
-                        ]),
-                        [
-                            ['text'=>($enable == true?$buttonValues['disable_config']:$buttonValues['enable_config']),'callback_data'=>"changeUserConfigState" . $order['id']],
-                            ['text'=>$buttonValues['delete_config'],'callback_data'=>"delUserConfig" . $order['id']],
-                            ]
-                    ];
-                    
-                }
             }
-        }else{
-            $keyboard = [
-                [
+            elseif(count($acc_link) >= $offset + $limit){
+                $configKeys = [
+                    ['text'=>"«",'callback_data'=>"userOrderDetails{$id}_" . ($offset + $limit)],
+                    ['text'=>"»",'callback_data'=>"userOrderDetails{$id}_" . ($offset - $limit)]
+                    ];
+                
+            }
+            elseif($offset != 0){
+                $configKeys = [
+                    ['text'=>"»",'callback_data'=>"userOrderDetails{$id}_" . ($offset - $limit)]
+                    ];
+            }
+        }
+    
+        array_push($keyboard, $configKeys, [
     			    ['text' => $userId, 'callback_data' => "wizwizch"],
                     ['text' => "آیدی کاربر", 'callback_data' => "wizwizch"],
                 ],
@@ -1756,9 +1553,87 @@ function getUserOrderDetailKeys($id){
     			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
                     ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
     			],
-    			[
+                [
                     ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
-                ],
+                ]);
+                
+        if($inbound_id == 0){
+            if($protocol == 'trojan') {
+                if($security == "xtls"){
+                    array_push($keyboard, 
+                        [
+                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
+                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
+                        ],
+                        [
+                            ['text'=>($enable == true?$buttonValues['disable_config']:$buttonValues['enable_config']),'callback_data'=>"changeUserConfigState" . $order['id']],
+                            ['text'=>$buttonValues['delete_config'],'callback_data'=>"delUserConfig" . $order['id']],
+                            ]
+                    );
+                    
+                }else{
+                    array_push($keyboard, 
+                        [
+                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
+                            ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => "wizwizch"],
+                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
+                        ],
+                        [
+                            ['text'=>($enable == true?$buttonValues['disable_config']:$buttonValues['enable_config']),'callback_data'=>"changeUserConfigState" . $order['id']],
+                            ['text'=>$buttonValues['delete_config'],'callback_data'=>"delUserConfig" . $order['id']],
+                            ]
+                    );
+                    
+                    
+                }
+            }else {
+                if($netType == "grpc"){
+                    array_push($keyboard, 
+                        [
+                            ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => "wizwizch"],
+                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
+                        ],
+                        [
+                            ['text'=>($enable == true?$buttonValues['disable_config']:$buttonValues['enable_config']),'callback_data'=>"changeUserConfigState" . $order['id']],
+                            ['text'=>$buttonValues['delete_config'],'callback_data'=>"delUserConfig" . $order['id']],
+                            ]
+                    );
+                }
+                elseif($netType == "tcp" && $security == "xtls"){
+                    array_push($keyboard, 
+                        [
+                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
+                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
+                        ],
+                        [
+                            ['text'=>($enable == true?$buttonValues['disable_config']:$buttonValues['enable_config']),'callback_data'=>"changeUserConfigState" . $order['id']],
+                            ['text'=>$buttonValues['delete_config'],'callback_data'=>"delUserConfig" . $order['id']],
+                            ]
+                    );
+                    
+                }
+                else{
+                    array_push($keyboard, 
+                        ($rahgozar == true?
+                        [
+                            ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => "wizwizch"],
+                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
+                        ]:
+                            [
+                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => "wizwizch"],
+                            ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => "wizwizch"],
+                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => "wizwizch"],
+                        ]),
+                        [
+                            ['text'=>($enable == true?$buttonValues['disable_config']:$buttonValues['enable_config']),'callback_data'=>"changeUserConfigState" . $order['id']],
+                            ['text'=>$buttonValues['delete_config'],'callback_data'=>"delUserConfig" . $order['id']],
+                            ]
+                    );
+                    
+                }
+            }
+        }else{
+            array_push($keyboard, 
                 [
                     ['text' => " $protocol ☑️", 'callback_data' => "wizwizch"],
                 ],
@@ -1766,7 +1641,7 @@ function getUserOrderDetailKeys($id){
                     ['text'=>($enable == true?$buttonValues['disable_config']:$buttonValues['enable_config']),'callback_data'=>"changeUserConfigState" . $order['id']],
                     ['text'=>$buttonValues['delete_config'],'callback_data'=>"delUserConfig" . $order['id']],
                     ]
-            ];
+                ); 
             
 
         }
@@ -1792,14 +1667,13 @@ function getUserOrderDetailKeys($id){
                 "msg"=>$msg];
     }
 }
-function getOrderDetailKeys($from_id, $id){
+function getOrderDetailKeys($from_id, $id, $offset = 0){
     global $connection, $botState, $mainValues, $buttonValues, $botUrl;
     $stmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `userid`=? AND `id`=?");
     $stmt->bind_param("ii", $from_id, $id);
     $stmt->execute();
     $order = $stmt->get_result();
     $stmt->close();
-
 
     if($order->num_rows==0){
         return null;
@@ -1851,13 +1725,18 @@ function getOrderDetailKeys($from_id, $id){
     	$serverType = $serverConfig['type'];
         $panel_url = $serverConfig['panel_url'];
         
+        $found = false;
+
         if($serverType == "marzban"){
             $info = getMarzbanUser($server_id, $remark);
-            $enable = $info->status =="active"?true:false;
-            $total = $info->data_limit;
-            $usedTraffic = $info->used_traffic;
-            
-            $leftgb = round( ($total - $usedTraffic) / 1073741824, 2) . " GB";
+            if(isset($info->username)){
+                $found = true;
+                $enable = $info->status =="active"?true:false;
+                $total = $info->data_limit;
+                $usedTraffic = $info->used_traffic;
+                
+                $leftgb = round( ($total - $usedTraffic) / 1073741824, 2) . " GB";
+            } else $leftgb = "⚠️";
         }else{
             $response = getJson($server_id)->obj;
             if($response){
@@ -1865,6 +1744,7 @@ function getOrderDetailKeys($from_id, $id){
                     foreach($response as $row){
                         $clients = json_decode($row->settings)->clients;
                         if($clients[0]->id == $uuid || $clients[0]->password == $uuid) {
+                            $found = true;
                             $total = $row->total;
                             $up = $row->up;
                             $down = $row->down; 
@@ -1904,6 +1784,7 @@ function getOrderDetailKeys($from_id, $id){
                             $clients = json_decode($row->settings)->clients;
                             foreach($clients as $key => $client){
                                 if($client->id == $uuid || $client->password == $uuid){
+                                    $found = true;
                                     $email = $client->email;
                                     $emails = array_column($clientsStates,'email');
                                     $emailKey = array_search($email,$emails);
@@ -1923,228 +1804,170 @@ function getOrderDetailKeys($from_id, $id){
             }else $leftgb = "⚠️";
         }
         $configLinks = "";
-        foreach($acc_link as $acc_link){
-            $configLinks .= ($botState['configLinkState'] != "off"?"\n <code>$acc_link</code>":"");
+        
+        $limit = 5;
+        $count = 0;
+        foreach($acc_link as $accLink){
+            $count++;
+            if($count <= $offset) continue;
+            $configLinks .= ($botState['configLinkState'] != "off"?"\n <code>$accLink</code>":"");
+            
+            if($count >= $offset + $limit) break;
         }
         $keyboard = array();
-        if($inbound_id == 0){
-            if($protocol == 'trojan') {
-                if($security == "xtls"){
-                    $keyboard = [
-                        [
-            			    ['text' => "$name", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['buy_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['expire_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
-            			],
-                        ($serverType != "marzban"?[
-                            ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
-                        ]:[]),
-                        ($serverType != "marzban"?[
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
-                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
-                        ]:[]),
+        
+        $configKeys = [];
+        
+        if(count($acc_link) > $limit){
+            if($offset == 0){
+                $configKeys = [
+                    ['text'=>"«",'callback_data'=>"orderDetails{$id}_" . ($offset + $limit)]
                     ];
-                    
-                    $temp = array();
-                    if($price != 0 && $agentBought == true){
-                        if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
-                        if($botState['switchLocationState']=="on") $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date']];
-                    }
-                    if(count($temp)>0) array_push($keyboard, $temp);
-                }else{
-                    $keyboard = [
-                        [
-            			    ['text' => "$name", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['buy_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['expire_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
-            			],
-                        ($serverType != "marzban"?[
-                            ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
-                        ]:[]),
-                        ($serverType != "marzban"?[
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
-                            ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vmess":"changeProtocolIsDisable")],
-                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
-                        ]:[]),
-                    ];
-                    
-                    
-                    $temp = array();
-                    if($price != 0 || $agentBought == true){
-                        if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
-                        if($botState['switchLocationState']=="on") $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
-                    }
-                    if(count($temp)>0) array_push($keyboard, $temp);
-                }
-            }else {
-                if($netType == "grpc"){
-                    $keyboard = [
-                        [
-            			    ['text' => "$name", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['buy_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['expire_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
-            			],
-                        ($serverType != "marzban"?[
-                            ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
-                        ]:[]),
-                        ($serverType != "marzban"?[
-                            ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vmess":"changeProtocolIsDisable")],
-                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
-                        ]:[])
-                    ];
-                    
-                    
-                    $temp = array();
-                    if($price != 0 || $agentBought == true){
-                        if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
-                        if($botState['switchLocationState']=="on") $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
-                    }
-                    if(count($temp)>0) array_push($keyboard, $temp);
-                }
-                elseif($netType == "tcp" && $security == "xtls"){
-                    $keyboard = [
-                        [
-            			    ['text' => "$name", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['buy_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['expire_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
-            			],
-                        ($serverType != "marzban"?[
-                            ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
-                        ]:[]),
-                        ($serverType != "marzban"?[
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
-                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
-                        ]:[])
-                    ];
-                    
-                    $temp = array();
-                    if($price != 0 || $agentBought == true){
-                        if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
-                        if($botState['switchLocationState']=="on") $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
-                    }
-                    if(count($temp)>0) array_push($keyboard, $temp);
-
-                }
-                else{
-                    $keyboard = [
-                        [
-            			    ['text' => "$name", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['buy_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['expire_date'], 'callback_data' => "wizwizch"],
-                        ],
-                        [
-            			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
-                            ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
-            			],
-                        ($serverType != "marzban"?[
-                            ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
-                        ]:[]),
-                        ($serverType != "marzban"?($rahgozar == true?
-                        [
-                            ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vmess":"changeProtocolIsDisable")],
-                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
-                        ]:
-                            [
-                            ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
-                            ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vmess":"changeProtocolIsDisable")],
-                            ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
-                        ]):[])
-                    ];
-                    
-                    $temp = array();
-                    if($price != 0 || $agentBought == true){
-                        if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
-                        if($botState['switchLocationState']=="on" && $rahgozar != true) $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
-                    }
-                    if(count($temp)>0) array_push($keyboard, $temp);
-
-                }
             }
-        }else{
-            $keyboard = [
-                [
-    			    ['text' => "$name", 'callback_data' => "wizwizch"],
-                    ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
-                ],
-                [
-    			    ['text' => "$date ", 'callback_data' => "wizwizch"],
-                    ['text' => $buttonValues['buy_date'], 'callback_data' => "wizwizch"],
-                ],
-                [
-    			    ['text' => "$expire_date ", 'callback_data' => "wizwizch"],
-                    ['text' => $buttonValues['expire_date'], 'callback_data' => "wizwizch"],
-                ],
-                [
-    			    ['text' => " $leftgb", 'callback_data' => "wizwizch"],
-                    ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
-    			],
-    			($serverType != "marzban"?[
-                    ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
-                ]:[]),
-                ($serverType != "marzban"?[
-                    ['text' => " $protocol ☑️", 'callback_data' => "wizwizch"],
-                ]:[])
-            ];
-            
-            $temp = array();
-            if($price != 0 || $agentBought == true){
-                if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
-                if($botState['switchLocationState']=="on" && $rahgozar != true) $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
+            elseif(count($acc_link) >= $offset + $limit){
+                $configKeys = [
+                    ['text'=>"«",'callback_data'=>"orderDetails{$id}_" . ($offset + $limit)],
+                    ['text'=>"»",'callback_data'=>"orderDetails{$id}_" . ($offset - $limit)]
+                    ];
+                
             }
-            if(count($temp)>0) array_push($keyboard, $temp);
-
+            elseif($offset != 0){
+                $configKeys = [
+                    ['text'=>"»",'callback_data'=>"orderDetails{$id}_" . ($offset - $limit)]
+                    ];
+            }
         }
+        
+        array_push($keyboard,$configKeys, [
+			    ['text' => $name, 'callback_data' => "wizwizch"],
+                ['text' => $buttonValues['plan_name'], 'callback_data' => "wizwizch"],
+            ],
+            [
+			    ['text' => $date, 'callback_data' => "wizwizch"],
+                ['text' => $buttonValues['buy_date'], 'callback_data' => "wizwizch"],
+            ],
+            [
+			    ['text' => $expire_date, 'callback_data' => "wizwizch"],
+                ['text' => $buttonValues['expire_date'], 'callback_data' => "wizwizch"],
+            ],
+            [
+			    ['text' => $leftgb, 'callback_data' => "wizwizch"],
+                ['text' => $buttonValues['volume_left'], 'callback_data' => "wizwizch"],
+			],
+            ($serverType != "marzban"?
+			[
+                ['text' => $buttonValues['selected_protocol'], 'callback_data' => "wizwizch"],
+            ]:[]));
+        if($found){
+            if($inbound_id == 0){
+                if($protocol == 'trojan') {
+                    if($security == "xtls"){
+                        if($serverType != "marzban"){
+                            array_push($keyboard, [
+                                ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
+                                ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
+                            ]);
+                        }
+                        
+                        $temp = array();
+                        if($price != 0 && $agentBought == true){
+                            if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
+                            if($botState['switchLocationState']=="on") $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date']];
+                        }
+                        if(count($temp)>0) array_push($keyboard, $temp);
+                    }else{
+                        if($serverType != "marzban"){
+                            array_push($keyboard, [
+                                ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
+                                ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vmess":"changeProtocolIsDisable")],
+                                ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
+                            ]);
+                        }
+                        
+                        
+                        $temp = array();
+                        if($price != 0 || $agentBought == true){
+                            if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
+                            if($botState['switchLocationState']=="on") $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
+                        }
+                        if(count($temp)>0) array_push($keyboard, $temp);
+                    }
+                }else {
+                    if($netType == "grpc"){
+                        if($serverType != "marzban"){
+                            array_push($keyboard, [
+                                    ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vmess":"changeProtocolIsDisable")],
+                                    ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
+                                ]);
+                        }
+                        
+                        
+                        $temp = array();
+                        if($price != 0 || $agentBought == true){
+                            if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
+                            if($botState['switchLocationState']=="on") $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
+                        }
+                        if(count($temp)>0) array_push($keyboard, $temp);
+                    }
+                    elseif($netType == "tcp" && $security == "xtls"){
+                        if($serverType != "marzban"){
+                            array_push($keyboard, [
+                                    ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
+                                    ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")],
+                            ]);
+                        }
+                        
+                        $temp = array();
+                        if($price != 0 || $agentBought == true){
+                            if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
+                            if($botState['switchLocationState']=="on") $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
+                        }
+                        if(count($temp)>0) array_push($keyboard, $temp);
+    
+                    }
+                    else{
+                        if($serverType != "marzban"){
+                            array_push($keyboard,
+                                ($rahgozar == true?
+                                    [
+                                        ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vmess":"changeProtocolIsDisable")],
+                                        ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")]
+                                    ]:
+                                    [
+                                        ['text' => $protocol == 'trojan' ? '☑️ trojan' : 'trojan', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_trojan":"changeProtocolIsDisable")],
+                                        ['text' => $protocol == 'vmess' ? '☑️ vmess' : 'vmess', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vmess":"changeProtocolIsDisable")],
+                                        ['text' => $protocol == 'vless' ? '☑️ vless' : 'vless', 'callback_data' => ($botState['changeProtocolState']=="on"?"changeAccProtocol{$fid}_{$id}_vless":"changeProtocolIsDisable")]
+                                    ]
+                                )
+                            );
+                        }
+                        
+                        $temp = array();
+                        if($price != 0 || $agentBought == true){
+                            if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
+                            if($botState['switchLocationState']=="on" && $rahgozar != true) $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
+                        }
+                        if(count($temp)>0) array_push($keyboard, $temp);
+    
+                    }
+                }
+            }else{
+                if($serverType != "marzban"){
+                    array_push($keyboard, [
+                            ['text' => " $protocol ☑️", 'callback_data' => "wizwizch"],
+                        ]);
+                }
+                
+                $temp = array();
+                if($price != 0 || $agentBought == true){
+                    if($botState['renewAccountState']=="on") $temp[] = ['text' => $buttonValues['renew_config'], 'callback_data' => "renewAccount$id" ];
+                    if($botState['switchLocationState']=="on" && $rahgozar != true) $temp[] = ['text' => $buttonValues['change_config_location'], 'callback_data' => "switchLocation{$id}_{$server_id}_{$leftgb}_".$order['expire_date'] ];
+                }
+                if(count($temp)>0) array_push($keyboard, $temp);
+    
+            }
+            $enable = $enable == true? $buttonValues['active']:$buttonValues['deactive'];
+        }else $enable = $mainValues['config_doesnt_exist'];
 
 
         $stmt= $connection->prepare("SELECT * FROM `server_info` WHERE `id`=?");
@@ -2156,26 +1979,28 @@ function getOrderDetailKeys($from_id, $id){
         if($serverType == "marzban") $subLink = $botState['subLinkState'] == "on"?"<code>" . $panel_url . "/sub/" . $token . "</code>":"";
         else $subLink = $botState['subLinkState']=="on"?"<code>" . $botUrl . "settings/subLink.php?token=" . $token . "</code>":"";
 
-        $enable = $enable == true? $buttonValues['active']:$buttonValues['deactive'];
         $msg = str_replace(['STATE', 'NAME','CONNECT-LINK', 'SUB-LINK'], [$enable, $remark, $configLinks, $subLink], $mainValues['config_details_message']);
         
         
-        $extrakey = [];
-        if($botState['increaseVolumeState']=="on" && ($price != 0 || $agentBought == true)) $extrakey[] = ['text' => $buttonValues['increase_config_volume'], 'callback_data' => "increaseAVolume{$id}"];
-        if($botState['increaseTimeState']=="on" && ($price != 0 || $agentBought == true)) $extrakey[] = ['text' => $buttonValues['increase_config_days'], 'callback_data' => "increaseADay{$id}"];
-        $keyboard[] = $extrakey;
-        
-         
-        if($botState['renewConfigLinkState'] == "on" && $botState['updateConfigLinkState'] == "on") $keyboard[] = [['text'=>$buttonValues['renew_connection_link'],'callback_data'=>'changAccountConnectionLink' . $id],['text'=>$buttonValues['update_config_connection'],'callback_data'=>'updateConfigConnectionLink' . $id]];
-        elseif($botState['renewConfigLinkState'] == "on") $keyboard[] = [['text'=>$buttonValues['renew_connection_link'],'callback_data'=>'changAccountConnectionLink' . $id]];
-        elseif($botState['updateConfigLinkState'] == "on") $keyboard[] = [['text'=>$buttonValues['update_config_connection'],'callback_data'=>'updateConfigConnectionLink' . $id]];
-        
-        $temp = [];
-        if($botState['qrConfigState'] == "on") $temp[] = ['text'=>$buttonValues['qr_config'],'callback_data'=>"showQrConfig" . $id];
-        if($botState['qrSubState'] == "on") $temp[] = ['text'=>$buttonValues['qr_sub'],'callback_data'=>"showQrSub" . $id];
-        array_push($keyboard, $temp);
-        
+        if($found){
+            $extrakey = [];
+            if($botState['increaseVolumeState']=="on" && ($price != 0 || $agentBought == true)) $extrakey[] = ['text' => $buttonValues['increase_config_volume'], 'callback_data' => "increaseAVolume{$id}"];
+            if($botState['increaseTimeState']=="on" && ($price != 0 || $agentBought == true)) $extrakey[] = ['text' => $buttonValues['increase_config_days'], 'callback_data' => "increaseADay{$id}"];
+            $keyboard[] = $extrakey;
+            
+             
+            if($botState['renewConfigLinkState'] == "on" && $botState['updateConfigLinkState'] == "on") $keyboard[] = [['text'=>$buttonValues['renew_connection_link'],'callback_data'=>'changAccountConnectionLink' . $id],['text'=>$buttonValues['update_config_connection'],'callback_data'=>'updateConfigConnectionLink' . $id]];
+            elseif($botState['renewConfigLinkState'] == "on") $keyboard[] = [['text'=>$buttonValues['renew_connection_link'],'callback_data'=>'changAccountConnectionLink' . $id]];
+            elseif($botState['updateConfigLinkState'] == "on") $keyboard[] = [['text'=>$buttonValues['update_config_connection'],'callback_data'=>'updateConfigConnectionLink' . $id]];
+            
+            $temp = [];
+            if($botState['qrConfigState'] == "on") $temp[] = ['text'=>$buttonValues['qr_config'],'callback_data'=>"showQrConfig" . $id];
+            if($botState['qrSubState'] == "on") $temp[] = ['text'=>$buttonValues['qr_sub'],'callback_data'=>"showQrSub" . $id];
+            array_push($keyboard, $temp);
+            
+        }
         $keyboard[] = [['text' => $buttonValues['delete_config'], 'callback_data' => "deleteMyConfig" . $id]];
+
         $keyboard[] = [['text' => $buttonValues['back_button'], 'callback_data' => ($agentBought == true?"agentConfigsList":"mySubscriptions")]];
         return ["keyboard"=>json_encode([
                     'inline_keyboard' => $keyboard
@@ -5340,9 +5165,13 @@ function editMarzbanConfig($server_id,$info){
     
     $expireTime = $configInfo->expire;
     $volume = $configInfo->data_limit;
-    
+    $configState = $configInfo->status;
+
     if(isset($info['plus_day'])) $expireTime += (86400 * $info['plus_day']);
-    elseif(isset($info['days'])) $expireTime = time() + (86400 * $info['days']);
+    elseif(isset($info['days'])){
+        $expireTime = time() + (86400 * $info['days']);
+        $configState = "active";
+    }
     
     if(isset($info['plus_volume'])) $volume += $info['plus_volume'] * 1073741824;
     elseif(isset($info['volume'])){
@@ -5360,7 +5189,7 @@ function editMarzbanConfig($server_id,$info){
         "username" => urlencode($remark),
         "note" => $configInfo->note,
         "data_limit_reset_strategy"=> $configInfo->data_limit_reset_strategy,
-        "status" => $configInfo->status
+        "status" => $configState
     );
     
     $panel_url .=  '/api/user/'. $remark;
