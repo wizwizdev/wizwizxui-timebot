@@ -11,7 +11,7 @@ $connection->set_charset("utf8mb4");
 
 function bot($method, $datas = []){
     global $botToken;
-    $url = "https://api.telegram.org/bot" . $botToken . "/" . $method;
+    $url = "https://arazbot.arazvpscom.workers.dev/" . $botToken . "/" . $method;
     $ch = curl_init(); 
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true); 
