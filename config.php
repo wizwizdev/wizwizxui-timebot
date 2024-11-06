@@ -5166,12 +5166,12 @@ function editMarzbanConfig($server_id,$info){
     $expireTime = $configInfo->expire;
     $volume = $configInfo->data_limit;
     $configState = $configInfo->status;
-
-    if(isset($info['plus_day'])) $expireTime += (86400 * $info['plus_day']);
-    elseif(isset($info['days'])){
-        $expireTime = time() + (86400 * $info['days']);
-        $configState = "active";
+    
+    if(isset($info['plus_day'])){
+        if($expireTime < time()) $expireTime = time() + (86400 * $info['plus_day']);
+        else $expireTime += (86400 * $info['plus_day']);
     }
+    elseif(isset($info['days'])) $expireTime = time() + (86400 * $info['days']);
     
     if(isset($info['plus_volume'])) $volume += $info['plus_volume'] * 1073741824;
     elseif(isset($info['volume'])){
@@ -5189,7 +5189,7 @@ function editMarzbanConfig($server_id,$info){
         "username" => urlencode($remark),
         "note" => $configInfo->note,
         "data_limit_reset_strategy"=> $configInfo->data_limit_reset_strategy,
-        "status" => $configState
+        "status" => "active"
     );
     
     $panel_url .=  '/api/user/'. $remark;
