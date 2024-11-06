@@ -1,7 +1,9 @@
 <?php
 include_once 'config.php';
 check();
+
 $robotState = $botState['botState']??"on";
+
 if ($userInfo['step'] == "banned" && $from_id != $admin && $userInfo['isAdmin'] != true) {
     sendMessage($mainValues['banned']);
     exit();
@@ -3623,9 +3625,8 @@ if(preg_match('/payWithWallet(.*)/',$data, $match)){
         include 'phpqrcode/qrlib.php';
         $msg = $message_id;
 
-        $agent_bought = false;
+        $agent_bought = $payInfo['agent_bought'];
 	    $eachPrice = $price / $accountCount;
-        if($userInfo['is_agent'] == true && ($match['buyType'] == "one" || $match['buyType'] == "much")) {$agent_bought = true; setUser('', 'temp');}
 
         alert($mainValues['sending_config_to_user']);
         define('IMAGE_WIDTH',540);
@@ -8548,7 +8549,7 @@ if(preg_match('/increaseADay(.*)/', $data, $match)){
     while ($cat = $res->fetch_assoc()){
         $id = $cat['id'];
         $title = $cat['volume'];
-        $price = number_format($cat['price']);
+        $price = $cat['price'];
         if($agentBought == true){
             $discounts = json_decode($userInfo['discount_percent'],true);
             if($botState['agencyPlanDiscount']=="on") $discount = $discounts['plans'][$orderInfo['fileid']]?? $discounts['normal'];
@@ -8556,7 +8557,7 @@ if(preg_match('/increaseADay(.*)/', $data, $match)){
             $price -= floor($price * $discount / 100);
         }
         if($price == 0) $price = "رایگان";
-        else $price .= " تومان";
+        else $price = number_format($price) . " تومان";
         $keyboard[] = ['text' => "$title روز $price", 'callback_data' => "selectPlanDayIncrease{$match[1]}_$id"];
     }
     $keyboard = array_chunk($keyboard,2);
@@ -8902,7 +8903,7 @@ if(preg_match('/^increaseAVolume(.*)/', $data, $match)){
     while($cat = $res->fetch_assoc()){
         $id = $cat['id'];
         $title = $cat['volume'];
-        $price = number_format($cat['price']);
+        $price = $cat['price'];
         if($agentBought == true){
             $discounts = json_decode($userInfo['discount_percent'],true);
             if($botState['agencyPlanDiscount']=="on") $discount = $discounts['plans'][$orderInfo['fileid']]?? $discounts['normal'];
@@ -8910,7 +8911,7 @@ if(preg_match('/^increaseAVolume(.*)/', $data, $match)){
             $price -= floor($price * $discount / 100);
         }
         if($price == 0) $price = "رایگان";
-        else $price .=  ' تومان';
+        else $price = number_format($price) .  ' تومان';
         
         $keyboard[] = ['text' => "$title گیگ $price", 'callback_data' => "increaseVolumePlan{$match[1]}_{$id}"];
     }
