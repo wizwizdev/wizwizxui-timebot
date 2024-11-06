@@ -110,17 +110,17 @@ if($giftList->num_rows>0){
 
                 
                     if(count($clients) > 1 && $clientTotal > 0 && $clientExpiry > 0 && $clientEnable){
-                        $response = editClientTraffic($server_id, $inbound_id, $uuid, ($volume / 1024), $day);
+                        $responseEdit = editClientTraffic($server_id, $inbound_id, $uuid, ($volume / 1024), $day);
                         $orderExistStmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `server_id` = ? AND `inbound_id` = ? AND `uuid` = ?");
                         $orderExistStmt->bind_param("iis", $server_id, $inbound_id, $uuid);
                     }
                     elseif($total > 0 && $expiry_time > 0 && $inboundEnable){
-                        $response = editInboundTraffic($server_id, $uuid, ($volume/1024), $day);
+                        $responseEdit = editInboundTraffic($server_id, $uuid, ($volume/1024), $day);
                         $orderExistStmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `server_id` = ? AND `inbound_id` = 0 AND `uuid` = ?");
                         $orderExistStmt->bind_param("is", $server_id, $uuid);
                     }
                     
-                    if(!is_null($response)){
+                    if(!is_null($responseEdit)){
                         $orderExistStmt->execute();
                         $orderExist = $orderExistStmt->get_result();
                         $orderExistStmt->close();
@@ -156,8 +156,8 @@ if($giftList->num_rows>0){
                 $found = true;
                 $uuid = $clients[0]['id'];
                 if($total > 0 && $expiry_time > 0 && $inboundEnable){
-                    $response = editInboundTraffic($server_id, $uuid, ($volume/1024), $day);
-                    if(!is_null($response)){
+                    $responseEdit = editInboundTraffic($server_id, $uuid, ($volume/1024), $day);
+                    if(!is_null($responseEdit)){
                         $stmt = $connection->prepare("UPDATE `gift_list` SET `offset` = `offset` + 1 WHERE `id` = ?");
                         $stmt->bind_param("i", $rowId);
                         $stmt->execute();
