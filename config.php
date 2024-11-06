@@ -2188,8 +2188,12 @@ function deleteClient($server_id, $inbound_id, $uuid, $delete = 0){
         $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
         $header = substr($response, 0, $header_size);
         $body = substr($response, $header_size);
-        preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-        $session = $match[1];
+        preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+        $cookies = array();
+        foreach($matches[1] as $item) {
+            parse_str($item, $cookie);
+            $cookies = array_merge($cookies, $cookie);
+        }
         
         $loginResponse = json_decode($body,true);
         
@@ -2222,7 +2226,7 @@ function deleteClient($server_id, $inbound_id, $uuid, $delete = 0){
                     'Accept-Language:  en-US,en;q=0.5',
                     'Accept-Encoding:  gzip, deflate',
                     'X-Requested-With:  XMLHttpRequest',
-                    'Cookie: ' . $session
+                    'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
                 )
             ));
         }else{
@@ -2244,7 +2248,7 @@ function deleteClient($server_id, $inbound_id, $uuid, $delete = 0){
                     'Accept-Language:  en-US,en;q=0.5',
                     'Accept-Encoding:  gzip, deflate',
                     'X-Requested-With:  XMLHttpRequest',
-                    'Cookie: ' . $session
+                    'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
                 )
             ));
         }
@@ -2264,7 +2268,6 @@ function editInboundRemark($server_id, $uuid, $newRemark){
     $stmt->close();
 
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
 
     $response = getJson($server_id);
@@ -2314,8 +2317,12 @@ function editInboundRemark($server_id, $uuid, $newRemark){
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
     
     $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
@@ -2344,7 +2351,7 @@ function editInboundRemark($server_id, $uuid, $newRemark){
             'Accept-Language:  en-US,en;q=0.5',
             'Accept-Encoding:  gzip, deflate',
             'X-Requested-With:  XMLHttpRequest',
-            'Cookie: ' . $session
+            'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
         )
     ));
 
@@ -2361,7 +2368,6 @@ function editInboundTraffic($server_id, $uuid, $volume, $days, $editType = null)
     $stmt->close();
 
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
 
     $response = getJson($server_id);
@@ -2433,8 +2439,12 @@ function editInboundTraffic($server_id, $uuid, $volume, $days, $editType = null)
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
@@ -2464,7 +2474,7 @@ function editInboundTraffic($server_id, $uuid, $volume, $days, $editType = null)
             'Accept-Language:  en-US,en;q=0.5',
             'Accept-Encoding:  gzip, deflate',
             'X-Requested-With:  XMLHttpRequest',
-            'Cookie: ' . $session
+            'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
         )
     ));
 
@@ -2482,7 +2492,6 @@ function changeInboundState($server_id, $uuid){
     $stmt->close();
 
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
 
     $response = getJson($server_id);
@@ -2536,8 +2545,12 @@ function changeInboundState($server_id, $uuid){
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
 
     $loginResponse = json_decode($body,true);
@@ -2568,7 +2581,7 @@ function changeInboundState($server_id, $uuid){
             'Accept-Language:  en-US,en;q=0.5',
             'Accept-Encoding:  gzip, deflate',
             'X-Requested-With:  XMLHttpRequest',
-            'Cookie: ' . $session
+            'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
         )
     ));
 
@@ -2588,7 +2601,6 @@ function renewInboundUuid($server_id, $uuid){
     $stmt->close();
 
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
 
     $response = getJson($server_id);
@@ -2650,8 +2662,12 @@ function renewInboundUuid($server_id, $uuid){
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
@@ -2681,7 +2697,7 @@ function renewInboundUuid($server_id, $uuid){
             'Accept-Language:  en-US,en;q=0.5',
             'Accept-Encoding:  gzip, deflate',
             'X-Requested-With:  XMLHttpRequest',
-            'Cookie: ' . $session
+            'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
         )
     ));
 
@@ -2700,7 +2716,6 @@ function changeClientState($server_id, $inbound_id, $uuid){
     $server_info = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
 
     $response = getJson($server_id);
@@ -2757,8 +2772,12 @@ function changeClientState($server_id, $inbound_id, $uuid){
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
@@ -2800,7 +2819,7 @@ function changeClientState($server_id, $inbound_id, $uuid){
                 'Accept-Language:  en-US,en;q=0.5',
                 'Accept-Encoding:  gzip, deflate',
                 'X-Requested-With:  XMLHttpRequest',
-                'Cookie: ' . $session
+                'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
             )
         ));
     }else{
@@ -2822,7 +2841,7 @@ function changeClientState($server_id, $inbound_id, $uuid){
                 'Accept-Language:  en-US,en;q=0.5',
                 'Accept-Encoding:  gzip, deflate',
                 'X-Requested-With:  XMLHttpRequest',
-                'Cookie: ' . $session
+                'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
             )
         ));
     }
@@ -2841,7 +2860,6 @@ function renewClientUuid($server_id, $inbound_id, $uuid){
     $server_info = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
 
     $response = getJson($server_id);
@@ -2901,8 +2919,12 @@ function renewClientUuid($server_id, $inbound_id, $uuid){
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
@@ -2944,7 +2966,7 @@ function renewClientUuid($server_id, $inbound_id, $uuid){
                 'Accept-Language:  en-US,en;q=0.5',
                 'Accept-Encoding:  gzip, deflate',
                 'X-Requested-With:  XMLHttpRequest',
-                'Cookie: ' . $session
+                'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
             )
         ));
     }else{
@@ -2966,7 +2988,7 @@ function renewClientUuid($server_id, $inbound_id, $uuid){
                 'Accept-Language:  en-US,en;q=0.5',
                 'Accept-Encoding:  gzip, deflate',
                 'X-Requested-With:  XMLHttpRequest',
-                'Cookie: ' . $session
+                'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
             )
         ));
     }
@@ -2987,7 +3009,6 @@ function editClientRemark($server_id, $inbound_id, $uuid, $newRemark){
     $server_info = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
 
     $response = getJson($server_id);
@@ -3051,8 +3072,12 @@ function editClientRemark($server_id, $inbound_id, $uuid, $newRemark){
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
@@ -3094,7 +3119,7 @@ function editClientRemark($server_id, $inbound_id, $uuid, $newRemark){
                 'Accept-Language:  en-US,en;q=0.5',
                 'Accept-Encoding:  gzip, deflate',
                 'X-Requested-With:  XMLHttpRequest',
-                'Cookie: ' . $session
+                'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
             )
         ));
     }else{
@@ -3116,7 +3141,7 @@ function editClientRemark($server_id, $inbound_id, $uuid, $newRemark){
                 'Accept-Language:  en-US,en;q=0.5',
                 'Accept-Encoding:  gzip, deflate',
                 'X-Requested-With:  XMLHttpRequest',
-                'Cookie: ' . $session
+                'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
             )
         ));
     }
@@ -3134,7 +3159,6 @@ function editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, $edit
     $server_info = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
 
     $response = getJson($server_id);
@@ -3218,8 +3242,12 @@ function editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, $edit
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
@@ -3261,7 +3289,7 @@ function editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, $edit
                 'Accept-Language:  en-US,en;q=0.5',
                 'Accept-Encoding:  gzip, deflate',
                 'X-Requested-With:  XMLHttpRequest',
-                'Cookie: ' . $session
+                'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
             )
         ));
     }else{
@@ -3283,7 +3311,7 @@ function editClientTraffic($server_id, $inbound_id, $uuid, $volume, $days, $edit
                 'Accept-Language:  en-US,en;q=0.5',
                 'Accept-Encoding:  gzip, deflate',
                 'X-Requested-With:  XMLHttpRequest',
-                'Cookie: ' . $session
+                'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
             )
         ));
     }
@@ -3302,7 +3330,6 @@ function deleteInbound($server_id, $uuid, $delete = 0){
     $server_info = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
 
     $response = getJson($server_id);
@@ -3355,8 +3382,12 @@ function deleteInbound($server_id, $uuid, $delete = 0){
         $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
         $header = substr($response, 0, $header_size);
         $body = substr($response, $header_size);
-        preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-        $session = $match[1];
+        preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+        $cookies = array();
+        foreach($matches[1] as $item) {
+            parse_str($item, $cookie);
+            $cookies = array_merge($cookies, $cookie);
+        }
 
         $loginResponse = json_decode($body,true);
         if(!$loginResponse['success']){
@@ -3384,7 +3415,7 @@ function deleteInbound($server_id, $uuid, $delete = 0){
                 'Accept-Language:  en-US,en;q=0.5',
                 'Accept-Encoding:  gzip, deflate',
                 'X-Requested-With:  XMLHttpRequest',
-                'Cookie: ' . $session
+                'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
             )
         ));
         $response = curl_exec($curl);
@@ -3400,7 +3431,6 @@ function resetIpLog($server_id, $remark){
     $server_info = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
 
 
@@ -3428,8 +3458,12 @@ function resetIpLog($server_id, $remark){
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
@@ -3457,7 +3491,7 @@ function resetIpLog($server_id, $remark){
             'Accept-Language:  en-US,en;q=0.5',
             'Accept-Encoding:  gzip, deflate',
             'X-Requested-With:  XMLHttpRequest',
-            'Cookie: ' . $session
+            'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
         )
     ));
 
@@ -3473,7 +3507,6 @@ function resetClientTraffic($server_id, $remark, $inboundId = null){
     $server_info = $stmt->get_result()->fetch_assoc();
     $stmt->close();
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
 
 
@@ -3501,8 +3534,12 @@ function resetClientTraffic($server_id, $remark, $inboundId = null){
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
@@ -3529,7 +3566,7 @@ function resetClientTraffic($server_id, $remark, $inboundId = null){
             'Accept-Language:  en-US,en;q=0.5',
             'Accept-Encoding:  gzip, deflate',
             'X-Requested-With:  XMLHttpRequest',
-            'Cookie: ' . $session
+            'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
         )
     ));
 
@@ -3546,7 +3583,6 @@ function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $re
     $stmt->close();
 
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
     $reality = $server_info['reality'];
     $volume = ($volume == 0) ? 0 : floor($volume * 1073741824);
@@ -3641,8 +3677,12 @@ function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $re
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
@@ -3684,7 +3724,7 @@ function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $re
                 'Accept-Language:  en-US,en;q=0.5',
                 'Accept-Encoding:  gzip, deflate',
                 'X-Requested-With:  XMLHttpRequest',
-                'Cookie: ' . $session
+                'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
             )
         ));
     }else{
@@ -3708,7 +3748,7 @@ function addInboundAccount($server_id, $client_id, $inbound_id, $expiryTime, $re
                 'Accept-Language:  en-US,en;q=0.5',
                 'Accept-Encoding:  gzip, deflate',
                 'X-Requested-With:  XMLHttpRequest',
-                'Cookie: ' . $session
+                'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
             )
         ));
     }
@@ -3787,7 +3827,6 @@ function getConnectionLink($server_id, $uniqid, $protocol, $remark, $port, $netT
     $header_type = $server_info['header_type'];
     $request_header = $server_info['request_header'];
     $response_header = $server_info['response_header'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
     preg_match("/^Host:(.*)/i",$request_header,$hostMatch);
 
@@ -4176,7 +4215,6 @@ function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $secu
     $header_type = $server_info['header_type'];
     $request_header = $server_info['request_header'];
     $response_header = $server_info['response_header'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
     $xtlsTitle = ($serverType == "sanaei" || $serverType == "alireza")?"XTLSSettings":"xtlsSettings";
     $sni = $server_info['sni'];
@@ -4411,8 +4449,12 @@ function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $secu
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
@@ -4442,7 +4484,7 @@ function updateConfig($server_id, $inboundId, $protocol, $netType = 'tcp', $secu
             'Accept-Language:  en-US,en;q=0.5',
             'Accept-Encoding:  gzip, deflate',
             'X-Requested-With:  XMLHttpRequest',
-            'Cookie: ' . $session
+            'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
         )
     ));
 
@@ -4464,7 +4506,6 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
     $header_type = $server_info['header_type'];
     $request_header = $server_info['request_header'];
     $response_header = $server_info['response_header'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
     $xtlsTitle = ($serverType == "sanaei" || $serverType == "alireza")?"XTLSSettings":"xtlsSettings";
     $sni = $server_info['sni'];
@@ -4888,8 +4929,12 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
@@ -4920,7 +4965,7 @@ function editInbound($server_id, $uniqid, $uuid, $protocol, $netType = 'tcp', $s
             'Accept-Language:  en-US,en;q=0.5',
             'Accept-Encoding:  gzip, deflate',
             'X-Requested-With:  XMLHttpRequest',
-            'Cookie: ' . $session
+            'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
         )
     ));
 
@@ -5378,7 +5423,6 @@ function getJson($server_id){
     $stmt->close();
 
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
 
     $serverName = $server_info['username'];
     $serverPass = $server_info['password'];
@@ -5405,8 +5449,12 @@ function getJson($server_id){
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
     
@@ -5433,7 +5481,7 @@ function getJson($server_id){
             'Accept-Language:  en-US,en;q=0.5',
             'Accept-Encoding:  gzip, deflate',
             'X-Requested-With:  XMLHttpRequest',
-            'Cookie: ' . $session
+            'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
         ),
         CURLOPT_SSL_VERIFYHOST => false,
         CURLOPT_SSL_VERIFYPEER => false,
@@ -5452,7 +5500,6 @@ function getNewCert($server_id){
     $stmt->close();
 
     $panel_url = $server_info['panel_url'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
 
     $serverName = $server_info['username'];
     $serverPass = $server_info['password'];
@@ -5478,8 +5525,12 @@ function getNewCert($server_id){
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
     if(!$loginResponse['success']){
@@ -5506,7 +5557,7 @@ function getNewCert($server_id){
             'Accept-Language:  en-US,en;q=0.5',
             'Accept-Encoding:  gzip, deflate',
             'X-Requested-With:  XMLHttpRequest',
-            'Cookie: ' . $session
+            'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
         )
     ));
 
@@ -5529,7 +5580,6 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
     $request_header = $server_info['request_header'];
     $response_header = $server_info['response_header'];
     $sni = $server_info['sni'];
-    $cookie = 'Cookie: session='.$server_info['cookie'];
     $serverType = $server_info['type'];
     $xtlsTitle = ($serverType == "sanaei" || $serverType == "alireza")?"XTLSSettings":"xtlsSettings";
     $reality = $server_info['reality'];
@@ -6110,8 +6160,12 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
     $body = substr($response, $header_size);
-    preg_match('/^Set-Cookie:\s*([^;]*)/mi', $header, $match);
-    $session = $match[1];
+    preg_match_all('/^Set-Cookie:\s*([^;]*)/mi', $header, $matches);
+    $cookies = array();
+    foreach($matches[1] as $item) {
+        parse_str($item, $cookie);
+        $cookies = array_merge($cookies, $cookie);
+    }
 
     $loginResponse = json_decode($body,true);
 
@@ -6143,7 +6197,7 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
             'Accept-Language:  en-US,en;q=0.5',
             'Accept-Encoding:  gzip, deflate',
             'X-Requested-With:  XMLHttpRequest',
-            'Cookie: ' . $session
+            'Cookie: ' . array_keys($cookies)[0] . "=" . $cookies[array_keys($cookies)[0]]
         )
     ));
     $response = curl_exec($curl);
