@@ -6156,6 +6156,7 @@ function addUser($server_id, $client_id, $protocol, $port, $expiryTime, $remark,
     curl_setopt($curl, CURLOPT_POSTFIELDS, http_build_query($postFields));
     curl_setopt($curl, CURLOPT_HEADER, 1);
     $response = curl_exec($curl);
+sendMessage(curl_error($curl));
 
     $header_size = curl_getinfo($curl, CURLINFO_HEADER_SIZE);
     $header = substr($response, 0, $header_size);
