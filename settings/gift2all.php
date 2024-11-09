@@ -3,8 +3,6 @@ include_once '../baseInfo.php';
 include_once '../config.php';
 $time = time();
 
-ini_set('display_errors', 1); ini_set('display_startup_errors', 1); error_reporting(E_ALL);
-
 $stmt = $connection->prepare("SELECT * FROM `gift_list` LIMIT 1");
 $stmt->execute();
 $giftList = $stmt->get_result();
@@ -111,7 +109,7 @@ if($giftList->num_rows>0){
                     $clientEnable = $client['enable'];
 
                     $responseEdit = null;
-                    if(count(value: $clients) > 1 && $clientTotal > 0 && $clientExpiry > 0 && $clientEnable){
+                    if(count($clients) > 1 && $clientTotal > 0 && $clientExpiry > 0 && $clientEnable){
                         $responseEdit = editClientTraffic($server_id, $inbound_id, $uuid, ($volume / 1024), $day);
                         $orderExistStmt = $connection->prepare("SELECT * FROM `orders_list` WHERE `server_id` = ? AND `inbound_id` = ? AND `uuid` = ?");
                         $orderExistStmt->bind_param("iis", $server_id, $inbound_id, $uuid);
