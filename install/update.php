@@ -117,7 +117,9 @@ $arrays = [
       PRIMARY KEY (`id`)
       );",
     "ALTER TABLE `orders_list` CHANGE `token` `token` VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_persian_ci NOT NULL;",
-    "ALTER TABLE `orders_list` CHANGE `uuid` `uuid` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_persian_ci NULL DEFAULT NULL;"
+    "ALTER TABLE `orders_list` CHANGE `uuid` `uuid` TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_persian_ci NULL DEFAULT NULL;",
+    "ALTER TABLE `pays` ADD `message_id` INT NULL DEFAULT NULL AFTER `agent_count`;",
+    "ALTER TABLE `pays` ADD `chat_id` VARCHAR(500) NULL DEFAULT NULL AFTER `message_id`;",
     ];
 function updateBot(){
     global $arrays, $connection, $walletwizwiz, $nowPaymentKey, $zarinpalId;
