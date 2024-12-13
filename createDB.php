@@ -136,6 +136,8 @@ $connection->query("CREATE TABLE IF NOT EXISTS `pays` (
     `state` varchar(255) NOT NULL,
     `agent_bought` int(1) NOT NULL DEFAULT 0,
     `agent_count` int(255) NOT NULL DEFAULT 0,
+    `message_id` INT NULL DEFAULT NULL,
+    `chat_id` VARCHAR(500) NULL DEFAULT NULL,
     PRIMARY KEY (`id`)
 );");
 
