@@ -15,6 +15,10 @@
 	<a href="./README-fa.md">
 	فارسی
 	</a>
+ 	/
+  	<a href="./README-ru.md">
+	Russian
+	</a>
 
 </p>
 
