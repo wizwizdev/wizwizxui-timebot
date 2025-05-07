@@ -302,11 +302,14 @@ wait
         fi
         
         sleep 2
+
+        SECRET_TOKEN=$(tr -dc 'A-Za-z0-9_- ' < /dev/urandom | head -c 256)
         
         # print file
         echo -e "<?php" >> /var/www/html/wizwizxui-timebot/baseInfo.php
         echo -e "error_reporting(0);" >> /var/www/html/wizwizxui-timebot/baseInfo.php
         echo -e "${ASAS}botToken = '${YOUR_BOT_TOKEN}';" >> /var/www/html/wizwizxui-timebot/baseInfo.php
+        echo -e "${ASAS}botSecret = '${SECRET_TOKEN}';" >> /var/www/html/wizwizxui-timebot/baseInfo.php
         echo -e "${ASAS}dbUserName = '${dbuser}';" >> /var/www/html/wizwizxui-timebot/baseInfo.php
         echo -e "${ASAS}dbPassword = '${dbpass}';" >> /var/www/html/wizwizxui-timebot/baseInfo.php
         echo -e "${ASAS}dbName = '${dbname}';" >> /var/www/html/wizwizxui-timebot/baseInfo.php
@@ -316,7 +319,7 @@ wait
 
         sleep 1
 
-        curl -F "url=https://${YOUR_DOMAIN}/wizwizxui-timebot/bot.php" "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/setWebhook"
+        curl -F "url=https://${YOUR_DOMAIN}/wizwizxui-timebot/bot.php" -F "secret_token=${SECRET_TOKEN}" "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/setWebhook"
         MESSAGE="✅ The wizwiz bot has been successfully installed! @wizwizch"
         curl -s -X POST "https://api.telegram.org/bot${YOUR_BOT_TOKEN}/sendMessage" -d chat_id="${YOUR_CHAT_ID}" -d text="$MESSAGE"
         
