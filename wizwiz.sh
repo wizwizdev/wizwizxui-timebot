@@ -303,7 +303,7 @@ wait
         
         sleep 2
 
-        SECRET_TOKEN=$(tr -dc 'A-Za-z0-9_- ' < /dev/urandom | head -c 256)
+        SECRET_TOKEN=$(tr -dc 'A-Za-z0-9' < /dev/urandom | head -c 128)
         
         # print file
         echo -e "<?php" >> /var/www/html/wizwizxui-timebot/baseInfo.php
