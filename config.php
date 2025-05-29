@@ -110,23 +110,13 @@ function alert($txt, $type = false, $callid = null){
     ]);
 }
 
-$range = [
-        '149.154.160.0/22',
-        '149.154.164.0/22',
-        '91.108.4.0/22',
-        '91.108.56.0/22',
-        '91.108.8.0/22',
-        '95.161.64.0/20',
-    ];
 function check($return = false){
-    global $range;
-    foreach ($range as $rg) {
-        if (ip_in_range($_SERVER['REMOTE_ADDR'], $rg)) {
-            return true;
-        }
-    }
-    if ($return == true) {
-        return false;
+    global $botSecret;
+
+    $secretToken = $_SERVER['HTTP_X_TELEGRAM_BOT_API_SECRET_TOKEN'] ?? '';
+
+    if ($secretToken == $botSecret) {
+        return true;
     }
 
     die('You do not have access');
