@@ -1,0 +1,22 @@
+{
+  "name": "php-to-node-migration",
+  "version": "1.0.0",
+  "description": "Migrated backend from PHP to Node.js",
+  "main": "src/app.js",
+  "scripts": {
+    "start": "node src/app.js",
+    "dev": "nodemon src/app.js",
+    "test": "jest --coverage"
+  },
+  "dependencies": {
+    "axios": "^0.21.4",
+    "dotenv": "^10.0.0",
+    "express": "^4.17.1",
+    "mysql2": "^2.3.0",
+    "node-telegram-bot-api": "^0.54.0"
+  },
+  "devDependencies": {
+    "jest": "^30.0.4",
+    "nodemon": "^2.0.12"
+  }
+}
