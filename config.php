@@ -267,7 +267,7 @@ function getMainKeys(){
                 []
             ),
         [['text'=>$buttonValues['sharj'],'callback_data'=>"increaseMyWallet"]],
-        [['text'=>$buttonValues['invite_friends'],'callback_data'=>"inviteFriends"],['text'=>$buttonValues['my_info'],'callback_data'=>"myInfo"]],
+        [['text'=>$buttonValues['my_info'],'callback_data'=>"myInfo"]], 
         (($botState['sharedExistence'] == "on" && $botState['individualExistence'] == "on")?
         [['text'=>$buttonValues['shared_existence'],'callback_data'=>"availableServers"],['text'=>$buttonValues['individual_existence'],'callback_data'=>"availableServers2"]]:[]),
         (($botState['sharedExistence'] == "on" && $botState['individualExistence'] != "on")?
