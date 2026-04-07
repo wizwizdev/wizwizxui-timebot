@@ -31,7 +31,7 @@ do
 			rm -r /var/www/html/wizwizxui-timebot/
 			echo -e "\n\e[92mWait a few seconds ...\033[0m\n"
 			sleep 3
-			git clone https://github.com/wizwizdev/wizwizxui-timebot.git /var/www/html/wizwizxui-timebot
+			git clone https://github.com/Aliirad/Arpelnet_sellbot.git /var/www/html/wizwizxui-timebot
 			sudo chown -R www-data:www-data /var/www/html/wizwizxui-timebot/
 			sudo chmod -R 755 /var/www/html/wizwizxui-timebot/
 			sleep 3
@@ -111,7 +111,7 @@ do
 			echo "Folder created successfully!"
 			
 			 cd /var/www/html/
-			 wget -O wizwizpanel.zip https://github.com/wizwizdev/wizwizxui-timebot/releases/download/10.3.1/wizwizpanel.zip
+			 wget -O wizwizpanel.zip https://github.com/Aliirad/Arpelnet_sellbot/releases/download/10.3.1/wizwizpanel.zip
 			
 			 file_to_transfer="/var/www/html/wizwizpanel.zip"
 			 destination_dir=$(find /var/www/html -type d -name "*${RANDOM_CODE}*" -print -quit)
@@ -171,10 +171,10 @@ do
 
 			(crontab -l ; echo "0 * * * * ./dbbackupwizwiz.sh") | sort - | uniq - | crontab -
 			
-			wget https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/main/dbbackupwizwiz.sh | chmod +x dbbackupwizwiz.sh
+			wget https://raw.githubusercontent.com/Aliirad/Arpelnet_sellbot/main/dbbackupwizwiz.sh | chmod +x dbbackupwizwiz.sh
 			./dbbackupwizwiz.sh
    
-			wget https://raw.githubusercontent.com/wizwizdev/wizwizxui-timebot/main/dbbackupwizwiz.sh | chmod +x dbbackupwizwiz.sh
+			wget https://raw.githubusercontent.com/Aliirad/Arpelnet_sellbot/main/dbbackupwizwiz.sh | chmod +x dbbackupwizwiz.sh
 			./dbbackupwizwiz.sh
 			
 			echo -e "\n\e[92m The backup settings have been successfully completed.\033[0m\n"

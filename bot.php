@@ -47,7 +47,7 @@ if(strstr($text, "/start ")){
         
         if($inviterInfo->num_rows > 0){
             $first_name = !empty($first_name)?$first_name:" ";
-            $username = !empty($username)?$username:" ";
+            $username = !empty($username)?$username:" ";  # TODO : Make Here a referal code for this  specific username 
             if($uinfo->num_rows == 0){
                 $sql = "INSERT INTO `users` (`userid`, `name`, `username`, `refcode`, `wallet`, `date`, `refered_by`)
                                     VALUES (?,?,?, 0,0,?,?)";
@@ -641,7 +641,8 @@ if($data=="inviteFriends"){
     
         $stmt = $connection->prepare("SELECT * FROM `setting` WHERE `type` = 'INVITE_BANNER_AMOUNT'");
         $stmt->execute();
-        $inviteAmount = number_format($stmt->get_result()->fetch_assoc()['value']??0) . " تومان";
+        // $inviteAmount = number_format($stmt->get_result()->fetch_assoc()['value']??0) . " تومان";
+        $inviteAmount = "1 گیگ";
         $stmt->close();
         
         $getBotInfo = json_decode(file_get_contents("http://api.telegram.org/bot" . $botToken . "/getMe"),true);
@@ -657,7 +658,8 @@ if($data=="inviteFriends"){
             $res = sendPhoto($inviteText['file_id'],$txt,null,"HTML");
         }
         $msgId = $res->result->message_id;
-        sendMessage("با لینک بالا دوستاتو به ربات دعوت کن و با هر خرید $inviteAmount بدست بیار",json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),null,null,$msgId);
+        sendMessage($link); # TODO :  DEBUG - CHECK IT LATER
+        sendMessage("با لینک بالا دوستاتو به ربات دعوت کن و به ازای هر 10 گیگ خرید با لینک شما $inviteAmount هدیه بگیر",json_encode(['inline_keyboard'=>[[['text'=>$buttonValues['back_to_main'],'callback_data'=>"mainMenu"]]]]),null,null,$msgId);
     }
     else alert("این قسمت غیر فعال است");
 }
